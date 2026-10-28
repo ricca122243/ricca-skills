@@ -177,6 +177,15 @@ export default async (req) => {
 
   const body = method === "POST" ? await req.json().catch(() => ({})) : {};
 
+  if (path === "/health" && method === "GET") {
+    try {
+      const { data } = await readState();
+      return json({ ok: true, seed: data.seedError || "ok", seedVersion: data.seedVersion || 0, contacts: Object.keys(data.contacts).length });
+    } catch (e) {
+      return json({ ok: false, message: e.message }, 500);
+    }
+  }
+
   if (path === "/login" && method === "POST") {
     const login = String(body.login || "").trim().toLowerCase();
     const name = String(body.name || "").trim().slice(0, 40);
