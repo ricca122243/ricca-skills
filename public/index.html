@@ -242,7 +242,7 @@ function plural(n,[a,b,c]){ n=Math.abs(n)%100; const n1=n%10; if(n>10&&n<20) ret
 const reviewsText = c => c.reviews ? `${c.reviews} ${plural(c.reviews,['отзыв','отзыва','отзывов'])}` : '';
 function fill(t,c){ return String(t||'').replaceAll('{manager}',()=>manager()).replaceAll('{name}',()=>c.name).replaceAll('{rating}',()=>c.rating||'').replaceAll('{reviews}',()=>reviewsText(c)).replaceAll('{niche}',()=>c.niche||''); }
 function hookFor(c){
-  const generic=GENERIC.test(c.name), hasRev=!!c.rating && +c.reviews>=5;
+  const generic=GENERIC.test(c.name), hasRev=parseFloat(c.rating)>=4.5 && +c.reviews>=5;
   if(generic) return fill(hasRev ? 'У вас в 2ГИС {rating} и {reviews}, а сайта нет.' : 'Нашёл вас в 2ГИС, сайта у вас нет.', c);
   return fill(hasRev ? settings.hooks.withReviews : settings.hooks.withoutReviews, c);
 }
