@@ -668,10 +668,47 @@ body.ui-on .lang-mini.ui{animation-name:uiInFree}
 .logo .lg-ring,.logo .lg-d,.logo .lg-in{transition:stroke .8s,fill .8s}
 @media (max-width:350px){.brand>span{display:none}}
 
+
+/* ---- added: why-site + pricing ---- */
+.whysite,.pricing{padding:clamp(80px,12vw,160px) 0;position:relative}
+.ws-lead{max-width:62ch;color:var(--muted);font-size:clamp(1.05rem,1.5vw,1.25rem);line-height:1.6;margin-top:28px}
+.ws-grid .card h3{margin-top:40px}
+.cmp{margin-top:clamp(36px,5vw,70px);border:1px solid var(--line);border-radius:var(--rad);background:var(--panel);padding:clamp(22px,3vw,40px);backdrop-filter:blur(6px)}
+.cmp-t{font-family:var(--f-d);font-weight:500;text-transform:uppercase;font-size:clamp(1.05rem,1.6vw,1.35rem);margin:0 0 18px}
+.cmp-table{width:100%;border-collapse:collapse;font-size:.98rem}
+.cmp-table th,.cmp-table td{text-align:left;padding:14px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp-table th{font-family:var(--f-d);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.cmp-table td:first-child{color:var(--muted)}
+.cmp-table .hi{color:var(--ink);font-weight:600}
+.cmp-table th.hi{color:var(--accent2)}
+.cmp .btn{margin-top:26px}
+.pr-sub{color:var(--muted);font-size:clamp(1.05rem,1.5vw,1.25rem);margin-top:22px}
+.pr-toggle{display:inline-flex;margin-top:28px;border:1px solid var(--line);border-radius:999px;padding:4px;background:var(--panel)}
+.pr-toggle button{border:0;background:transparent;color:var(--muted);font-family:var(--f-d);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:12px 20px;border-radius:999px;cursor:pointer;transition:background .3s,color .3s}
+.pr-toggle button.on{background:var(--accent);color:#fff}
+.pr-note{color:var(--muted);font-size:.9rem;margin-top:12px}
+.pr-grid{list-style:none;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:clamp(28px,4vw,48px) 0 0}
+.pr-card{position:relative;display:flex;flex-direction:column;padding:30px 26px 28px;border:1px solid var(--line);border-radius:var(--rad);background:var(--panel);backdrop-filter:blur(6px);transition:border-color .5s,transform .7s var(--ease)}
+.pr-card.popular{border-color:var(--accent2);box-shadow:0 20px 60px -30px var(--glow)}
+.pr-card .pop{position:absolute;top:-12px;left:22px;font-family:var(--f-d);font-size:10px;letter-spacing:.18em;text-transform:uppercase;background:var(--accent);color:#fff;padding:6px 12px;border-radius:999px}
+.pr-card h3{font-family:var(--f-d);font-weight:500;text-transform:uppercase;font-size:clamp(1rem,1.3vw,1.2rem);margin:6px 0 6px}
+.pr-card .d{color:var(--muted);font-size:.92rem;min-height:2.8em}
+.pr-card .price{font-family:var(--f-d);font-weight:700;font-size:clamp(1.6rem,2.2vw,2.1rem);letter-spacing:-.01em;margin:18px 0 4px;font-variant-numeric:tabular-nums}
+.pr-card .price small{font-size:.55em;font-weight:500;color:var(--accent2);margin-left:4px}
+.pr-card .free{font-size:.82rem;color:var(--accent2);min-height:1.2em}
+.pr-card ul{list-style:none;padding:0;margin:18px 0 22px;display:grid;gap:9px;font-size:.93rem;color:var(--ink)}
+.pr-card ul li{padding-left:20px;position:relative}
+.pr-card ul li::before{content:"";position:absolute;left:0;top:.55em;width:9px;height:9px;border-radius:50%;background:var(--accent2);opacity:.85}
+.pr-card .btn{margin-top:auto;width:100%}
+.pr-guar{margin-top:28px;color:var(--ink);font-size:1rem}
+.pr-ask{margin-top:10px;font-size:.95rem}
+.pr-ask a{color:var(--accent2);text-decoration:underline;text-underline-offset:4px}
+@media (max-width:1100px){.pr-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:620px){.pr-grid{grid-template-columns:1fr}.cmp-table th,.cmp-table td{padding:10px 6px;font-size:.9rem}}
 </style>
 </head>
 <body class="has-cursor ui-on">
-<a class="skip-link" href="https://legendary-pothos-cf2e0c.netlify.app/#main">Skip to content</a>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.23 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.14-1.18-.06-.11-.23-.17-.48-.29z"></path></symbol></svg>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><lineargradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--accent2)"></stop><stop offset="1" style="stop-color:var(--accent)"></stop></lineargradient></defs></svg>
@@ -691,7 +728,7 @@ body.ui-on .lang-mini.ui{animation-name:uiInFree}
 <div id="cur" aria-hidden="true" class=""><i class="cur-glow" style="transform: translate3d(875.588px, 347.587px, 0px);"></i><i class="cur-dot" style="transform: translate3d(951.303px, 558.209px, 0px);"></i><i class="cur-ring" style="transform: translate3d(896.053px, 476.034px, 0px);"><b>Ашу</b></i></div>
 
 <header class="hdr" id="hdr">
-  <a class="brand" href="https://legendary-pothos-cf2e0c.netlify.app/#home" data-nav="home" aria-label="Damillion Agency — Home">
+  <a class="brand" href="#home" data-nav="home" aria-label="Damillion Agency — Home">
     <svg class="logo" viewBox="0 0 64 64" width="36" height="36" aria-hidden="true" focusable="false"><circle class="lg-ring" cx="32" cy="32" r="30" pathLength="1"></circle><path class="lg-d" d="M20 16h14a16 16 0 0 1 0 32H20z" pathLength="1"></path><path class="lg-in" d="M28 24h6a8 8 0 0 1 0 16h-6z"></path></svg><span>DAMILLION AGENCY</span>
   </a>
   <div class="hdr-r">
@@ -711,11 +748,11 @@ body.ui-on .lang-mini.ui{animation-name:uiInFree}
   </div>
   <nav class="nav" id="nav" aria-label="Main">
     <ul>
-      <li class="ui" style="--i:1"><a href="https://legendary-pothos-cf2e0c.netlify.app/#home" data-nav="home" data-i18n="nav.home" class="on">Басты</a></li>
-      <li class="ui" style="--i:2"><a href="https://legendary-pothos-cf2e0c.netlify.app/#work" data-nav="work" data-i18n="nav.work">Жұмыстар</a></li>
-      <li class="ui" style="--i:3"><a href="https://legendary-pothos-cf2e0c.netlify.app/#about" data-nav="about" data-i18n="nav.about">Біз туралы</a></li>
-      <li class="ui" style="--i:4"><a href="https://legendary-pothos-cf2e0c.netlify.app/#services" data-nav="services" data-i18n="nav.services">Қызметтер</a></li>
-      <li class="ui" style="--i:5"><a href="https://legendary-pothos-cf2e0c.netlify.app/#contact" data-nav="contact" data-i18n="nav.contact">Байланыс</a></li>
+      <li class="ui" style="--i:1"><a href="#home" data-nav="home" data-i18n="nav.home" class="on">Басты</a></li>
+      <li class="ui" style="--i:2"><a href="#work" data-nav="work" data-i18n="nav.work">Жұмыстар</a></li>
+      <li class="ui" style="--i:3"><a href="#about" data-nav="about" data-i18n="nav.about">Біз туралы</a></li>
+      <li class="ui" style="--i:4"><a href="#services" data-nav="services" data-i18n="nav.services">Қызметтер</a><a href="#pricing" data-nav="pricing" data-i18n="nav.pricing">Цены</a></li>
+      <li class="ui" style="--i:5"><a href="#contact" data-nav="contact" data-i18n="nav.contact">Байланыс</a></li>
     </ul>
     <div class="lang ui" style="--i:6" role="group" data-i18n-aria="ui.lang" aria-label="Тіл">
       <button type="button" data-lang="en" aria-pressed="false">EN</button>
@@ -723,7 +760,7 @@ body.ui-on .lang-mini.ui{animation-name:uiInFree}
       <button type="button" data-lang="kz" aria-pressed="true">KZ</button>
     </div>
     <button class="xp ui" style="--i: 7; translate: 0px;" type="button" data-xp="" data-magnetic=""><span class="xp-sw" aria-hidden="true"><i data-x="blue"></i><i data-x="purple"></i><i data-x="black"></i></span><span data-i18n="ui.change">Стильді ауыстыру</span></button>
-    <a class="btn btn-sm ui" style="--i: 8; translate: 0px;" data-wa="" data-magnetic="" target="_blank" rel="noopener" href="https://wa.me/77714147055?text=%D0%A1%D3%99%D0%BB%D0%B5%D0%BC%D0%B5%D1%82%D1%81%D1%96%D0%B7%20%D0%B1%D0%B5%2C%20Damillion%20Agency!%20%D0%A1%D0%B0%D0%B9%D1%82%20%D0%B6%D0%BE%D0%B1%D0%B0%D1%81%D1%8B%D0%BD%20%D1%82%D0%B0%D0%BB%D2%9B%D1%8B%D0%BB%D0%B0%D2%93%D1%8B%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96."><span data-i18n="nav.talk">Жазу</span></a>
+    <a class="btn btn-sm ui" style="--i: 8; translate: 0px;" data-wa="" data-magnetic="" target="_blank" rel="noopener" href="https://wa.me/77750431833?text=%D0%A1%D3%99%D0%BB%D0%B5%D0%BC%D0%B5%D1%82%D1%81%D1%96%D0%B7%20%D0%B1%D0%B5%2C%20Damillion%20Agency!%20%D0%A1%D0%B0%D0%B9%D1%82%20%D0%B6%D0%BE%D0%B1%D0%B0%D1%81%D1%8B%D0%BD%20%D1%82%D0%B0%D0%BB%D2%9B%D1%8B%D0%BB%D0%B0%D2%93%D1%8B%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96."><span data-i18n="nav.talk">Жазу</span></a>
   </nav>
 </header>
 
@@ -737,8 +774,8 @@ body.ui-on .lang-mini.ui{animation-name:uiInFree}
       </h1>
       <p class="statement" data-i18n="hero.statement">Мақсатты бизнеске арналған цифрлық шешімдер.</p>
       <div class="hero-cta">
-        <a class="btn" href="https://legendary-pothos-cf2e0c.netlify.app/#work" data-nav="work" data-magnetic="" style="translate: 0px;"><span data-i18n="hero.explore">Жұмыстарды көру</span></a>
-        <a class="btn ghost" data-wa="" data-magnetic="" target="_blank" rel="noopener" href="https://wa.me/77714147055?text=%D0%A1%D3%99%D0%BB%D0%B5%D0%BC%D0%B5%D1%82%D1%81%D1%96%D0%B7%20%D0%B1%D0%B5%2C%20Damillion%20Agency!%20%D0%A1%D0%B0%D0%B9%D1%82%20%D0%B6%D0%BE%D0%B1%D0%B0%D1%81%D1%8B%D0%BD%20%D1%82%D0%B0%D0%BB%D2%9B%D1%8B%D0%BB%D0%B0%D2%93%D1%8B%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96." style="translate: 0px;"><span data-i18n="hero.talk">Жазу</span></a>
+        <a class="btn" href="#work" data-nav="work" data-magnetic="" style="translate: 0px;"><span data-i18n="hero.explore">Жұмыстарды көру</span></a>
+        <a class="btn ghost" data-wa="" data-magnetic="" target="_blank" rel="noopener" href="https://wa.me/77750431833?text=%D0%A1%D3%99%D0%BB%D0%B5%D0%BC%D0%B5%D1%82%D1%81%D1%96%D0%B7%20%D0%B1%D0%B5%2C%20Damillion%20Agency!%20%D0%A1%D0%B0%D0%B9%D1%82%20%D0%B6%D0%BE%D0%B1%D0%B0%D1%81%D1%8B%D0%BD%20%D1%82%D0%B0%D0%BB%D2%9B%D1%8B%D0%BB%D0%B0%D2%93%D1%8B%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96." style="translate: 0px;"><span data-i18n="hero.talk">Жазу</span></a>
       </div>
     </div>
     <div class="scroll-cue" aria-hidden="true"><span data-i18n="ui.scroll">Төмен</span><i></i></div>
@@ -841,9 +878,36 @@ body.ui-on .lang-mini.ui{animation-name:uiInFree}
   </section>
 
   <!-- ABOUT — the studio: philosophy, approach, values, process, direction -->
+
+  <section class="whysite" id="whysite" data-sec="whysite">
+    <div class="wrap">
+      <span class="idx rv">02</span>
+      <h2 data-split="" data-i18n="ws.title">Зачем бизнесу сайт</h2>
+      <p class="ws-lead rv" data-i18n="ws.lead"></p>
+      <ul class="why-grid ws-grid">
+        <li class="card rv" data-hover=""><span class="n">01</span><h3 data-i18n="ws.c1"></h3><p data-i18n="ws.c1d"></p></li>
+        <li class="card rv" data-hover="" style="--d:.06s"><span class="n">02</span><h3 data-i18n="ws.c2"></h3><p data-i18n="ws.c2d"></p></li>
+        <li class="card rv" data-hover="" style="--d:.12s"><span class="n">03</span><h3 data-i18n="ws.c3"></h3><p data-i18n="ws.c3d"></p></li>
+        <li class="card rv" data-hover="" style="--d:.18s"><span class="n">04</span><h3 data-i18n="ws.c4"></h3><p data-i18n="ws.c4d"></p></li>
+      </ul>
+      <div class="cmp rv">
+        <h3 class="cmp-t" data-i18n="ws.cmpTitle"></h3>
+        <table class="cmp-table">
+          <thead><tr><th></th><th data-i18n="ws.cmpA"></th><th class="hi" data-i18n="ws.cmpB"></th></tr></thead>
+          <tbody>
+            <tr><td data-i18n="ws.r1"></td><td data-i18n="ws.r1a"></td><td class="hi" data-i18n="ws.r1b"></td></tr>
+            <tr><td data-i18n="ws.r2"></td><td data-i18n="ws.r2a"></td><td class="hi" data-i18n="ws.r2b"></td></tr>
+            <tr><td data-i18n="ws.r3"></td><td data-i18n="ws.r3a"></td><td class="hi" data-i18n="ws.r3b"></td></tr>
+            <tr><td data-i18n="ws.r4"></td><td data-i18n="ws.r4a"></td><td class="hi" data-i18n="ws.r4b"></td></tr>
+          </tbody>
+        </table>
+        <a class="btn rv" data-wa="" href="#" target="_blank" rel="noopener" data-i18n="ws.cta"></a>
+      </div>
+    </div>
+  </section>
   <section class="about" id="about" data-sec="about">
     <div class="wrap ab">
-      <span class="idx rv">02</span>
+      <span class="idx rv">03</span>
       <h2 data-split="" data-i18n="about.title" aria-label="Тағы бір шаблон емес."><span class="w" aria-hidden="true"><span style="--i:0">Тағы</span></span><span class="w" aria-hidden="true"><span style="--i:1">бір</span></span><span class="w" aria-hidden="true"><span style="--i:2">шаблон</span></span><span class="w" aria-hidden="true"><span style="--i:3">емес.</span></span></h2>
       <p class="ab-lead rv" data-i18n="about.lead">Тәуелсіз цифрлық студия. Біз мінезі бар сайттар жасаймыз: дизайны ойластырылған, әзірлеуі дәл, есте қалғысы келетін брендтерге арналған.</p>
 
@@ -897,7 +961,7 @@ body.ui-on .lang-mini.ui{animation-name:uiInFree}
         <span class="ab-label rv" data-i18n="about.next.k">Қайда бара жатырмыз</span>
         <div class="ab-body">
           <p class="ab-q rv" data-i18n="about.next.p">Біз жолдың басындамыз және студияны саналы түрде құрып жатырмыз — жоба сайын, әрқайсысы мұқият жасалады. Мақсат қарапайым: сайт сайттан артық болуы керек болғанда іздейтін студия болу.</p>
-          <a class="btn ghost rv" href="https://legendary-pothos-cf2e0c.netlify.app/#contact" data-nav="contact" data-magnetic="" style="--d: .15s; translate: 0px;"><span data-i18n="about.next.cta">Әңгімені бастау</span></a>
+          <a class="btn ghost rv" href="#contact" data-nav="contact" data-magnetic="" style="--d: .15s; translate: 0px;"><span data-i18n="about.next.cta">Әңгімені бастау</span></a>
         </div>
       </div>
     </div>
@@ -905,7 +969,7 @@ body.ui-on .lang-mini.ui{animation-name:uiInFree}
   <!-- SERVICES -->
   <section class="services" id="services" data-sec="services">
     <div class="wrap">
-      <span class="idx rv">03</span>
+      <span class="idx rv">04</span>
       <h2 data-split="" data-i18n="svc.title" aria-label="Біз не жасаймыз"><span class="w" aria-hidden="true"><span style="--i:0">Біз</span></span><span class="w" aria-hidden="true"><span style="--i:1">не</span></span><span class="w" aria-hidden="true"><span style="--i:2">жасаймыз</span></span></h2>
       <ol class="svc-list">
         <li class="svc rv" data-hover=""><span class="n">01</span><h3 data-i18n="svc.s1">Веб-дизайн</h3><p data-i18n="svc.s1d">Сайтқа арналған заманауи, ерекше визуалды стиль.</p><span class="arr" aria-hidden="true">↗</span><i class="svc-line"></i></li>
@@ -919,6 +983,22 @@ body.ui-on .lang-mini.ui{animation-name:uiInFree}
   </section>
 
   <!-- WHY -->
+
+  <section class="pricing" id="pricing" data-sec="pricing">
+    <div class="wrap">
+      <span class="idx rv">05</span>
+      <h2 data-split="" data-i18n="pr.title">Цены</h2>
+      <p class="pr-sub rv" data-i18n="pr.sub"></p>
+      <div class="pr-toggle rv" role="group">
+        <button type="button" class="on" data-act="0" data-i18n="pr.tg1"></button>
+        <button type="button" data-act="1" data-i18n="pr.tg2"></button>
+      </div>
+      <p class="pr-note rv" data-i18n="pr.note"></p>
+      <ul class="pr-grid" id="prGrid"></ul>
+      <p class="pr-guar rv">★ <span data-i18n="pr.guar"></span></p>
+      <p class="pr-ask rv"><a data-wa="" href="#" target="_blank" rel="noopener" data-i18n="pr.ask"></a></p>
+    </div>
+  </section>
   <section class="why" id="why" data-sec="why">
     <div class="wrap">
       <h2 data-split="" data-i18n="why.title" aria-label="Мақсатты дизайн."><span class="w" aria-hidden="true"><span style="--i:0">Мақсатты</span></span><span class="w" aria-hidden="true"><span style="--i:1">дизайн.</span></span></h2>
@@ -936,17 +1016,17 @@ body.ui-on .lang-mini.ui{animation-name:uiInFree}
   <!-- CONTACT -->
   <section class="contact" id="contact" data-sec="contact">
     <div class="wrap">
-      <span class="idx rv">04</span>
+      <span class="idx rv">07</span>
       <h2 class="big" data-split="" data-i18n="contact.title" aria-label="Бизнесіңізді ерекшелендіруге дайынсыз ба?"><span class="w" aria-hidden="true"><span style="--i:0">Бизнесіңізді</span></span><span class="w" aria-hidden="true"><span style="--i:1">ерекшелендіруге</span></span><span class="w" aria-hidden="true"><span style="--i:2">дайынсыз</span></span><span class="w" aria-hidden="true"><span style="--i:3">ба?</span></span></h2>
       <p class="rv c-text" data-i18n="contact.text">Не жасап жатқаныңызды айтыңыз. Мақсаттарыңызды, идеяларыңызды және бизнесіңізге сай цифрлық шешімді талқылаймыз.</p>
-      <a class="btn btn-xl rv" data-wa="" data-magnetic="" target="_blank" rel="noopener" href="https://wa.me/77714147055?text=%D0%A1%D3%99%D0%BB%D0%B5%D0%BC%D0%B5%D1%82%D1%81%D1%96%D0%B7%20%D0%B1%D0%B5%2C%20Damillion%20Agency!%20%D0%A1%D0%B0%D0%B9%D1%82%20%D0%B6%D0%BE%D0%B1%D0%B0%D1%81%D1%8B%D0%BD%20%D1%82%D0%B0%D0%BB%D2%9B%D1%8B%D0%BB%D0%B0%D2%93%D1%8B%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96." style="translate: 0px;"><svg class="wa-ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#wa"></use></svg><span data-i18n="contact.wa">WhatsApp-қа жазу</span><i aria-hidden="true">↗</i></a>
+      <a class="btn btn-xl rv" data-wa="" data-magnetic="" target="_blank" rel="noopener" href="https://wa.me/77750431833?text=%D0%A1%D3%99%D0%BB%D0%B5%D0%BC%D0%B5%D1%82%D1%81%D1%96%D0%B7%20%D0%B1%D0%B5%2C%20Damillion%20Agency!%20%D0%A1%D0%B0%D0%B9%D1%82%20%D0%B6%D0%BE%D0%B1%D0%B0%D1%81%D1%8B%D0%BD%20%D1%82%D0%B0%D0%BB%D2%9B%D1%8B%D0%BB%D0%B0%D2%93%D1%8B%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96." style="translate: 0px;"><svg class="wa-ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#wa"></use></svg><span data-i18n="contact.wa">WhatsApp-қа жазу</span><i aria-hidden="true">↗</i></a>
       <p class="rv price" data-i18n="contact.price">Жоба құны көлеміне, мақсаттарына және функционалына қарай жеке талқыланады.</p>
-      <div class="c-links rv" id="cLinks"><a data-wa="" target="_blank" rel="noopener" href="https://wa.me/77714147055?text=%D0%A1%D3%99%D0%BB%D0%B5%D0%BC%D0%B5%D1%82%D1%81%D1%96%D0%B7%20%D0%B1%D0%B5%2C%20Damillion%20Agency!%20%D0%A1%D0%B0%D0%B9%D1%82%20%D0%B6%D0%BE%D0%B1%D0%B0%D1%81%D1%8B%D0%BD%20%D1%82%D0%B0%D0%BB%D2%9B%D1%8B%D0%BB%D0%B0%D2%93%D1%8B%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96."><svg class="wa-ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#wa"></use></svg>WhatsApp · +7 771 414 7055</a><a href="mailto:damillionagency@gmail.com">damillionagency@gmail.com</a><a href="https://instagram.com/damillionagency" target="_blank" rel="noopener">Instagram</a><a href="https://t.me/damillionagency" target="_blank" rel="noopener">Telegram</a></div>
+      <div class="c-links rv" id="cLinks"><a data-wa="" target="_blank" rel="noopener" href="https://wa.me/77750431833?text=%D0%A1%D3%99%D0%BB%D0%B5%D0%BC%D0%B5%D1%82%D1%81%D1%96%D0%B7%20%D0%B1%D0%B5%2C%20Damillion%20Agency!%20%D0%A1%D0%B0%D0%B9%D1%82%20%D0%B6%D0%BE%D0%B1%D0%B0%D1%81%D1%8B%D0%BD%20%D1%82%D0%B0%D0%BB%D2%9B%D1%8B%D0%BB%D0%B0%D2%93%D1%8B%D0%BC%20%D0%BA%D0%B5%D0%BB%D0%B5%D0%B4%D1%96."><svg class="wa-ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#wa"></use></svg>WhatsApp · +7 775 043 18 33</a><a href="mailto:damillionagency@gmail.com">damillionagency@gmail.com</a><a href="https://instagram.com/damillionagency" target="_blank" rel="noopener">Instagram</a><a href="https://t.me/damillionagency" target="_blank" rel="noopener">Telegram</a></div>
     </div>
     <footer class="foot">
       <div class="foot-brand"><svg class="logo" viewBox="0 0 64 64" width="28" height="28" aria-hidden="true" focusable="false"><circle class="lg-ring" cx="32" cy="32" r="30" pathLength="1"></circle><path class="lg-d" d="M20 16h14a16 16 0 0 1 0 32H20z" pathLength="1"></path><path class="lg-in" d="M28 24h6a8 8 0 0 1 0 16h-6z"></path></svg><span>DAMILLION AGENCY</span><em>AZAMAT × DIAS</em></div>
       <p><span data-i18n="foot.made">Дизайн және әзірлеу — Азамат × Диас</span> · © <span id="yr">2026</span> · <span data-i18n="foot.rights">Барлық құқықтар қорғалған.</span></p>
-      <a href="https://legendary-pothos-cf2e0c.netlify.app/#home" data-nav="home" class="totop" data-i18n="ui.top">Жоғары</a>
+      <a href="#home" data-nav="home" class="totop" data-i18n="ui.top">Жоғары</a>
     </footer>
   </section>
 </main>
@@ -958,14 +1038,20 @@ body.ui-on .lang-mini.ui{animation-name:uiInFree}
    this one file. Replace image paths with real screenshots
    (tall full-page screenshots look best — they scroll on hover).
    ========================================================= */
+window.PRICING = [
+  { key: 't1', price: 45000, act: 60000 },
+  { key: 't2', price: 100000, act: 125000, popular: true },
+  { key: 't3', price: 225000, act: 250000 },
+  { key: 't4', price: 450000, act: 450000, free: true }
+];
 window.SITE = {
   // language shown on first visit (a visitor's own choice is remembered). Phones/tablets open in Russian.
   defaultLang: 'en',
   defaultLangMobile: 'ru',
 
   contact: {
-    whatsapp: '77714147055',            // digits only, with country code (no + or spaces)  →  https://wa.me/77714147055
-    whatsappDisplay: '+7 771 414 7055', // how the number is shown on the page
+    whatsapp: '77750431833',            // digits only, with country code (no + or spaces)  →  https://wa.me/77750431833
+    whatsappDisplay: '+7 775 043 18 33', // how the number is shown on the page
     email: 'damillionagency@gmail.com',
     instagram: 'https://instagram.com/damillionagency',
     socials: [
@@ -1409,6 +1495,97 @@ window.I18N = {
   }
 };
 
+
+/* ---- added: why-site + pricing (EN / RU / KZ) ---- */
+(function(){
+  const A = {
+    en: {
+      nav: { pricing: 'Prices' },
+      ws: {
+        title: 'Why your business needs a website',
+        lead: 'Instagram gets scrolled. A website gets found. When a client types "custom kitchen Almaty" or "massage near me" into Google, they land on a website, not on a feed.',
+        c1: 'You get found', c1d: 'Google and 2GIS lead to a website. No website — the client goes to the one who has it.',
+        c2: 'Trust in 5 seconds', c2d: 'Prices, work, reviews and a WhatsApp button on one screen. The client decides faster.',
+        c3: 'Leads while you sleep', c3d: 'The site takes requests 24/7 — while you work and while you rest.',
+        c4: 'Fast, never templated', c4d: 'We build with modern AI tools and finish by hand: a site with character in days, not months.',
+        cmpTitle: 'Instagram or a website?', cmpA: 'Instagram', cmpB: 'Website',
+        r1: 'Google search', r1a: 'no', r1b: 'yes',
+        r2: 'Prices and catalogue', r2a: '"DM for price"', r2b: 'on screen',
+        r3: 'Request', r3a: 'a message in DM', r3b: 'form + WhatsApp',
+        r4: 'Brand', r4a: 'a feed', r4b: 'your own space',
+        cta: 'I want a website like this'
+      },
+      pr: {
+        title: 'Prices', sub: 'Four packages. A guarantee on every site.',
+        tg1: 'Website', tg2: 'Website + activation', note: 'Activation — domain, hosting and a turnkey launch.',
+        from: '', cur: '₸', free: 'activation free', popular: 'Most popular', cta: 'Choose', ask: 'Not sure which one? Ask us',
+        t1: 'Basic', t1d: 'One-page site for a quick start', t1i: ['Up to 5 blocks', 'Mobile-ready', 'WhatsApp button', '1 round of edits'],
+        t2: 'Business', t2d: 'A full site that brings requests', t2i: ['Up to 8 sections', 'Catalogue or services', 'Request form', 'Animations, basic SEO', '2 rounds of edits'],
+        t3: 'Premium', t3d: 'Custom design with character', t3i: ['Individual design', 'Interactive & animated', 'Several pages', 'EN / RU / KZ', '2GIS and Instagram integration', '3 rounds of edits'],
+        t4: 'Ultra', t4d: 'A flagship digital experience', t4i: ['Everything in Premium', 'Unique concept, 3D / video', 'Brand visuals', 'Priority timeline', '3 months of support'],
+        guar: 'Guarantee on every site: we fix errors and refine until everything works the way it should.',
+        wa: 'Hello! I am interested in the "{tier}" package ({price}).'
+      }
+    },
+    ru: {
+      nav: { pricing: 'Цены' },
+      ws: {
+        title: 'Зачем бизнесу сайт',
+        lead: 'Instagram листают. Сайт находят. Когда клиент пишет в Google «кухня на заказ Алматы» или «массаж рядом», он попадает на сайт, а не в ленту.',
+        c1: 'Вас находят', c1d: 'Google и 2ГИС ведут на сайт. Нет сайта — клиент уходит к тому, у кого он есть.',
+        c2: 'Доверие за 5 секунд', c2d: 'Цены, работы, отзывы и кнопка WhatsApp на одном экране. Клиент решает быстрее.',
+        c3: 'Заявки, пока вы спите', c3d: 'Сайт принимает заявки 24/7, пока вы работаете или отдыхаете.',
+        c4: 'Быстро и без шаблонов', c4d: 'Делаем с современными AI-инструментами и доводим руками: сайт с характером за дни, а не месяцы.',
+        cmpTitle: 'Instagram или сайт?', cmpA: 'Instagram', cmpB: 'Сайт',
+        r1: 'Поиск в Google', r1a: 'нет', r1b: 'да',
+        r2: 'Цены и каталог', r2a: '«цена в директ»', r2b: 'на экране',
+        r3: 'Заявка', r3a: 'сообщение в директ', r3b: 'форма + WhatsApp',
+        r4: 'Бренд', r4a: 'лента', r4b: 'своё пространство',
+        cta: 'Хочу такой сайт'
+      },
+      pr: {
+        title: 'Цены', sub: 'Четыре пакета. Гарантия на каждый сайт.',
+        tg1: 'Сайт', tg2: 'Сайт + активация', note: 'Активация — домен, хостинг и запуск под ключ.',
+        from: '', cur: '₸', free: 'активация бесплатно', popular: 'Чаще всего берут', cta: 'Выбрать', ask: 'Не знаете, какой нужен? Спросите нас',
+        t1: 'Базовый', t1d: 'Одностраничный сайт для быстрого старта', t1i: ['До 5 блоков', 'Адаптив под телефон', 'Кнопка WhatsApp', '1 раунд правок'],
+        t2: 'Для бизнеса', t2d: 'Полноценный сайт, который приносит заявки', t2i: ['До 8 разделов', 'Каталог или услуги', 'Форма заявки', 'Анимации, базовое SEO', '2 раунда правок'],
+        t3: 'Премиум', t3d: 'Индивидуальный дизайн с характером', t3i: ['Индивидуальный дизайн', 'Интерактив и анимации', 'Несколько страниц', 'RU / KZ / EN', 'Интеграция 2ГИС и Instagram', '3 раунда правок'],
+        t4: 'Ультра', t4d: 'Флагманский цифровой проект', t4i: ['Всё из Премиум', 'Уникальная концепция, 3D / видео', 'Визуал бренда', 'Приоритетные сроки', '3 месяца поддержки'],
+        guar: 'Гарантия на каждый сайт: исправляем ошибки и дорабатываем, пока всё не заработает как надо.',
+        wa: 'Здравствуйте! Интересует пакет «{tier}» ({price}).'
+      }
+    },
+    kz: {
+      nav: { pricing: 'Бағасы' },
+      ws: {
+        title: 'Бизнеске сайт не үшін керек',
+        lead: 'Instagram-ды парақтайды. Сайтты іздеп табады. Клиент Google-ге «Алматы жиһаз на заказ» немесе «массаж жақын жерде» деп жазғанда, ол лентаға емес, сайтқа келеді.',
+        c1: 'Сізді табады', c1d: 'Google мен 2ГИС сайтқа апарады. Сайт болмаса, клиент сайты бар бәсекелеске кетеді.',
+        c2: '5 секундта сенім', c2d: 'Бағасы, жұмыстар, пікірлер және WhatsApp батырмасы бір экранда. Клиент тезірек шешеді.',
+        c3: 'Өтінімдер сіз демалғанда да', c3d: 'Сайт өтінімдерді тәулік бойы қабылдайды.',
+        c4: 'Жылдам және шаблонсыз', c4d: 'Заманауи AI-құралдармен жасап, қолмен жетілдіреміз: мінезі бар сайт айлар емес, күндер ішінде.',
+        cmpTitle: 'Instagram әлде сайт?', cmpA: 'Instagram', cmpB: 'Сайт',
+        r1: 'Google іздеуі', r1a: 'жоқ', r1b: 'бар',
+        r2: 'Бағасы мен каталог', r2a: '«бағасы директте»', r2b: 'экранда',
+        r3: 'Өтінім', r3a: 'директке хабарлама', r3b: 'форма + WhatsApp',
+        r4: 'Бренд', r4a: 'лента', r4b: 'өз кеңістігіңіз',
+        cta: 'Осындай сайт керек'
+      },
+      pr: {
+        title: 'Бағасы', sub: 'Төрт пакет. Әр сайтқа кепілдік.',
+        tg1: 'Сайт', tg2: 'Сайт + активация', note: 'Активация — домен, хостинг және толық іске қосу.',
+        from: '', cur: '₸', free: 'активация тегін', popular: 'Жиі таңдайды', cta: 'Таңдау', ask: 'Қайсысы керек екенін білмейсіз бе? Бізден сұраңыз',
+        t1: 'Базалық', t1d: 'Жылдам бастауға арналған бір беттік сайт', t1i: ['5 блокқа дейін', 'Телефонға бейімделген', 'WhatsApp батырмасы', '1 түзету раунды'],
+        t2: 'Бизнеске', t2d: 'Өтінім әкелетін толық сайт', t2i: ['8 бөлімге дейін', 'Каталог немесе қызметтер', 'Өтінім формасы', 'Анимация, базалық SEO', '2 түзету раунды'],
+        t3: 'Премиум', t3d: 'Мінезі бар жеке дизайн', t3i: ['Жеке дизайн', 'Интерактив және анимация', 'Бірнеше бет', 'RU / KZ / EN', '2ГИС және Instagram интеграциясы', '3 түзету раунды'],
+        t4: 'Ультра', t4d: 'Флагмандық цифрлық жоба', t4i: ['Премиумдағының бәрі', 'Бірегей концепция, 3D / видео', 'Бренд визуалы', 'Басым мерзім', '3 ай қолдау'],
+        guar: 'Әр сайтқа кепілдік: қателерді түзетіп, бәрі дұрыс жұмыс істегенше жетілдіреміз.',
+        wa: 'Сәлеметсіз бе! «{tier}» пакеті қызықтырады ({price}).'
+      }
+    }
+  };
+  for (const l in A) for (const k in A[l]) window.I18N[l][k] = Object.assign(window.I18N[l][k] || {}, A[l][k]);
+})();
 </script>
 <script>
 /* =========================================================
@@ -1719,8 +1896,8 @@ const TIER = _tq ? +_tq[1] : isSmall() ? 0 : innerWidth < 1100 ? 1 : 2;      // 
 const SEG = [34, 48, 64][TIER];
 
 /* ---- adaptive quality: the effect load steps down (and back up) by itself so the motion stays smooth on any device ---- */
-const QMAX = 2, _qq = /[?&]quality=([012])/.exec(location.search);
-let Q = _qq ? +_qq[1] : (TIER === 0 ? 1 : 2), nAct = N, qCap = QMAX, qAcc = 0, qWork = 0, qN = 0, qOK = 0, qBlock = 0, qUp = 0, TK = 8, TGLOW = true;
+const QMAX = 1, _qq = /[?&]quality=([012])/.exec(location.search);
+let Q = _qq ? +_qq[1] : (TIER === 0 ? 0 : 1), nAct = N, qCap = QMAX, qAcc = 0, qWork = 0, qN = 0, qOK = 0, qBlock = 0, qUp = 0, TK = 8, TGLOW = true;
 const FGX = TIER === 0 ? lx : fgx;                    // phones draw the foreground trails on the same canvas: one full-screen layer less
 if (TIER === 0) fgc.style.display = 'none';
 function setQ(q) { Q = q; nAct = Math.round(N * [.4, .7, 1][q]); TK = [3, 5, 8][q]; TGLOW = q > 0; }
@@ -2184,8 +2361,8 @@ async function veilRun({ variant, ox, oy, title, sub, mid, hold = 350, flood = f
   veil.classList.remove('on'); body.classList.remove('tr'); html.classList.remove('lock');
 }
 
-const SEC_ORDER = ['home', 'work', 'about', 'services', 'why', 'contact'];
-const SEC_VARIANT = { home: 'iris', work: 'iris', about: 'slit', services: 'curtain', why: 'curtain', contact: 'blade' };
+const SEC_ORDER = ['home', 'work', 'whysite', 'about', 'services', 'pricing', 'why', 'contact'];
+const SEC_VARIANT = { home: 'iris', work: 'iris', whysite: 'slit', about: 'slit', services: 'curtain', pricing: 'curtain', why: 'curtain', contact: 'blade' };
 function targetY(el, id) {
   if (id === 'home') return 0;
   const top = el.getBoundingClientRect().top + scrollY;
@@ -2201,7 +2378,7 @@ async function go(id, e, variant) {
   busy = true;
   const isProj = id.startsWith('project-'), pi = isProj ? +id.split('-')[1] - 1 : -1;
   const ox = e && e.clientX ? e.clientX : W / 2, oy = e && e.clientY ? e.clientY : H / 2;
-  const key = id === 'why' ? 'services' : id;
+  const key = id === 'why' ? 'services' : id === 'whysite' ? 'work' : id;
   const title = isProj ? S.projects[pi].name : tr('nav.' + key);
   const sub = isProj ? `— ${tr('nav.work')} 0${pi + 1} / 0${S.projects.length}` : `— 0${Math.max(0, SEC_ORDER.indexOf(id))}`;
   variant = variant || SEC_VARIANT[id] || 'iris';
@@ -2253,7 +2430,7 @@ function toggleMenu() {
 /* ---------------- observers ---------------- */
 function setSec(id) {
   if (id === curSec) return; const prev = curSec; curSec = id;
-  const navKey = id === 'why' ? 'services' : id;
+  const navKey = id === 'why' ? 'services' : id === 'whysite' ? 'work' : id;
   $$('.nav a[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === navKey));
   body.classList.toggle('in-work', id === 'work');
   setCam(); boost(.55);
@@ -2358,9 +2535,9 @@ function bindEmbeds() {
   const live = (f, on) => {
     const s = f.getAttribute('src');
     if (on && (!s || s === 'about:blank')) f.src = f.dataset.src;
-    else if (!on && lite && s && s !== 'about:blank') { f.src = 'about:blank'; f.dispatchEvent(new Event('embedoff')); }
+    else if (!on && s && s !== 'about:blank') { f.src = 'about:blank'; f.dispatchEvent(new Event('embedoff')); }
   };
-  const io = new IntersectionObserver(es => es.forEach(en => live($('iframe', en.target), en.isIntersecting)), { rootMargin: lite ? '25% 0px' : '120% 0px' });
+  const io = new IntersectionObserver(es => es.forEach(en => live($('iframe', en.target), en.isIntersecting)), { rootMargin: lite ? '15% 0px' : '30% 0px' });
   frames.forEach(f => io.observe(f.closest('.p-view')));
 }
 function bindTours() {
@@ -2442,4 +2619,32 @@ boot();
 </script>
 
 
-<iframe id="nl-badge-frame" title="Powered by Netlify" style="position: fixed; bottom: 0px; right: 0px; border: 0px; margin: 0px; padding: 0px; background: transparent; color-scheme: dark; z-index: 2147483645; width: 197px; height: 64px; clip-path: path(&quot;M 3 3 H 184 V 51 H 3 Z&quot;);" data-nl-ready="1" ></iframe></body></html>
+<iframe id="nl-badge-frame" title="Powered by Netlify" style="position: fixed; bottom: 0px; right: 0px; border: 0px; margin: 0px; padding: 0px; background: transparent; color-scheme: dark; z-index: 2147483645; width: 197px; height: 64px; clip-path: path(&quot;M 3 3 H 184 V 51 H 3 Z&quot;);" data-nl-ready="1" ></iframe>
+<script>
+/* ---- added: pricing cards (reacts to language + activation toggle) ---- */
+(function(){
+  const fmt = n => n.toLocaleString('ru-RU').replace(/\u00a0|,/g, ' ');
+  let act = 0;
+  const grid = document.getElementById('prGrid'); if (!grid) return;
+  const langNow = () => { const l = document.documentElement.lang; return l === 'kk' ? 'kz' : (l === 'ru' ? 'ru' : 'en'); };
+  const t = (k) => { const d = window.I18N[langNow()]; return k.split('.').reduce((o, x) => (o || {})[x], d) || ''; };
+  function render() {
+    const pr = t('pr'), cur = pr.cur || '₸';
+    grid.innerHTML = window.PRICING.map((p, i) => {
+      const price = act ? p.act : p.price, name = pr[p.key], items = pr[p.key + 'i'] || [];
+      const msg = (pr.wa || '').replace('{tier}', name).replace('{price}', fmt(price) + ' ' + cur);
+      const wa = 'https://wa.me/' + window.SITE.contact.whatsapp + '?text=' + encodeURIComponent(msg);
+      return `<li class="pr-card rv in${p.popular ? ' popular' : ''}" data-hover="" style="--d:${i * .06}s">${p.popular ? `<span class="pop">${pr.popular}</span>` : ''}
+        <h3>${name}</h3><p class="d">${pr[p.key + 'd'] || ''}</p>
+        <div class="price">${fmt(price)}<small>${cur}</small></div>
+        <div class="free">${p.free ? pr.free : ''}</div>
+        <ul>${items.map(x => `<li>${x}</li>`).join('')}</ul>
+        <a class="btn" href="${wa}" target="_blank" rel="noopener">${pr.cta}</a></li>`;
+    }).join('');
+  }
+  document.querySelectorAll('.pr-toggle button').forEach(b => b.addEventListener('click', () => { act = +b.dataset.act; document.querySelectorAll('.pr-toggle button').forEach(x => x.classList.toggle('on', x === b)); render(); }));
+  new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+  render();
+})();
+</script>
+</body></html>
