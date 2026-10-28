@@ -22,7 +22,26 @@ export const DEFAULT_SETTINGS = {
     withReviews: "У «{name}» в 2ГИС {rating} и {reviews} отзывов, а сайта нет.",
     withoutReviews: "Нашёл «{name}» в 2ГИС, сайта у вас нет.",
   },
+  templatesKz: {
+    furniture: "Сәлеметсіз бе! Менің атым {manager}, мен Damillion компаниясынанмын, Алматыдағы жиһаз компанияларына сайт жасаймыз. {hook} Қазір адамдар жиһазды алдымен интернеттен қарайды: каталог, дайын жұмыстар. Сайт болмаса, көп клиент сізге жетпейді. Каталогы, жұмыс фотолары және WhatsApp-қа өтінім батырмасы бар сайт жасаймыз. Үлгі жіберейін бе?",
+    massage: "Сәлеметсіз бе! Менің атым {manager}, мен Damillion компаниясынанмын, массаж кабинеттеріне сайт жасаймыз. {hook} Массажды пікір бойынша таңдап, бірден жазылады. Бағасы, пікірлері және WhatsApp арқылы жазылу батырмасы бар сайт жасаймыз. Үлгі жіберейін бе?",
+    default: "Сәлеметсіз бе! Менің атым {manager}, мен Damillion компаниясынанмын, Алматыдағы жергілікті бизнеске сайт жасаймыз. {hook} WhatsApp-қа өтінім жіберетін қарапайым сайт жасаймыз. Үлгі жіберейін бе?",
+    followup: "Қайта сәлеметсіз бе! Бұл Damillion-нан {manager}. «{name}» үшін сайт туралы жазған едім. Қызық болса, үлгі мен бағасын жіберемін, 2 минут. Қажет болмаса, «жоқ» деп жазыңыз, енді мазаламаймын.",
+  },
+  hooksKz: {
+    withReviews: "2ГИС-те «{name}» рейтингі {rating}, {reviews}, бірақ сайты жоқ.",
+    withoutReviews: "2ГИС-те «{name}» бар, бірақ сайты жоқ.",
+  },
+  scripts: [
+    { title: "Дорого", ru: "Понимаю. Для старта хватает одностраничного сайта: каталог, фото работ и кнопка WhatsApp, это дешевле, чем кажется. Скажите, сколько у вас позиций, и я назову точную цену сегодня.", kz: "Түсінемін. Бастау үшін бір беттік сайт жеткілікті: каталог, жұмыс фотолары және WhatsApp батырмасы, бұл ойлағаннан арзан. Қанша позицияңыз бар екенін айтыңыз, бүгін нақты бағасын айтамын." },
+    { title: "Есть Instagram", ru: "Instagram листают, а сайт находят: человек ищет в Google «кухня на заказ Алматы» и попадает к вам. Плюс ссылка на сайт с ценами в шапке Instagram, и вам перестанут писать «сколько стоит» по 50 раз в день.", kz: "Instagram-ды парақтайды, ал сайтты іздеп табады: адам Google-ден «Алматы жиһаз на заказ» деп іздеп, сізге келеді. Оған қоса Instagram шапкасына бағасы бар сайт сілтемесін қоясыз, күніне 50 рет «бағасы қанша» деп жазуды қояды." },
+    { title: "Подумаю", ru: "Конечно. Чтобы было проще решить, скину пример сайта в вашей нише и цену, посмотрите за минуту. Хорошо?", kz: "Әрине. Шешім қабылдау оңай болуы үшін сіздің саладағы сайт үлгісі мен бағасын жіберейін, бір минутта қарап шығасыз. Жарай ма?" },
+    { title: "Сколько стоит", ru: "Зависит от объёма: каталог, страницы услуг, запись. Напишите, что нужно, и назову цену сегодня. Для старта обычно хватает одной страницы.", kz: "Көлеміне байланысты: каталог, қызмет беттері, жазылу. Не керек екенін жазыңыз, бүгін бағасын айтамын. Бастау үшін әдетте бір бет жеткілікті." },
+    { title: "Нет времени", ru: "Понимаю. От вас нужно 15 минут: фото работ и цены. Остальное делаем мы, сайт готов за несколько дней.", kz: "Түсінемін. Сізден 15 минут керек: жұмыс фотолары мен бағалар. Қалғанын біз жасаймыз, сайт бірнеше күнде дайын." },
+    { title: "Не интересно", ru: "Понял, спасибо за ответ. Если позже понадобится сайт, напишите, контакт останется.", kz: "Түсіндім, жауабыңызға рахмет. Кейін сайт керек болса, жазыңыз, байланыс сақталады." },
+  ],
 };
+const LANGS = ["ru", "kz"];
 
 const env = (k) => (globalThis.Netlify?.env?.get?.(k) ?? process.env[k] ?? "").trim();
 const store = () => globalThis.__rassylkaStore || getStore({ name: "rassylka", consistency: "strong" });
@@ -74,7 +93,7 @@ export function decryptSeed() {
   }
 }
 function fresh(r, ord) {
-  return { name: r.name, phone: r.phone, niche: r.niche || "", address: r.address || "", rating: r.rating || "", reviews: r.reviews || 0, instagram: r.instagram || "", hours: r.hours || "", category: r.category || "", firmId: r.firmId || "", status: "new", ord, by: null, at: null, sentBy: null, sentAt: null, followAt: null, note: "" };
+  return { name: r.name, phone: r.phone, niche: r.niche || "", address: r.address || "", rating: r.rating || "", reviews: r.reviews || 0, instagram: r.instagram || "", hours: r.hours || "", category: r.category || "", firmId: r.firmId || "", status: "new", ord, by: null, at: null, sentBy: null, sentAt: null, followAt: null, note: "", lang: /[әғқңөұүһі]/i.test(r.name || "") ? "kz" : "ru" };
 }
 // Добавляет новых клиентов из стартового списка и дополняет карточки (рейтинг, Instagram...), статусы не трогает.
 function applySeed(s) {
@@ -98,7 +117,7 @@ function normalize(data) {
   data.contacts ||= {};
   data.events ||= [];
   const d = DEFAULT_SETTINGS, st = data.settings || {};
-  data.settings = { ...d, ...st, templates: { ...d.templates, ...(st.templates || {}) }, hooks: { ...d.hooks, ...(st.hooks || {}) } };
+  data.settings = { ...d, ...st, templates: { ...d.templates, ...(st.templates || {}) }, hooks: { ...d.hooks, ...(st.hooks || {}) }, templatesKz: { ...d.templatesKz, ...(st.templatesKz || {}) }, hooksKz: { ...d.hooksKz, ...(st.hooksKz || {}) }, scripts: Array.isArray(st.scripts) && st.scripts.length ? st.scripts : d.scripts };
   return data;
 }
 async function readState() {
@@ -207,7 +226,18 @@ export default async (req) => {
     if (path === "/me" && method === "GET") return json({ me: { role: me.role, name: who } });
 
     if (path === "/state" && method === "GET") {
-      const [{ data }, presence] = await Promise.all([readState(), readPresence()]);
+      let [{ data }, presence] = await Promise.all([readState(), readPresence()]);
+      // Напомнили, а ответа нет полтора срока дожима: закрываем как «Не ответил», чтобы не висело.
+      const limit = Date.now() - (data.settings.followupHours || 48) * 3600000 * 1.5;
+      if (Object.values(data.contacts).some((c) => c.status === "followup" && (c.followAt || c.at || 0) < limit)) {
+        data = await mutate((s) => {
+          let changed = false;
+          for (const c of Object.values(s.contacts)) {
+            if (c.status === "followup" && (c.followAt || c.at || 0) < limit) { c.status = "noreply"; c.by = "авто"; c.at = Date.now(); s.events.push({ t: c.at, who: "авто", phone: c.phone, status: "noreply" }); changed = true; }
+          }
+          return changed ? s : false;
+        });
+      }
       return json({ me: { role: me.role, name: who }, contacts: sorted(data), settings: data.settings, presence, events: isOwner ? data.events : [], seedError: isOwner ? data.seedError || null : null, now: Date.now() });
     }
 
@@ -246,6 +276,12 @@ export default async (req) => {
       return json({ ok: true });
     }
 
+    if (path === "/lang" && method === "POST") {
+      const phone = normPhone(body.phone), lang = LANGS.includes(body.lang) ? body.lang : "ru";
+      await mutate((s) => { const c = s.contacts[phone]; if (!c) return false; c.lang = lang; return s; });
+      return json({ ok: true });
+    }
+
     if (!isOwner) return json({ error: "forbidden" }, 403);
 
     if (path === "/import" && method === "POST") {
@@ -275,6 +311,9 @@ export default async (req) => {
           followupHours: Math.max(1, parseInt(body.followupHours) || cur.followupHours),
           templates: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.templates).map((k) => [k, pick(t[k], cur.templates[k])])),
           hooks: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.hooks).map((k) => [k, pick(h[k], cur.hooks[k])])),
+          templatesKz: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.templatesKz).map((k) => [k, pick((body.templatesKz || {})[k], cur.templatesKz[k])])),
+          hooksKz: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.hooksKz).map((k) => [k, pick((body.hooksKz || {})[k], cur.hooksKz[k])])),
+          scripts: Array.isArray(body.scripts) ? body.scripts.filter((x) => x && x.title).slice(0, 20).map((x) => ({ title: String(x.title).slice(0, 60), ru: String(x.ru || "").slice(0, 1000), kz: String(x.kz || "").slice(0, 1000) })) : cur.scripts,
         };
         return s;
       });
@@ -283,9 +322,9 @@ export default async (req) => {
 
     if (path === "/export" && method === "GET") {
       const { data } = await readState();
-      const lines = ["Название;Телефон;Ниша;Адрес;Рейтинг;Отзывы;Instagram;Часы;Статус;Кто отметил;Когда (Алматы);Кто написал первым;Когда написал;Напомнил;Заметка"];
+      const lines = ["Название;Телефон;Ниша;Адрес;Язык;Рейтинг;Отзывы;Instagram;Часы;Статус;Кто отметил;Когда (Алматы);Кто написал первым;Когда написал;Напомнил;Заметка"];
       for (const c of sorted(data)) {
-        lines.push([c.name, "+" + c.phone, c.niche, c.address, c.rating, c.reviews || "", c.instagram, c.hours, LABEL[c.status || "new"], c.by || "", c.status !== "new" ? fmtAlmaty(c.at) : "", c.sentBy || "", fmtAlmaty(c.sentAt), fmtAlmaty(c.followAt), c.note || ""].map(csvCell).join(";"));
+        lines.push([c.name, "+" + c.phone, c.niche, c.address, c.lang === "kz" ? "KZ" : "RU", c.rating, c.reviews || "", c.instagram, c.hours, LABEL[c.status || "new"], c.by || "", c.status !== "new" ? fmtAlmaty(c.at) : "", c.sentBy || "", fmtAlmaty(c.sentAt), fmtAlmaty(c.followAt), c.note || ""].map(csvCell).join(";"));
       }
       return new Response("﻿" + lines.join("\r\n"), { headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": 'attachment; filename="rassylka-damillion.csv"', "cache-control": "no-store" } });
     }

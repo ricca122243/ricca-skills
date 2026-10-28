@@ -79,6 +79,11 @@ h1{font-family:var(--f-display);font-weight:700;font-size:19px;letter-spacing:-.
 .btn:focus-visible,.chip:focus-visible,.f:focus-visible,.tab:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .chips{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .chip{--c:var(--c-new);background:transparent;border:1px solid var(--line);border-radius:7px;padding:6px 10px;cursor:pointer;font-size:13px}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;margin-left:6px;vertical-align:middle}
+.lang button{border:0;background:var(--surface);padding:3px 8px;font-size:11.5px;cursor:pointer;color:var(--muted);font-weight:600}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.scripts{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:var(--surface2);border-radius:8px}
+.scripts a{font-size:13px}
 .chip.on{background:color-mix(in srgb,var(--c) 16%,var(--surface));border-color:var(--c);color:var(--c);font-weight:600}
 .s-sent{--c:var(--c-sent)}.s-followup{--c:var(--c-followup)}.s-interested{--c:var(--c-interested)}.s-refused{--c:var(--c-refused)}.s-noreply{--c:var(--c-noreply)}.s-skip{--c:var(--c-skip)}
 .trace{grid-column:1/-1;font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
@@ -196,8 +201,22 @@ td.day{font-weight:600}
           <label for="tplU">Второе сообщение (дожим), если не ответили</label><textarea id="tplU"></textarea>
           <label for="hookW">Зацепка, когда у фирмы есть рейтинг и отзывы в 2ГИС</label><textarea id="hookW" style="min-height:52px"></textarea>
           <label for="hookN">Зацепка, когда отзывов нет</label><textarea id="hookN" style="min-height:52px"></textarea>
+          <h2 style="margin-top:6px">Қазақша: тексты для казахоязычных клиентов</h2>
+          <label>Язык у клиента ставится сам, если в названии есть казахские буквы, и переключается на карточке кнопкой RU/KZ.</label>
+          <label for="tplFk">Жиһаз (мебель)</label><textarea id="tplFk"></textarea>
+          <label for="tplMk">Массаж</label><textarea id="tplMk"></textarea>
+          <label for="tplDk">Остальные</label><textarea id="tplDk"></textarea>
+          <label for="tplUk">Екінші хабарлама (дожим)</label><textarea id="tplUk"></textarea>
+          <label for="hookWk">Зацепка с рейтингом</label><textarea id="hookWk" style="min-height:52px"></textarea>
+          <label for="hookNk">Зацепка без рейтинга</label><textarea id="hookNk" style="min-height:52px"></textarea>
           <div class="tools"><button class="btn primary" id="saveCfg">Сохранить</button><span class="hint">Пример для первого клиента в очереди: <button class="btn small" id="preview">показать</button></span></div>
           <p class="hint" id="previewBox" hidden></p>
+        </div>
+        <div class="panel form">
+          <h2>Ответы на возражения</h2>
+          <p class="hint">Работник видит их по кнопке «Ответы» на карточке: нажал — WhatsApp открылся с текстом. Один ответ = блок из трёх строк: <code>Заголовок</code>, русский текст, казахский текст. Блоки разделяются пустой строкой.</p>
+          <textarea id="scripts" style="min-height:260px"></textarea>
+          <div class="tools"><button class="btn primary" id="saveScripts">Сохранить ответы</button></div>
         </div>
         <div class="panel form">
           <h2>Загрузить клиентов</h2>
@@ -227,7 +246,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 let me = null, contacts = [], settings = {templates:{}, hooks:{}, dailyPlan:60, autoSent:true, followupHours:48}, presence = {}, events = [], serverNow = Date.now(), seedError = null;
-let filter = 'new', shown = 60, pollTimer = null, prevDone = null, undo = null;
+let filter = 'new', shown = 60, pollTimer = null, prevDone = null, openScripts = null;
 const busy = new Set();
 
 function toast(t, btnText, btnFn){ const el=$('#toast'); $('#toastText').textContent=t; const b=$('#toastBtn'); b.hidden=!btnText; if(btnText){ b.textContent=btnText; b.onclick=()=>{ el.hidden=true; btnFn&&btnFn(); }; } el.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>el.hidden=true, btnText?5000:2600); }
@@ -239,16 +258,18 @@ const fmtPhone = d => `+7 ${d.slice(1,4)} ${d.slice(4,7)} ${d.slice(7,9)} ${d.sl
 const isMobile = d => /^77[047]/.test(d);
 const manager = () => (me?.name||'').split(' ')[0] || 'менеджер';
 function plural(n,[a,b,c]){ n=Math.abs(n)%100; const n1=n%10; if(n>10&&n<20) return c; if(n1>1&&n1<5) return b; if(n1===1) return a; return c; }
-const reviewsText = c => c.reviews ? `${c.reviews} ${plural(c.reviews,['отзыв','отзыва','отзывов'])}` : '';
+const langOf = c => c.lang==='kz' ? 'kz' : 'ru';
+const reviewsText = c => !c.reviews ? '' : langOf(c)==='kz' ? `${c.reviews} пікір` : `${c.reviews} ${plural(c.reviews,['отзыв','отзыва','отзывов'])}`;
 function fill(t,c){ return String(t||'').replaceAll('{manager}',()=>manager()).replaceAll('{name}',()=>c.name).replaceAll('{rating}',()=>c.rating||'').replaceAll('{reviews}',()=>reviewsText(c)).replaceAll('{niche}',()=>c.niche||''); }
 function hookFor(c){
-  const generic=GENERIC.test(c.name), hasRev=parseFloat(c.rating)>=4.5 && +c.reviews>=5;
-  if(generic) return fill(hasRev ? 'У вас в 2ГИС {rating} и {reviews}, а сайта нет.' : 'Нашёл вас в 2ГИС, сайта у вас нет.', c);
-  return fill(hasRev ? settings.hooks.withReviews : settings.hooks.withoutReviews, c);
+  const kz=langOf(c)==='kz', generic=GENERIC.test(c.name), hasRev=parseFloat(c.rating)>=4.5 && +c.reviews>=5, h=kz?settings.hooksKz:settings.hooks;
+  if(generic) return fill(kz ? (hasRev ? '2ГИС-те рейтингіңіз {rating}, {reviews}, бірақ сайтыңыз жоқ.' : 'Сізді 2ГИС-тен таптым, сайтыңыз жоқ.') : (hasRev ? 'У вас в 2ГИС {rating} и {reviews}, а сайта нет.' : 'Нашёл вас в 2ГИС, сайта у вас нет.'), c);
+  return fill(hasRev ? h.withReviews : h.withoutReviews, c);
 }
-function tplFor(c){ const n=(c.niche||'').toLowerCase(), t=settings.templates; if(n.includes('мебел')) return t.furniture; if(n.includes('массаж')) return t.massage; return t.default; }
+function tplFor(c){ const n=(c.niche||'').toLowerCase(), t=langOf(c)==='kz'?settings.templatesKz:settings.templates; if(n.includes('мебел')) return t.furniture; if(n.includes('массаж')) return t.massage; return t.default; }
 const msgFor = c => fill(String(tplFor(c)||'').replaceAll('{hook}',()=>hookFor(c)), c);
-const followFor = c => fill(GENERIC.test(c.name) ? String(settings.templates.followup||'').replace(' для «{name}»','') : settings.templates.followup, c);
+function followFor(c){ const kz=langOf(c)==='kz', t=String((kz?settings.templatesKz:settings.templates).followup||''); return fill(GENERIC.test(c.name) ? t.replace(' для «{name}»','').replace('«{name}» үшін ','') : t, c); }
+const scriptText = (sc,c) => fill(langOf(c)==='kz' && sc.kz ? sc.kz : sc.ru, c);
 const waUrl = (c, text) => `https://wa.me/${c.phone}?text=${encodeURIComponent(text)}`;
 const gisUrl = c => c.firmId ? `https://2gis.kz/almaty/firm/${c.firmId}` : `https://2gis.kz/almaty/search/${c.phone}`;
 const igUrl = c => /^https?:/.test(c.instagram) ? c.instagram : `https://instagram.com/${String(c.instagram).replace(/^@/,'')}`;
@@ -330,13 +351,16 @@ function drawQueue(){
     const main = due ? `<a class="btn follow" data-follow="${x.phone}" href="${esc(waUrl(x, followFor(x)))}" target="_blank" rel="noopener">Напомнить</a>` : `<a class="btn primary" data-open="${x.phone}" href="${esc(waUrl(x, msgFor(x)))}" target="_blank" rel="noopener">Открыть чат</a>`;
     const ig = x.instagram ? `<a class="btn" href="${esc(igUrl(x))}" target="_blank" rel="noopener">Instagram</a>` : '';
     const del = owner ? `<button class="btn danger" data-del="${x.phone}" title="Удалить из списка">✕</button>` : '';
+    const lang = `<span class="lang" title="Язык сообщений"><button data-lang="ru" data-id="${x.phone}" aria-pressed="${langOf(x)==='ru'}">RU</button><button data-lang="kz" data-id="${x.phone}" aria-pressed="${langOf(x)==='kz'}">KZ</button></span>`;
+    const scr = (settings.scripts||[]).length ? `<button class="btn" data-scripts="${x.phone}">Ответы</button>` : '';
+    const panel = openScripts===x.phone ? `<div class="scripts">${(settings.scripts||[]).map((sc,i)=>`<a class="btn small" href="${esc(waUrl(x, scriptText(sc,x)))}" target="_blank" rel="noopener" data-script="${i}" data-id="${x.phone}">${esc(sc.title)}</a>`).join('')}</div>` : '';
     const extra = [x.rating?`<span class="star">★ ${esc(x.rating)}</span>${x.reviews?' · '+esc(reviewsText(x)):''}`:'', x.hours?esc(x.hours):'', x.category?esc(x.category):''].filter(Boolean).join(' · ');
     return `<article class="row${done?' done':''}${taken?' taken':''}${due?' due':''}">
-      <div><h3>${esc(x.name)}</h3>
+      <div><h3>${esc(x.name)}${lang}</h3>
         <p class="meta"><span class="ph">${fmtPhone(x.phone)}</span>${isMobile(x.phone)?'':'<span class="tag">городской</span>'}${x.niche?' · '+esc(x.niche):''}${x.address?' · '+esc(x.address):''}</p>
         ${extra?`<p class="meta">${extra}</p>`:''}</div>
-      <div class="act">${main}<a class="btn" href="${esc(gisUrl(x))}" target="_blank" rel="noopener">2ГИС</a>${ig}<button class="btn" data-copy="${x.phone}" data-kind="${due?'follow':'first'}">Копировать</button>${del}</div>
-      <div class="chips">${chips}</div>
+      <div class="act">${main}<a class="btn" href="${esc(gisUrl(x))}" target="_blank" rel="noopener">2ГИС</a>${ig}<button class="btn" data-copy="${x.phone}" data-kind="${due?'follow':'first'}">Копировать</button>${scr}${del}</div>
+      <div class="chips">${chips}</div>${panel}
       <div class="trace">${trace}${hint}<input data-note="${x.phone}" value="${esc(x.note||'')}" placeholder="Заметка (сохраняется сама)"></div></article>`;
   }).join('');
   $('#more').hidden = arr.length<=shown;
@@ -372,7 +396,7 @@ async function load(){
     const d = await api('/state');
     me=d.me; contacts=d.contacts; settings=d.settings; presence=d.presence; events=d.events||[]; serverNow=d.now||Date.now(); seedError=d.seedError;
     render();
-    if(me.role==='owner' && !['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)){ const t=settings.templates, h=settings.hooks; $('#tplF').value=t.furniture||''; $('#tplM').value=t.massage||''; $('#tplD').value=t.default||''; $('#tplU').value=t.followup||''; $('#hookW').value=h.withReviews||''; $('#hookN').value=h.withoutReviews||''; $('#plan').value=settings.dailyPlan||60; $('#followupHours').value=settings.followupHours||48; $('#autoSent').checked=settings.autoSent!==false; }
+    if(me.role==='owner' && !['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)){ const t=settings.templates, h=settings.hooks; $('#tplF').value=t.furniture||''; $('#tplM').value=t.massage||''; $('#tplD').value=t.default||''; $('#tplU').value=t.followup||''; $('#hookW').value=h.withReviews||''; $('#hookN').value=h.withoutReviews||''; const tk=settings.templatesKz||{}, hk=settings.hooksKz||{}; $('#tplFk').value=tk.furniture||''; $('#tplMk').value=tk.massage||''; $('#tplDk').value=tk.default||''; $('#tplUk').value=tk.followup||''; $('#hookWk').value=hk.withReviews||''; $('#hookNk').value=hk.withoutReviews||''; $('#scripts').value=(settings.scripts||[]).map(sc=>`${sc.title}\n${sc.ru}\n${sc.kz||''}`).join('\n\n'); $('#plan').value=settings.dailyPlan||60; $('#followupHours').value=settings.followupHours||48; $('#autoSent').checked=settings.autoSent!==false; }
   }catch(e){ if(e.message!=='auth') toast(e.message||'Нет связи'); }
 }
 async function beat(){ try{ await api('/heartbeat',{visible:!document.hidden}); }catch{} }
@@ -404,8 +428,11 @@ document.addEventListener('click', async e=>{
   if(t.dataset.follow){ const c=contacts.find(x=>x.phone===t.dataset.follow); if(!c) return; copy(followFor(c)); setTimeout(()=>setStatus(c.phone,'followup',{toggle:false}),300); return; }
   if(t.dataset.copy){ const c=contacts.find(x=>x.phone===t.dataset.copy); if(c) toast(await copy(t.dataset.kind==='follow'?followFor(c):msgFor(c)) ? 'Текст скопирован' : 'Не удалось скопировать'); return; }
   if(t.dataset.del){ const c=contacts.find(x=>x.phone===t.dataset.del); if(!c) return; if(t.dataset.sure!=='1'){ t.dataset.sure='1'; t.textContent='Точно?'; setTimeout(()=>{t.dataset.sure='';t.textContent='✕';},2500); return; } try{ await api('/remove',{phone:c.phone}); contacts=contacts.filter(x=>x.phone!==c.phone); render(); }catch(e){ toast(e.message); } return; }
+  if(t.dataset.lang){ const c=contacts.find(x=>x.phone===t.dataset.id); if(!c||c.lang===t.dataset.lang) return; c.lang=t.dataset.lang; render(); api('/lang',{phone:c.phone,lang:c.lang}).catch(()=>toast('Язык не сохранился')); return; }
+  if(t.dataset.scripts){ openScripts = openScripts===t.dataset.scripts ? null : t.dataset.scripts; render(); return; }
+  if(t.dataset.script!==undefined){ const c=contacts.find(x=>x.phone===t.dataset.id); const sc=(settings.scripts||[])[+t.dataset.script]; if(c&&sc) copy(scriptText(sc,c)); return; }
   if(t.id==='more'){ shown+=60; render(); return; }
-  if(t.id==='preview'){ const c=contacts.find(x=>stOf(x)==='new')||contacts[0]; if(!c){ toast('Нет клиентов'); return; } const saved=settings; settings={...settings, templates:{...settings.templates, furniture:$('#tplF').value, massage:$('#tplM').value, default:$('#tplD').value, followup:$('#tplU').value}, hooks:{withReviews:$('#hookW').value, withoutReviews:$('#hookN').value}}; $('#previewBox').hidden=false; $('#previewBox').innerHTML=`<b>${esc(c.name)}</b><br>${esc(msgFor(c))}<br><br><b>Дожим:</b><br>${esc(followFor(c))}`; settings=saved; return; }
+  if(t.id==='preview'){ const c=contacts.find(x=>stOf(x)==='new')||contacts[0]; if(!c){ toast('Нет клиентов'); return; } const saved=settings; settings={...settings, templates:{...settings.templates, furniture:$('#tplF').value, massage:$('#tplM').value, default:$('#tplD').value, followup:$('#tplU').value}, hooks:{withReviews:$('#hookW').value, withoutReviews:$('#hookN').value}, templatesKz:{...settings.templatesKz, furniture:$('#tplFk').value, massage:$('#tplMk').value, default:$('#tplDk').value, followup:$('#tplUk').value}, hooksKz:{withReviews:$('#hookWk').value, withoutReviews:$('#hookNk').value}}; $('#previewBox').hidden=false; $('#previewBox').innerHTML=`<b>${esc(c.name)}</b><br>${esc(msgFor(c))}<br><br><b>Дожим:</b><br>${esc(followFor(c))}`; settings=saved; return; }
 });
 document.addEventListener('change', async e=>{
   const inp=e.target.closest('[data-note]'); if(!inp) return;
@@ -422,8 +449,13 @@ $('#doImport').addEventListener('click',async()=>{
   catch(e){ toast(e.message); } finally{ $('#doImport').disabled=false; }
 });
 $('#saveCfg').addEventListener('click',async()=>{
-  try{ await api('/settings',{templates:{furniture:$('#tplF').value,massage:$('#tplM').value,default:$('#tplD').value,followup:$('#tplU').value},hooks:{withReviews:$('#hookW').value,withoutReviews:$('#hookN').value},dailyPlan:$('#plan').value,followupHours:$('#followupHours').value,autoSent:$('#autoSent').checked}); toast('Сохранено'); document.activeElement?.blur(); await load(); }
+  try{ await api('/settings',{templates:{furniture:$('#tplF').value,massage:$('#tplM').value,default:$('#tplD').value,followup:$('#tplU').value},hooks:{withReviews:$('#hookW').value,withoutReviews:$('#hookN').value},templatesKz:{furniture:$('#tplFk').value,massage:$('#tplMk').value,default:$('#tplDk').value,followup:$('#tplUk').value},hooksKz:{withReviews:$('#hookWk').value,withoutReviews:$('#hookNk').value},dailyPlan:$('#plan').value,followupHours:$('#followupHours').value,autoSent:$('#autoSent').checked}); toast('Сохранено'); document.activeElement?.blur(); await load(); }
   catch(e){ toast(e.message); }
+});
+$('#saveScripts').addEventListener('click',async()=>{
+  const scripts=$('#scripts').value.split(/\n\s*\n/).map(b=>b.split('\n').map(l=>l.trim())).filter(l=>l[0]&&l[1]).map(l=>({title:l[0],ru:l[1],kz:l[2]||''}));
+  if(!scripts.length){ toast('Нужен хотя бы один ответ: заголовок и текст'); return; }
+  try{ await api('/settings',{scripts}); toast(`Сохранено ответов: ${scripts.length}`); await load(); }catch(e){ toast(e.message); }
 });
 $('#loginForm').addEventListener('submit',async e=>{
   e.preventDefault(); $('#lerr').textContent=''; $('#lbtn').disabled=true;
