@@ -1,0 +1,24 @@
+{
+  "name": "damillion-site",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ricca122243/ricca-skills.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ricca122243/ricca-skills/issues"
+  },
+  "homepage": "https://github.com/ricca122243/ricca-skills#readme",
+  "devDependencies": {
+    "csso": "^5.0.5",
+    "terser": "^5.51.2"
+  }
+}
