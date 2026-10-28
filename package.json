@@ -1,0 +1,10 @@
+{
+  "name": "damillion-rassylka",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Рассылка Damillion: очередь клиентов для работников и сводка для владельца",
+  "dependencies": {
+    "@netlify/blobs": "^11.1.7"
+  }
+}

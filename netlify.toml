@@ -1,0 +1,13 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+  command = "npm install"
+
+[functions]
+  node_bundler = "esbuild"
+
+[template.environment]
+  OWNER_LOGIN = "Логин владельца"
+  OWNER_PASS = "Пароль владельца"
+  WORKER_LOGIN = "Логин для работников"
+  WORKER_PASS = "Пароль для работников"

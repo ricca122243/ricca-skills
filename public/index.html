@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Рассылка Damillion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF0F3; --surface:#FFFFFF; --surface2:#F4F6F8; --ink:#11161D; --muted:#5B6672; --line:#D9DFE5;
+  --accent:#0B6E5F; --accent-ink:#FFFFFF; --online:#1FA463; --warn:#B7791F;
+  --c-new:#5B6672; --c-sent:#2F6FDB; --c-followup:#7C4DCC; --c-interested:#1B8F5A; --c-refused:#C2412D; --c-noreply:#B7791F; --c-skip:#7A8591;
+  --f-display:'Unbounded',system-ui,sans-serif; --f-body:'Onest',system-ui,sans-serif; --f-mono:'JetBrains Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0E1318; --surface:#151C23; --surface2:#1B242C; --ink:#E8EDF1; --muted:#93A1AE; --line:#26313B;
+  --accent:#3FBFA8; --accent-ink:#06211C; --online:#3DD68C; --warn:#E0AE58;
+  --c-new:#93A1AE; --c-sent:#6FA2FF; --c-followup:#B18CFF; --c-interested:#4CC38A; --c-refused:#F08A78; --c-noreply:#E0AE58; --c-skip:#8C98A4; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;
+  padding-block:16px 90px;padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+header{display:flex;flex-wrap:wrap;gap:10px 20px;justify-content:space-between;align-items:flex-start}
+h1{font-family:var(--f-display);font-weight:700;font-size:19px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:13px;margin-top:3px}
+.online{display:flex;flex-wrap:wrap;gap:6px;min-width:0;align-items:center}
+.who-chip{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:12.5px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--c-skip);flex:none}
+.dot.on{background:var(--online);box-shadow:0 0 0 3px color-mix(in srgb,var(--online) 25%,transparent)}
+.dot.idle{background:var(--warn)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px}
+.stat b{display:block;font-family:var(--f-display);font-weight:500;font-size:24px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat span{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.bar{display:flex;height:9px;border-radius:5px;overflow:hidden;background:var(--surface2);margin-top:12px}
+.bar i{display:block;height:100%}
+.plan{margin-top:12px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.plan .track{flex:1;height:8px;border-radius:4px;background:var(--surface2);overflow:hidden}
+.plan .track i{display:block;height:100%;background:var(--accent)}
+.banner{border-radius:10px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.banner.good{background:color-mix(in srgb,var(--c-interested) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--c-interested) 40%,var(--line))}
+.banner.warn{background:color-mix(in srgb,var(--warn) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--warn) 45%,var(--line))}
+.banner.bad{background:color-mix(in srgb,var(--c-refused) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--c-refused) 40%,var(--line))}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{background:none;border:0;padding:10px 12px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tools input,.tools select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 11px;min-width:0}
+.tools input[type=search]{flex:1 1 180px}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.f{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:13px}
+.f[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.f small{opacity:.7;margin-left:4px;font-variant-numeric:tabular-nums}
+.f.due{border-color:var(--c-followup);color:var(--c-followup)}
+.f.due[aria-pressed="true"]{background:var(--c-followup);color:#fff}
+.list{display:flex;flex-direction:column;gap:10px}
+.row{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 14px}
+.row.done{opacity:.75}
+.row.taken{border-style:dashed}
+.row.due{border-color:color-mix(in srgb,var(--c-followup) 60%,var(--line))}
+.row h3{font-size:16px;font-weight:600;overflow-wrap:anywhere}
+.meta{font-size:13px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}
+.meta .ph{font-family:var(--f-mono);font-size:13px;color:var(--ink)}
+.meta .star{color:var(--warn);font-weight:600}
+.tag{font-size:11px;border:1px solid var(--line);border-radius:4px;padding:1px 6px;margin-left:6px;color:var(--muted)}
+.act{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap;justify-content:flex-end}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 13px;cursor:pointer;text-decoration:none;color:var(--ink);font-weight:500;white-space:nowrap;font-size:14px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.follow{background:var(--c-followup);border-color:var(--c-followup);color:#fff}
+.btn.danger{color:var(--c-refused)}
+.btn.small{padding:5px 9px;font-size:12.5px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,.chip:focus-visible,.f:focus-visible,.tab:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{--c:var(--c-new);background:transparent;border:1px solid var(--line);border-radius:7px;padding:6px 10px;cursor:pointer;font-size:13px}
+.chip.on{background:color-mix(in srgb,var(--c) 16%,var(--surface));border-color:var(--c);color:var(--c);font-weight:600}
+.s-sent{--c:var(--c-sent)}.s-followup{--c:var(--c-followup)}.s-interested{--c:var(--c-interested)}.s-refused{--c:var(--c-refused)}.s-noreply{--c:var(--c-noreply)}.s-skip{--c:var(--c-skip)}
+.trace{grid-column:1/-1;font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.trace input{flex:1 1 160px;background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:12px}
+.trace .hintdue{color:var(--c-followup);font-weight:600}
+.empty{padding:34px 16px;text-align:center;color:var(--muted)}
+.empty h2{font-family:var(--f-display);font-weight:500;font-size:17px;color:var(--ink);margin-bottom:8px}
+.more{align-self:center}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:500}
+td.day{font-weight:600}
+.scroll{overflow-x:auto}
+.form{display:flex;flex-direction:column;gap:10px}
+.form label{font-size:13px;color:var(--muted)}
+.form textarea,.form input[type=text],.form input[type=number]{width:100%;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.form textarea{min-height:90px;resize:vertical}
+.form .inline{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.form .inline label{display:flex;align-items:center;gap:8px;color:var(--ink)}
+.form .inline input[type=number]{width:90px}
+.hint{font-size:13px;color:var(--muted)}
+.hint code{font-family:var(--f-mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:4px}
+.sect{display:flex;flex-direction:column;gap:12px}
+.sect h2{font-family:var(--f-display);font-weight:500;font-size:15px}
+.login{max-width:380px;margin:40px auto 0;display:flex;flex-direction:column;gap:14px}
+.login form{display:flex;flex-direction:column;gap:10px}
+.login input{width:100%;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:11px 12px}
+.err{color:var(--c-refused);font-size:13px;min-height:1em}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;font-size:14px;z-index:20;max-width:92vw;display:flex;gap:12px;align-items:center}
+.toast button{background:none;border:0;color:var(--accent);font-weight:600;cursor:pointer;padding:0}
+[hidden]{display:none!important}
+@media (max-width:560px){.row{grid-template-columns:1fr}.act{justify-content:stretch}.act .btn{flex:1 1 auto}.btn{padding:10px 12px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+
+  <section class="login" id="v-login" hidden>
+    <div><h1>Рассылка Damillion</h1><p class="sub">Вход</p></div>
+    <form class="panel" id="loginForm">
+      <label for="llogin" class="hint">Логин</label>
+      <input id="llogin" autocomplete="username" autocapitalize="off" spellcheck="false">
+      <label for="lpass" class="hint">Пароль</label>
+      <input id="lpass" type="password" autocomplete="current-password">
+      <label for="lname" class="hint">Твоё имя (так тебя видно в сводке)</label>
+      <input id="lname" autocomplete="nickname" placeholder="Даниал">
+      <p class="err" id="lerr"></p>
+      <button class="btn primary" type="submit" id="lbtn">Войти</button>
+    </form>
+  </section>
+
+  <section id="v-app" hidden>
+    <div class="wrap" style="padding:0">
+      <header>
+        <div><h1>Рассылка Damillion</h1><p class="sub" id="sub"></p></div>
+        <div class="online" id="online"></div>
+      </header>
+
+      <section class="panel" aria-label="Прогресс">
+        <div class="stats" id="stats"></div>
+        <div class="bar" id="bar" role="img" aria-label="Распределение статусов"></div>
+        <div class="plan" id="planBox" hidden><span id="planText"></span><div class="track"><i id="planFill" style="width:0%"></i></div></div>
+      </section>
+
+      <div class="banner bad" id="seedWarn" hidden><b>Стартовый список не расшифрован.</b><span class="hint">На Netlify не задан или неверный SEED_KEY. Задай его в Environment variables и нажми Trigger deploy, либо загрузи клиентов файлом в «Настройках».</span></div>
+      <div class="banner warn" id="dueBanner" hidden><b id="dueText"></b><button class="btn small" data-f="due">Открыть список</button></div>
+      <div class="banner good" id="done" hidden><b id="doneText"></b><span class="hint">Все клиенты получили статус. Загрузи следующий список в «Настройках».</span></div>
+
+      <nav class="tabs" role="tablist">
+        <button class="tab" role="tab" aria-selected="true" data-tab="queue">Очередь</button>
+        <button class="tab owner" role="tab" aria-selected="false" data-tab="team" hidden>Команда</button>
+        <button class="tab owner" role="tab" aria-selected="false" data-tab="report" hidden>Отчёт</button>
+        <button class="tab owner" role="tab" aria-selected="false" data-tab="set" hidden>Настройки</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="out" style="margin-left:auto">Выйти</button>
+      </nav>
+
+      <main id="p-queue" class="sect">
+        <div class="tools">
+          <input id="q" type="search" placeholder="Поиск: название, телефон, адрес" aria-label="Поиск">
+          <select id="niche" aria-label="Ниша"><option value="">Все ниши</option></select>
+        </div>
+        <div class="filters" id="filters"></div>
+        <div class="list" id="list"></div>
+        <button class="btn more" id="more" hidden>Показать ещё</button>
+      </main>
+
+      <section id="p-team" class="panel sect" hidden>
+        <h2>Работа сотрудников</h2>
+        <div class="scroll"><table id="teamTable"></table></div>
+        <p class="hint">«Написал» засчитывается по нажатию кнопки или по открытию чата (если включено в настройках). Сайт не видит, ушло ли сообщение в WhatsApp на самом деле.</p>
+      </section>
+
+      <section id="p-report" class="panel sect" hidden>
+        <h2>Отчёт по дням</h2>
+        <div class="stats" id="rstats"></div>
+        <div class="scroll"><table id="reportTable"></table></div>
+        <p class="hint">Считается по нажатиям статусов. Конверсия = интерес ÷ всех, кому написали.</p>
+      </section>
+
+      <section id="p-set" class="sect" hidden>
+        <div class="panel form">
+          <h2>Как работает очередь</h2>
+          <div class="inline">
+            <label><input type="checkbox" id="autoSent"> Ставить «Написал» сразу при нажатии «Открыть чат»</label>
+            <label>Дожимать через <input id="followupHours" type="number" min="1" max="240"> ч без ответа</label>
+            <label>План на день <input id="plan" type="number" min="1" max="1000"> сообщений</label>
+          </div>
+        </div>
+        <div class="panel form">
+          <h2>Тексты сообщений</h2>
+          <label>Подставляются: <code>{manager}</code> имя сотрудника, <code>{name}</code> название фирмы, <code>{hook}</code> зацепка про 2ГИС (ниже), <code>{rating}</code> рейтинг, <code>{reviews}</code> «230 отзывов», <code>{niche}</code> ниша.</label>
+          <label for="tplF">Мебель (ниша содержит «мебель»)</label><textarea id="tplF"></textarea>
+          <label for="tplM">Массаж (ниша содержит «массаж»)</label><textarea id="tplM"></textarea>
+          <label for="tplD">Остальные ниши</label><textarea id="tplD"></textarea>
+          <label for="tplU">Второе сообщение (дожим), если не ответили</label><textarea id="tplU"></textarea>
+          <label for="hookW">Зацепка, когда у фирмы есть рейтинг и отзывы в 2ГИС</label><textarea id="hookW" style="min-height:52px"></textarea>
+          <label for="hookN">Зацепка, когда отзывов нет</label><textarea id="hookN" style="min-height:52px"></textarea>
+          <div class="tools"><button class="btn primary" id="saveCfg">Сохранить</button><span class="hint">Пример для первого клиента в очереди: <button class="btn small" id="preview">показать</button></span></div>
+          <p class="hint" id="previewBox" hidden></p>
+        </div>
+        <div class="panel form">
+          <h2>Загрузить клиентов</h2>
+          <p class="hint">Файл .csv или вставка текстом, по строке на клиента: <code>Название; Телефон; Ниша; Адрес; Instagram</code>. Дубли по телефону пропускаются, статусы уже загруженных не трогаются.</p>
+          <input id="file" type="file" accept=".csv,.txt,text/csv,text/plain">
+          <textarea id="paste" placeholder="Салон Аура; +7 777 123 45 67; массаж; ул. Абая 10"></textarea>
+          <div class="tools"><button class="btn primary" id="doImport">Загрузить</button><span class="hint" id="impInfo"></span></div>
+        </div>
+        <div class="panel form">
+          <h2>Выгрузка в Excel</h2>
+          <p class="hint">Все клиенты со статусами, кто и когда отметил, рейтинг, Instagram, заметки. Открывается в Excel.</p>
+          <div class="tools"><a class="btn" href="/api/export" download>Скачать таблицу</a></div>
+        </div>
+        <div class="panel hint">Логины и пароли меняются на Netlify: Site configuration → Environment variables → OWNER_LOGIN, OWNER_PASS, WORKER_LOGIN, WORKER_PASS, потом Deploys → Trigger deploy. После смены все выходят из системы.</div>
+      </section>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden><span id="toastText"></span><button id="toastBtn" hidden></button></div>
+
+<script>
+const ST = [['sent','Написал'],['followup','Напомнил'],['noreply','Не ответил'],['interested','Интерес'],['refused','Отказал'],['skip','Нет WhatsApp']];
+const LABEL = Object.fromEntries(ST); LABEL.new = 'Новый';
+const CLAIM_MS = 30*60*1000;
+const GENERIC = /^(массажный кабинет|массаж|massage)$|^мебель( на заказ| и двери)?(\s|\(|$)/i;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let me = null, contacts = [], settings = {templates:{}, hooks:{}, dailyPlan:60, autoSent:true, followupHours:48}, presence = {}, events = [], serverNow = Date.now(), seedError = null;
+let filter = 'new', shown = 60, pollTimer = null, prevDone = null, undo = null;
+const busy = new Set();
+
+function toast(t, btnText, btnFn){ const el=$('#toast'); $('#toastText').textContent=t; const b=$('#toastBtn'); b.hidden=!btnText; if(btnText){ b.textContent=btnText; b.onclick=()=>{ el.hidden=true; btnFn&&btnFn(); }; } el.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>el.hidden=true, btnText?5000:2600); }
+const dayStart = () => { const d=new Date(); d.setHours(0,0,0,0); return d.getTime(); };
+const hhmm = t => new Date(t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+const dmy = t => new Date(t).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});
+function ago(t){ const m=Math.round((Date.now()-t)/60000); if(m<1) return 'только что'; if(m<60) return m+' мин назад'; const h=Math.floor(m/60); return h<24 ? h+' ч назад' : new Date(t).toLocaleDateString('ru-RU'); }
+const fmtPhone = d => `+7 ${d.slice(1,4)} ${d.slice(4,7)} ${d.slice(7,9)} ${d.slice(9)}`;
+const isMobile = d => /^77[047]/.test(d);
+const manager = () => (me?.name||'').split(' ')[0] || 'менеджер';
+function plural(n,[a,b,c]){ n=Math.abs(n)%100; const n1=n%10; if(n>10&&n<20) return c; if(n1>1&&n1<5) return b; if(n1===1) return a; return c; }
+const reviewsText = c => c.reviews ? `${c.reviews} ${plural(c.reviews,['отзыв','отзыва','отзывов'])}` : '';
+function fill(t,c){ return String(t||'').replaceAll('{manager}',()=>manager()).replaceAll('{name}',()=>c.name).replaceAll('{rating}',()=>c.rating||'').replaceAll('{reviews}',()=>reviewsText(c)).replaceAll('{niche}',()=>c.niche||''); }
+function hookFor(c){
+  const generic=GENERIC.test(c.name), hasRev=!!c.rating && +c.reviews>=5;
+  if(generic) return fill(hasRev ? 'У вас в 2ГИС {rating} и {reviews}, а сайта нет.' : 'Нашёл вас в 2ГИС, сайта у вас нет.', c);
+  return fill(hasRev ? settings.hooks.withReviews : settings.hooks.withoutReviews, c);
+}
+function tplFor(c){ const n=(c.niche||'').toLowerCase(), t=settings.templates; if(n.includes('мебел')) return t.furniture; if(n.includes('массаж')) return t.massage; return t.default; }
+const msgFor = c => fill(String(tplFor(c)||'').replaceAll('{hook}',()=>hookFor(c)), c);
+const followFor = c => fill(GENERIC.test(c.name) ? String(settings.templates.followup||'').replace(' для «{name}»','') : settings.templates.followup, c);
+const waUrl = (c, text) => `https://wa.me/${c.phone}?text=${encodeURIComponent(text)}`;
+const gisUrl = c => c.firmId ? `https://2gis.kz/almaty/firm/${c.firmId}` : `https://2gis.kz/almaty/search/${c.phone}`;
+const igUrl = c => /^https?:/.test(c.instagram) ? c.instagram : `https://instagram.com/${String(c.instagram).replace(/^@/,'')}`;
+const stOf = c => c.status||'new';
+const takenBy = c => c.claimedBy && c.claimedBy!==me.name && stOf(c)==='new' && serverNow-(c.claimedAt||0)<CLAIM_MS ? c.claimedBy : null;
+const dueMs = () => (settings.followupHours||48)*3600000;
+const isDue = c => stOf(c)==='sent' && serverNow-(c.at||0) >= dueMs();
+const isStale = c => stOf(c)==='followup' && serverNow-(c.followAt||c.at||0) >= dueMs()*1.5;
+
+async function api(path, body){
+  const r = await fetch('/api'+path, body ? {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(body)} : {});
+  const data = await r.json().catch(()=>({}));
+  if(r.status===401 && path!=='/login'){ showLogin(); throw new Error('auth'); }
+  if(!r.ok){ throw Object.assign(new Error(data.message||'Ошибка'), data); }
+  return data;
+}
+
+function counts(arr){ const o={new:0,sent:0,followup:0,noreply:0,interested:0,refused:0,skip:0}; arr.forEach(c=>o[stOf(c) in o ? stOf(c) : 'new']++); return o; }
+let rq=0; function render(){ cancelAnimationFrame(rq); rq=requestAnimationFrame(draw); }
+function draw(){ drawStats(); drawOnline(); drawQueue(); if(!$('#p-team').hidden) drawTeam(); if(!$('#p-report').hidden) drawReport(); }
+
+function drawStats(){
+  const c=counts(contacts), total=contacts.length, done=total-c.new, ds=dayStart(), owner=me.role==='owner';
+  const mineToday = contacts.filter(x=>x.sentAt>=ds && x.sentBy && (owner || x.sentBy===me.name)).length;
+  const contacted = total-c.new-c.skip, conv = contacted ? Math.round(100*c.interested/contacted) : 0;
+  $('#stats').innerHTML = [
+    [done+' / '+total,'обработано'],
+    [mineToday, owner?'написали сегодня':'вы сегодня'],
+    [c.interested,'интерес'], [conv+'%','конверсия'], [c.refused,'отказ']
+  ].map(([v,l])=>`<div class="stat"><b>${esc(v)}</b><span>${l}</span></div>`).join('');
+  $('#bar').innerHTML = total ? ST.map(([k])=>`<i style="width:${c[k]/total*100}%;background:var(--c-${k})"></i>`).join('') : '';
+  const plan=settings.dailyPlan||0;
+  $('#planBox').hidden = owner || !plan;
+  if(!owner && plan){ const p=Math.min(100,Math.round(100*mineToday/plan)); $('#planText').textContent = mineToday>=plan ? `План на сегодня выполнен: ${mineToday} из ${plan}` : `План на сегодня: ${mineToday} из ${plan}`; $('#planFill').style.width=p+'%'; }
+  const due = contacts.filter(x=>isDue(x) && (owner || x.sentBy===me.name || !x.sentBy)).length;
+  $('#dueBanner').hidden = !(due && filter!=='due');
+  $('#dueText').textContent = `Пора дожать: ${due} ${plural(due,['клиент','клиента','клиентов'])} без ответа больше ${settings.followupHours} ч`;
+  const all = total>0 && c.new===0;
+  $('#done').hidden = !(all && owner);
+  if(all) $('#doneText').textContent = `Обработаны все ${total} клиентов`;
+  if(all && prevDone===false && owner) toast('Все клиенты обработаны');
+  prevDone = all;
+  $('#seedWarn').hidden = !(owner && seedError && !total);
+}
+
+function onlineState(p){ if(serverNow-(p.t||0) >= 75000) return null; return p.visible===false ? 'idle' : 'on'; }
+function drawOnline(){
+  const items=[];
+  for(const [name,p] of Object.entries(presence)){
+    const st=onlineState(p); if(!st && name!==me.name) continue;
+    items.push(`<span class="who-chip"><i class="dot ${st||''}"></i>${esc(name)}${name===me.name?' (вы)':''}${st==='idle'?' · в фоне':st==='on'?' · онлайн':''}</span>`);
+  }
+  $('#online').innerHTML = items.join('');
+}
+
+function drawQueue(){
+  const c=counts(contacts), owner=me.role==='owner';
+  const niches=[...new Set(contacts.map(x=>x.niche).filter(Boolean))].sort();
+  const sel=$('#niche'), cur=sel.value;
+  if(sel.options.length-1!==niches.length){ sel.innerHTML='<option value="">Все ниши</option>'+niches.map(n=>`<option>${esc(n)}</option>`).join(''); sel.value=niches.includes(cur)?cur:''; }
+  const dueN = contacts.filter(isDue).length;
+  const fl=[['new','Новые',c.new],['due','Дожать',dueN],['all','Все',contacts.length],...ST.map(([k,l])=>[k,l,c[k]])];
+  $('#filters').innerHTML = fl.map(([k,l,n])=>`<button class="f${k==='due'?' due':''}" data-f="${k}" aria-pressed="${filter===k}">${l}<small>${n}</small></button>`).join('');
+  const q=$('#q').value.trim().toLowerCase(), nf=sel.value;
+  let arr=contacts.filter(x=>(filter==='all'||(filter==='due'?isDue(x):stOf(x)===filter))&&(!nf||x.niche===nf)&&(!q||(x.name+' '+x.phone+' '+(x.address||'')).toLowerCase().includes(q)));
+  if(filter==='new') arr.sort((a,b)=>(takenBy(a)?1:0)-(takenBy(b)?1:0) || (a.ord||0)-(b.ord||0));
+  else if(filter==='due') arr.sort((a,b)=>(a.at||0)-(b.at||0));
+  else arr.sort((a,b)=>(a.ord||0)-(b.ord||0));
+  if(!contacts.length){
+    $('#list').innerHTML = owner ? '<div class="panel empty"><h2>Клиентов пока нет</h2><p>Открой «Настройки» и загрузи список.</p></div>' : '<div class="panel empty"><h2>Список пустой</h2><p>Владелец ещё не загрузил клиентов. Загляни позже.</p></div>';
+    $('#more').hidden=true; return;
+  }
+  if(!arr.length){ $('#list').innerHTML=`<div class="panel empty"><h2>${filter==='new'?'Новых клиентов нет':filter==='due'?'Дожимать пока некого':'Здесь пусто'}</h2><p>${filter==='new'&&dueN?'Есть кого дожать: открой «Дожать».':'Смени фильтр или очисти поиск.'}</p></div>`; $('#more').hidden=true; return; }
+  $('#list').innerHTML = arr.slice(0,shown).map(x=>{
+    const st=stOf(x), done=st!=='new', taken=takenBy(x), due=isDue(x), stale=isStale(x);
+    const chips=ST.map(([k,l])=>`<button class="chip s-${k}${st===k?' on':''}" data-st="${k}" data-id="${x.phone}">${l}</button>`).join('');
+    const trace = (done && x.by) ? `<span>${LABEL[st]} · ${esc(x.by)} · ${dmy(x.at)} ${hhmm(x.at)}</span>` : taken ? `<span>в работе у ${esc(taken)}</span>` : '';
+    const hint = due ? `<span class="hintdue">Без ответа ${Math.floor((serverNow-x.at)/3600000)} ч → напомни</span>` : stale ? `<span class="hintdue">Напоминали, ответа нет → поставь «Не ответил»</span>` : '';
+    const main = due ? `<a class="btn follow" data-follow="${x.phone}" href="${esc(waUrl(x, followFor(x)))}" target="_blank" rel="noopener">Напомнить</a>` : `<a class="btn primary" data-open="${x.phone}" href="${esc(waUrl(x, msgFor(x)))}" target="_blank" rel="noopener">Открыть чат</a>`;
+    const ig = x.instagram ? `<a class="btn" href="${esc(igUrl(x))}" target="_blank" rel="noopener">Instagram</a>` : '';
+    const del = owner ? `<button class="btn danger" data-del="${x.phone}" title="Удалить из списка">✕</button>` : '';
+    const extra = [x.rating?`<span class="star">★ ${esc(x.rating)}</span>${x.reviews?' · '+esc(reviewsText(x)):''}`:'', x.hours?esc(x.hours):'', x.category?esc(x.category):''].filter(Boolean).join(' · ');
+    return `<article class="row${done?' done':''}${taken?' taken':''}${due?' due':''}">
+      <div><h3>${esc(x.name)}</h3>
+        <p class="meta"><span class="ph">${fmtPhone(x.phone)}</span>${isMobile(x.phone)?'':'<span class="tag">городской</span>'}${x.niche?' · '+esc(x.niche):''}${x.address?' · '+esc(x.address):''}</p>
+        ${extra?`<p class="meta">${extra}</p>`:''}</div>
+      <div class="act">${main}<a class="btn" href="${esc(gisUrl(x))}" target="_blank" rel="noopener">2ГИС</a>${ig}<button class="btn" data-copy="${x.phone}" data-kind="${due?'follow':'first'}">Копировать</button>${del}</div>
+      <div class="chips">${chips}</div>
+      <div class="trace">${trace}${hint}<input data-note="${x.phone}" value="${esc(x.note||'')}" placeholder="Заметка (сохраняется сама)"></div></article>`;
+  }).join('');
+  $('#more').hidden = arr.length<=shown;
+}
+
+function drawTeam(){
+  const ds=dayStart(), names=[...new Set(contacts.flatMap(x=>[x.sentBy,x.by]).filter(Boolean).concat(Object.keys(presence)))].filter(n=>n!==me.name || presence[n]?.role==='worker');
+  if(!names.length){ $('#teamTable').innerHTML='<tr><td>Пока никто не заходил и не отмечал клиентов.</td></tr>'; return; }
+  const rows=names.map(n=>{
+    const mine=contacts.filter(x=>x.sentBy===n), c=counts(mine), contacted=mine.length, conv=contacted?Math.round(100*c.interested/contacted):0;
+    const last=Math.max(0,...contacts.filter(x=>x.by===n).map(x=>x.at||0)), p=presence[n], st=p?onlineState(p):null;
+    return `<tr><td><i class="dot ${st||''}"></i> ${esc(n)}</td><td>${mine.filter(x=>x.sentAt>=ds).length}</td><td>${contacted}</td><td>${c.followup}</td><td>${c.interested}</td><td>${conv}%</td><td>${c.refused}</td><td>${c.noreply}</td><td>${st==='on'?'онлайн':st==='idle'?'в фоне':p?ago(p.t):last?ago(last):'—'}</td></tr>`;
+  }).join('');
+  $('#teamTable').innerHTML=`<tr><th>Сотрудник</th><th>Сегодня</th><th>Написал всего</th><th>Напомнил</th><th>Интерес</th><th>Конверсия</th><th>Отказ</th><th>Не ответ.</th><th>Был активен</th></tr>${rows}`;
+}
+
+function drawReport(){
+  const byDay = {};
+  for(const e of events){ if(e.status==='new') continue; const d=new Date(e.t); d.setHours(0,0,0,0); const k=d.getTime(); (byDay[k] ||= {}); const w=(byDay[k][e.who] ||= {sent:0,followup:0,interested:0,refused:0,noreply:0,skip:0}); if(w[e.status]!==undefined) w[e.status]++; }
+  const days=Object.keys(byDay).map(Number).sort((a,b)=>b-a).slice(0,14);
+  const c=counts(contacts), contacted=contacts.length-c.new-c.skip;
+  const todayE=events.filter(e=>e.t>=dayStart());
+  $('#rstats').innerHTML=[[todayE.filter(e=>e.status==='sent').length,'написали сегодня'],[todayE.filter(e=>e.status==='interested').length,'интерес сегодня'],[contacted,'написали всего'],[c.interested,'интерес всего'],[(contacted?Math.round(100*c.interested/contacted):0)+'%','конверсия']].map(([v,l])=>`<div class="stat"><b>${esc(v)}</b><span>${l}</span></div>`).join('');
+  if(!days.length){ $('#reportTable').innerHTML='<tr><td>Пока нет данных.</td></tr>'; return; }
+  let html='<tr><th>Дата</th><th>Сотрудник</th><th>Написал</th><th>Напомнил</th><th>Интерес</th><th>Отказ</th><th>Не ответил</th></tr>';
+  for(const k of days){ const ws=Object.entries(byDay[k]); ws.forEach(([w,s],i)=>{ html+=`<tr><td class="day">${i?'':dmy(k)}</td><td>${esc(w)}</td><td>${s.sent}</td><td>${s.followup}</td><td>${s.interested}</td><td>${s.refused}</td><td>${s.noreply}</td></tr>`; }); }
+  $('#reportTable').innerHTML=html;
+}
+
+/* ---------- данные ---------- */
+async function load(){
+  try{
+    const d = await api('/state');
+    me=d.me; contacts=d.contacts; settings=d.settings; presence=d.presence; events=d.events||[]; serverNow=d.now||Date.now(); seedError=d.seedError;
+    render();
+    if(me.role==='owner' && !['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)){ const t=settings.templates, h=settings.hooks; $('#tplF').value=t.furniture||''; $('#tplM').value=t.massage||''; $('#tplD').value=t.default||''; $('#tplU').value=t.followup||''; $('#hookW').value=h.withReviews||''; $('#hookN').value=h.withoutReviews||''; $('#plan').value=settings.dailyPlan||60; $('#followupHours').value=settings.followupHours||48; $('#autoSent').checked=settings.autoSent!==false; }
+  }catch(e){ if(e.message!=='auth') toast(e.message||'Нет связи'); }
+}
+async function beat(){ try{ await api('/heartbeat',{visible:!document.hidden}); }catch{} }
+
+async function setStatus(phone, st, {toggle=true, silent=false}={}){
+  const c=contacts.find(x=>x.phone===phone); if(!c||busy.has(phone)) return;
+  busy.add(phone);
+  const cur=stOf(c), next=(toggle && cur===st)?'new':st, prev={status:c.status,by:c.by,at:c.at,sentBy:c.sentBy,sentAt:c.sentAt,followAt:c.followAt};
+  try{ const r=await api('/status',{phone,status:next}); Object.assign(c, r.contact||{});
+    if(!silent && next!=='new') toast(`${c.name}: ${LABEL[next]}`, 'Отменить', ()=>setStatus(phone, prev.status||'new', {toggle:false, silent:true}));
+  }catch(e){ toast(e.message||'Не сохранилось'); }
+  finally{ busy.delete(phone); render(); }
+}
+async function copy(text){ try{ await navigator.clipboard.writeText(text); return true; }catch{ return false; } }
+
+/* ---------- события ---------- */
+document.addEventListener('click', async e=>{
+  const t=e.target.closest('button,a'); if(!t) return;
+  if(t.dataset.tab){
+    if(t.dataset.tab==='out'){ await api('/logout',{}).catch(()=>{}); showLogin(); return; }
+    document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b===t)); ['queue','team','report','set'].forEach(k=>$('#p-'+k).hidden=k!==t.dataset.tab); render(); return;
+  }
+  if(t.dataset.f){ filter=t.dataset.f; shown=60; render(); window.scrollTo({top:0}); return; }
+  if(t.dataset.st){ setStatus(t.dataset.id, t.dataset.st); return; }
+  if(t.dataset.open){ const c=contacts.find(x=>x.phone===t.dataset.open); if(!c) return; copy(msgFor(c));
+    if(settings.autoSent!==false && stOf(c)==='new') setTimeout(()=>setStatus(c.phone,'sent',{toggle:false}),300);
+    else { c.claimedBy=me.name; c.claimedAt=Date.now(); api('/claim',{phone:c.phone}).catch(()=>{}); }
+    return; }
+  if(t.dataset.follow){ const c=contacts.find(x=>x.phone===t.dataset.follow); if(!c) return; copy(followFor(c)); setTimeout(()=>setStatus(c.phone,'followup',{toggle:false}),300); return; }
+  if(t.dataset.copy){ const c=contacts.find(x=>x.phone===t.dataset.copy); if(c) toast(await copy(t.dataset.kind==='follow'?followFor(c):msgFor(c)) ? 'Текст скопирован' : 'Не удалось скопировать'); return; }
+  if(t.dataset.del){ const c=contacts.find(x=>x.phone===t.dataset.del); if(!c) return; if(t.dataset.sure!=='1'){ t.dataset.sure='1'; t.textContent='Точно?'; setTimeout(()=>{t.dataset.sure='';t.textContent='✕';},2500); return; } try{ await api('/remove',{phone:c.phone}); contacts=contacts.filter(x=>x.phone!==c.phone); render(); }catch(e){ toast(e.message); } return; }
+  if(t.id==='more'){ shown+=60; render(); return; }
+  if(t.id==='preview'){ const c=contacts.find(x=>stOf(x)==='new')||contacts[0]; if(!c){ toast('Нет клиентов'); return; } const saved=settings; settings={...settings, templates:{...settings.templates, furniture:$('#tplF').value, massage:$('#tplM').value, default:$('#tplD').value, followup:$('#tplU').value}, hooks:{withReviews:$('#hookW').value, withoutReviews:$('#hookN').value}}; $('#previewBox').hidden=false; $('#previewBox').innerHTML=`<b>${esc(c.name)}</b><br>${esc(msgFor(c))}<br><br><b>Дожим:</b><br>${esc(followFor(c))}`; settings=saved; return; }
+});
+document.addEventListener('change', async e=>{
+  const inp=e.target.closest('[data-note]'); if(!inp) return;
+  const c=contacts.find(x=>x.phone===inp.dataset.note); if(!c) return;
+  c.note=inp.value; try{ await api('/note',{phone:c.phone,note:inp.value}); }catch{ toast('Заметка не сохранилась'); }
+});
+$('#q').addEventListener('input',()=>{ shown=60; render(); });
+$('#niche').addEventListener('change',()=>{ shown=60; render(); });
+$('#file').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ $('#paste').value=String(r.result||''); }; r.readAsText(f); });
+$('#doImport').addEventListener('click',async()=>{
+  const csv=$('#paste').value; if(!csv.trim()){ toast('Сначала выбери файл или вставь строки'); return; }
+  $('#doImport').disabled=true;
+  try{ const r=await api('/import',{csv}); $('#impInfo').textContent=`Распознано ${r.parsed}, добавлено новых ${r.added}`; $('#paste').value=''; $('#file').value=''; await load(); }
+  catch(e){ toast(e.message); } finally{ $('#doImport').disabled=false; }
+});
+$('#saveCfg').addEventListener('click',async()=>{
+  try{ await api('/settings',{templates:{furniture:$('#tplF').value,massage:$('#tplM').value,default:$('#tplD').value,followup:$('#tplU').value},hooks:{withReviews:$('#hookW').value,withoutReviews:$('#hookN').value},dailyPlan:$('#plan').value,followupHours:$('#followupHours').value,autoSent:$('#autoSent').checked}); toast('Сохранено'); document.activeElement?.blur(); await load(); }
+  catch(e){ toast(e.message); }
+});
+$('#loginForm').addEventListener('submit',async e=>{
+  e.preventDefault(); $('#lerr').textContent=''; $('#lbtn').disabled=true;
+  try{ await api('/login',{login:$('#llogin').value.trim(), name:$('#lname').value.trim(), pass:$('#lpass').value}); $('#lpass').value=''; await showApp(); }
+  catch(e){ $('#lerr').textContent=e.message||'Не удалось войти'; }
+  finally{ $('#lbtn').disabled=false; }
+});
+document.addEventListener('visibilitychange',()=>{ if(me){ beat(); if(!document.hidden) load(); } });
+
+/* ---------- экраны ---------- */
+function showLogin(){ clearInterval(pollTimer); me=null; $('#v-app').hidden=true; $('#v-login').hidden=false; }
+async function showApp(){
+  const d = await api('/me'); me=d.me;
+  $('#v-login').hidden=true; $('#v-app').hidden=false;
+  const owner=me.role==='owner';
+  document.querySelectorAll('.tab.owner').forEach(b=>b.hidden=!owner);
+  $('#sub').textContent = owner ? 'Режим владельца' : `Привет, ${me.name}. Жми «Открыть чат», отправляй, дальше всё само.`;
+  await load(); beat();
+  clearInterval(pollTimer); pollTimer=setInterval(()=>{ load(); beat(); }, 20000);
+}
+(async()=>{ try{ await showApp(); }catch{ showLogin(); } })();
+</script>
+</body>
+</html>
