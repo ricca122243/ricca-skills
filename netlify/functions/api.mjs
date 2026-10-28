@@ -1,7 +1,7 @@
 // API сайта «Рассылка Damillion»: вход, очередь, статусы, дожим, присутствие, отчёт, импорт/экспорт.
 import { getStore } from "@netlify/blobs";
 import { createHash, createHmac, createDecipheriv, timingSafeEqual } from "node:crypto";
-import seed from "./seed-data.mjs";
+import seed from "../lib/seed-data.mjs";
 
 export const STATUSES = ["new", "sent", "followup", "noreply", "interested", "refused", "skip"];
 const LABEL = { new: "Новый", sent: "Написал", followup: "Напомнил", noreply: "Не ответил", interested: "Интерес", refused: "Отказал", skip: "Нет WhatsApp" };

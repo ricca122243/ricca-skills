@@ -8,7 +8,7 @@ Import этого репозитория как проект (netlify.toml уж�
 
 - `OWNER_LOGIN`, `OWNER_PASS` — вход владельца
 - `WORKER_LOGIN`, `WORKER_PASS` — общий вход работников (каждый вводит своё имя)
-- `SEED_KEY` — ключ, которым расшифровывается стартовый список клиентов (`netlify/functions/seed-data.mjs`)
+- `SEED_KEY` — ключ, которым расшифровывается стартовый список клиентов (`netlify/lib/seed-data.mjs`)
 
 После смены переменных: Deploys → Trigger deploy.
 
