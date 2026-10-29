@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>SoftLife — мягкая мебель на заказ в Алматы (демо)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF0EB; --paper:#F8F9F6; --ink:#16201C; --muted:#5C6862; --line:#D5DBD3;
+  --forest:#1F3A32; --forest-2:#2E5245; --sand:#C9B79A; --sand-2:#E7DDCB; --wa:#1FA855;
+  --f-d:'Cormorant Garamond',Georgia,serif; --f-b:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --r:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-b);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+img,svg{max-width:100%;display:block}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+h1,h2,h3{font-family:var(--f-d);font-weight:500;line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+p{margin:0}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--forest-2);font-weight:600}
+
+/* demo ribbon */
+.demo{background:var(--forest);color:#dfe9e3;font-size:13px;text-align:center;padding:9px 16px}
+.demo a{color:#fff;font-weight:600}
+
+/* header */
+header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid transparent;transition:border-color .3s}
+header.scrolled{border-bottom-color:var(--line)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:20px;height:72px}
+.logo{font-family:var(--f-d);font-size:28px;font-weight:600;text-decoration:none;letter-spacing:.01em}
+.logo span{color:var(--forest-2);font-style:italic}
+nav{display:flex;gap:28px;font-size:14px;font-weight:500}
+nav a{text-decoration:none;color:var(--muted);transition:color .2s}
+nav a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:15px 26px;border-radius:999px;font-weight:600;font-size:15px;text-decoration:none;border:0;cursor:pointer;transition:transform .2s,box-shadow .3s,background .2s;white-space:nowrap}
+.btn:active{transform:translateY(1px)}
+.btn-dark{background:var(--forest);color:#fff;box-shadow:0 14px 30px -16px var(--forest)}
+.btn-dark:hover{background:var(--forest-2)}
+.btn-wa{background:var(--wa);color:#fff;box-shadow:0 14px 30px -14px var(--wa)}
+.btn-ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.btn-ghost:hover{background:var(--ink);color:var(--paper)}
+.btn svg{width:18px;height:18px}
+.hdr-btn{padding:11px 20px;font-size:14px}
+
+/* hero */
+.hero{padding:56px 0 40px}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.hero h1{font-size:clamp(46px,6.4vw,88px);margin-top:18px}
+.hero h1 em{color:var(--forest-2)}
+.hero .lead{font-size:clamp(17px,1.6vw,20px);color:var(--muted);margin-top:22px;max-width:46ch}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.proof{display:flex;flex-wrap:wrap;gap:28px;margin-top:38px;padding-top:26px;border-top:1px solid var(--line)}
+.proof b{display:block;font-family:var(--f-d);font-size:34px;font-weight:600;line-height:1}
+.proof span{font-size:13px;color:var(--muted)}
+.stars{color:#C99A2E;letter-spacing:2px;font-size:15px}
+.hero-art{position:relative;aspect-ratio:1/1.02;border-radius:32px;overflow:hidden;background:radial-gradient(120% 80% at 70% 20%,#fff 0%,var(--sand-2) 55%,var(--sand) 100%)}
+.hero-art .tag{position:absolute;left:22px;bottom:22px;right:22px;background:rgba(255,255,255,.82);backdrop-filter:blur(8px);border-radius:18px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px}
+.hero-art .tag b{font-family:var(--f-d);font-size:22px;font-weight:600}
+
+/* sections */
+section{padding:clamp(70px,9vw,120px) 0}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:40px}
+.sec-head h2{font-size:clamp(36px,4.6vw,60px);margin-top:12px;max-width:16ch}
+.sec-head p{color:var(--muted);max-width:42ch}
+
+/* catalog */
+.cat{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.item{background:var(--paper);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line);transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.item:hover{transform:translateY(-4px);box-shadow:0 30px 50px -36px rgba(22,32,28,.45)}
+.item .pic{aspect-ratio:4/3;background:linear-gradient(160deg,var(--sand-2),#fff);display:grid;place-items:center;padding:24px}
+.item .pic svg{width:86%;height:auto}
+.item .body{padding:22px 22px 24px;display:flex;flex-direction:column;gap:8px;flex:1}
+.item h3{font-size:30px}
+.item p{color:var(--muted);font-size:15px}
+.item .row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:14px}
+.item .row span{font-size:13px;color:var(--forest-2);font-weight:600}
+.item .row a{font-size:14px;font-weight:600;text-decoration:none;border-bottom:1.5px solid currentColor;padding-bottom:2px}
+.item.wide{grid-column:span 2;flex-direction:row}
+.item.wide .pic{aspect-ratio:auto;flex:1.1}
+.item.wide .body{flex:1}
+
+/* fabrics */
+.fab{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.fab i{width:30px;height:30px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(255,255,255,.6),0 0 0 1px var(--line)}
+
+/* why */
+.why{background:var(--forest);color:#E8EFEA}
+.why .eyebrow{color:var(--sand)}
+.why .sec-head p{color:#B5C6BC}
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.12);border-radius:var(--r);overflow:hidden}
+.why-grid div{background:var(--forest);padding:30px 26px 34px}
+.why-grid b{font-family:var(--f-d);font-size:46px;font-weight:500;color:var(--sand);display:block;line-height:1}
+.why-grid h3{font-size:26px;margin:18px 0 10px;color:#fff}
+.why-grid p{color:#B5C6BC;font-size:15px}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;counter-reset:s}
+.step{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:28px 24px}
+.step::before{counter-increment:s;content:counter(s,decimal-leading-zero);font-family:var(--f-d);font-size:22px;color:var(--forest-2);font-weight:600}
+.step h3{font-size:26px;margin:16px 0 8px}
+.step p{color:var(--muted);font-size:15px}
+
+/* reviews */
+.rev-top{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.rev-score{font-family:var(--f-d);font-size:72px;line-height:1;font-weight:600}
+.reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+.rev{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:28px 26px;display:flex;flex-direction:column;gap:16px}
+.rev q{font-family:var(--f-d);font-size:26px;line-height:1.2;quotes:"«" "»"}
+.rev span{font-size:14px;color:var(--muted);margin-top:auto}
+
+/* showroom */
+.show{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.show .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:34px}
+.show h3{font-size:38px;margin-bottom:18px}
+.show dl{display:grid;grid-template-columns:auto 1fr;gap:12px 22px;margin:0 0 26px;font-size:16px}
+.show dt{color:var(--muted)}
+.show dd{margin:0;font-weight:500}
+.show .map{border-radius:var(--r);overflow:hidden;min-height:320px;background:linear-gradient(135deg,var(--sand-2),#fff);position:relative;display:grid;place-items:center;text-decoration:none;border:1px solid var(--line)}
+.show .map svg{position:absolute;inset:0;width:100%;height:100%;opacity:.5}
+.pin{position:relative;background:var(--forest);color:#fff;padding:14px 20px;border-radius:999px;font-weight:600;font-size:15px;box-shadow:0 20px 40px -20px var(--forest)}
+
+/* final */
+.final{text-align:center}
+.final h2{font-size:clamp(40px,5.4vw,72px);max-width:18ch;margin:0 auto}
+.final p{color:var(--muted);margin:20px auto 0;max-width:48ch}
+.final .cta{display:flex;justify-content:center;gap:12px;margin-top:32px;flex-wrap:wrap}
+
+footer{border-top:1px solid var(--line);padding:30px 0 100px;font-size:14px;color:var(--muted)}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* floating whatsapp */
+.fab-wa{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:30;width:60px;height:60px;border-radius:50%;background:var(--wa);display:grid;place-items:center;box-shadow:0 16px 34px -12px rgba(31,168,85,.7);transition:transform .2s}
+.fab-wa:hover{transform:scale(1.06)}
+.fab-wa svg{width:30px;height:30px}
+
+/* reveal */
+.rv{opacity:1;transform:none;transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.js .rv{opacity:0;transform:translateY(22px)}
+.js .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.js .rv{opacity:1;transform:none}html{scroll-behavior:auto}}
+
+@media (max-width:980px){
+  .hero-grid{grid-template-columns:1fr}
+  .hero-art{max-width:560px;aspect-ratio:1.2/1}
+  .cat{grid-template-columns:1fr 1fr}
+  .item.wide{grid-column:span 2}
+  .why-grid,.steps{grid-template-columns:1fr 1fr}
+  .reviews{grid-template-columns:1fr}
+  .show{grid-template-columns:1fr}
+  nav{display:none}
+}
+@media (max-width:620px){
+  .cat{grid-template-columns:1fr}
+  .item.wide{grid-column:auto;flex-direction:column}
+  .item.wide .pic{aspect-ratio:4/3}
+  .why-grid,.steps{grid-template-columns:1fr}
+  .hdr-btn span{display:none}
+  .hero .cta .btn{flex:1}
+}
+</style>
+</head>
+<body>
+<div class="demo">Это демо-версия сайта, собранная Damillion Agency для SoftLife по открытым данным 2ГИС. <a href="https://wa.me/77750431833?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9F%D0%BE%D1%81%D0%BC%D0%BE%D1%82%D1%80%D0%B5%D0%BB%D0%B8%20%D0%B4%D0%B5%D0%BC%D0%BE%20%D1%81%D0%B0%D0%B9%D1%82%D0%B0%20SoftLife" target="_blank" rel="noopener">Обсудить</a></div>
+
+<header id="hdr">
+  <div class="wrap bar">
+    <a class="logo" href="#top">Soft<span>Life</span></a>
+    <nav>
+      <a href="#catalog">Каталог</a>
+      <a href="#why">Производство</a>
+      <a href="#order">Как заказать</a>
+      <a href="#reviews">Отзывы</a>
+      <a href="#showroom">Шоурум</a>
+    </nav>
+    <a class="btn btn-wa hdr-btn" data-wa="Здравствуйте! Хочу узнать цену на мебель." href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.3-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l1.8.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg><span>Узнать цену</span></a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow rv">Мягкая мебель на заказ · Алматы</p>
+        <h1 class="rv">Кровати и диваны, которые <em>не скрипят</em> через год</h1>
+        <p class="lead rv">Шьём на своём производстве под ваш размер и ткань. Доставка и сборка по Алматы, в подарок подушки к кровати.</p>
+        <div class="cta rv">
+          <a class="btn btn-wa" data-wa="Здравствуйте! Хочу узнать цену на кровать/диван." href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.3-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l1.8.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg>Рассчитать в WhatsApp</a>
+          <a class="btn btn-ghost" href="#catalog">Смотреть каталог</a>
+        </div>
+        <div class="proof rv">
+          <div><b>4.8</b><span class="stars">★★★★★</span><br><span>77 оценок в 2ГИС</span></div>
+          <div><b>180+</b><span>фото работ<br>в 2ГИС</span></div>
+          <div><b>Своё</b><span>производство<br>и опт</span></div>
+        </div>
+      </div>
+      <div class="hero-art rv" aria-hidden="true">
+        <svg viewBox="0 0 600 560" style="position:absolute;inset:0;width:100%;height:100%">
+          <defs>
+            <linearGradient id="hb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b5c4f"/><stop offset="1" stop-color="#1f3a32"/></linearGradient>
+            <linearGradient id="hl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfaf7"/><stop offset="1" stop-color="#e9e2d4"/></linearGradient>
+          </defs>
+          <ellipse cx="300" cy="430" rx="250" ry="22" fill="#1f3a32" opacity=".12"/>
+          <!-- headboard -->
+          <rect x="95" y="120" width="410" height="200" rx="46" fill="url(#hb)"/>
+          <g stroke="#ffffff" stroke-opacity=".12" stroke-width="3"><line x1="198" y1="138" x2="198" y2="300"/><line x1="300" y1="138" x2="300" y2="300"/><line x1="402" y1="138" x2="402" y2="300"/></g>
+          <!-- bed base -->
+          <rect x="70" y="300" width="460" height="110" rx="30" fill="url(#hb)"/>
+          <rect x="90" y="276" width="420" height="60" rx="26" fill="url(#hl)"/>
+          <!-- pillows -->
+          <rect x="128" y="236" width="150" height="62" rx="28" fill="#fff"/>
+          <rect x="322" y="236" width="150" height="62" rx="28" fill="#fff"/>
+          <rect x="250" y="250" width="100" height="44" rx="20" fill="#c9b79a"/>
+          <!-- throw -->
+          <path d="M330 300 h170 a22 22 0 0 1 22 22 v32 a12 12 0 0 1 -12 12 h-180 z" fill="#c9b79a" opacity=".9"/>
+          <!-- legs -->
+          <rect x="110" y="408" width="14" height="26" rx="4" fill="#16201c"/><rect x="476" y="408" width="14" height="26" rx="4" fill="#16201c"/>
+        </svg>
+        <div class="tag"><div><span>Кровать с мягким изголовьем</span><br><b>Под ваш размер</b></div><a class="btn btn-dark" style="padding:11px 18px;font-size:14px" data-wa="Здравствуйте! Сколько стоит кровать с мягким изголовьем?" href="#" target="_blank" rel="noopener">Цена</a></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="catalog">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow rv">Каталог</p><h2 class="rv">Всё мягкое для дома</h2></div>
+        <p class="rv">Любую модель шьём в нужном размере, ткани и цвете. Цену считаем за пару минут в WhatsApp.</p>
+      </div>
+      <div class="cat">
+        <article class="item wide rv">
+          <div class="pic"><svg viewBox="0 0 320 200"><rect x="20" y="40" width="280" height="96" rx="30" fill="#2e5245"/><rect x="10" y="118" width="300" height="56" rx="20" fill="#1f3a32"/><rect x="30" y="102" width="260" height="34" rx="16" fill="#efe9dc"/><rect x="50" y="76" width="90" height="36" rx="16" fill="#fff"/><rect x="180" y="76" width="90" height="36" rx="16" fill="#fff"/><rect x="26" y="172" width="8" height="16" rx="2" fill="#16201c"/><rect x="286" y="172" width="8" height="16" rx="2" fill="#16201c"/></svg></div>
+          <div class="body">
+            <p class="eyebrow">Хит</p>
+            <h3>Кровати</h3>
+            <p>Мягкое изголовье, подъёмный механизм с ящиком для белья, ортопедическое основание. Взрослые и детские, любой размер.</p>
+            <div class="fab"><i style="background:#1f3a32"></i><i style="background:#c9b79a"></i><i style="background:#8a8f93"></i><i style="background:#e7ddcb"></i><i style="background:#5b3f35"></i><i style="background:#2d3a5c"></i></div>
+            <div class="row"><span>Подарок: подушки</span><a data-wa="Здравствуйте! Хочу узнать цену на кровать." href="#" target="_blank" rel="noopener">Узнать цену</a></div>
+          </div>
+        </article>
+        <article class="item rv">
+          <div class="pic"><svg viewBox="0 0 320 200"><rect x="30" y="50" width="260" height="80" rx="26" fill="#c9b79a"/><rect x="14" y="80" width="40" height="88" rx="18" fill="#b6a383"/><rect x="266" y="80" width="40" height="88" rx="18" fill="#b6a383"/><rect x="44" y="112" width="232" height="56" rx="18" fill="#d8cbb3"/><rect x="40" y="166" width="8" height="16" rx="2" fill="#16201c"/><rect x="272" y="166" width="8" height="16" rx="2" fill="#16201c"/></svg></div>
+          <div class="body"><h3>Диваны</h3><p>Прямые, угловые, модульные. Раскладные для ежедневного сна.</p><div class="row"><span>Под ваш размер</span><a data-wa="Здравствуйте! Хочу узнать цену на диван." href="#" target="_blank" rel="noopener">Узнать цену</a></div></div>
+        </article>
+        <article class="item rv">
+          <div class="pic"><svg viewBox="0 0 320 200"><rect x="40" y="40" width="240" height="120" rx="14" fill="#fff"/><rect x="40" y="40" width="240" height="22" rx="10" fill="#e7ddcb"/><g stroke="#c9b79a" stroke-width="2" opacity=".7"><line x1="80" y1="70" x2="80" y2="150"/><line x1="120" y1="70" x2="120" y2="150"/><line x1="160" y1="70" x2="160" y2="150"/><line x1="200" y1="70" x2="200" y2="150"/><line x1="240" y1="70" x2="240" y2="150"/></g></svg></div>
+          <div class="body"><h3>Матрасы</h3><p>Независимые пружины, разная жёсткость. Подберём под вес и привычки.</p><div class="row"><span>Любой размер</span><a data-wa="Здравствуйте! Хочу подобрать матрас." href="#" target="_blank" rel="noopener">Подобрать</a></div></div>
+        </article>
+        <article class="item rv">
+          <div class="pic"><svg viewBox="0 0 320 200"><rect x="90" y="30" width="140" height="96" rx="40" fill="#2e5245"/><rect x="70" y="80" width="40" height="80" rx="18" fill="#1f3a32"/><rect x="210" y="80" width="40" height="80" rx="18" fill="#1f3a32"/><rect x="100" y="110" width="120" height="50" rx="18" fill="#3b5c4f"/><rect x="96" y="158" width="8" height="18" rx="2" fill="#16201c"/><rect x="216" y="158" width="8" height="18" rx="2" fill="#16201c"/></svg></div>
+          <div class="body"><h3>Кресла</h3><p>Для гостиной и спальни, в комплект к дивану или отдельно.</p><div class="row"><span>В тон дивану</span><a data-wa="Здравствуйте! Хочу узнать цену на кресло." href="#" target="_blank" rel="noopener">Узнать цену</a></div></div>
+        </article>
+        <article class="item rv">
+          <div class="pic"><svg viewBox="0 0 320 200"><rect x="40" y="80" width="240" height="60" rx="22" fill="#c9b79a"/><rect x="56" y="136" width="8" height="30" rx="2" fill="#16201c"/><rect x="256" y="136" width="8" height="30" rx="2" fill="#16201c"/><ellipse cx="160" cy="70" rx="0" ry="0"/></svg></div>
+          <div class="body"><h3>Пуфы и банкетки</h3><p>В прихожую, к кровати, к туалетному столику.</p><div class="row"><span>Комплектом дешевле</span><a data-wa="Здравствуйте! Хочу узнать цену на пуф/банкетку." href="#" target="_blank" rel="noopener">Узнать цену</a></div></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="why" id="why">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow rv">Почему SoftLife</p><h2 class="rv">Шьём сами, поэтому отвечаем за каждый шов</h2></div>
+        <p class="rv">Своё производство в Алматы: от каркаса до последней строчки. Без посредников и наценок салонов.</p>
+      </div>
+      <div class="why-grid">
+        <div class="rv"><b>01</b><h3>Своё производство</h3><p>Контролируем каркас, наполнитель и пошив, а не перепродаём чужое.</p></div>
+        <div class="rv"><b>02</b><h3>Любой размер</h3><p>Нестандартная комната или ниша? Сделаем по вашим замерам.</p></div>
+        <div class="rv"><b>03</b><h3>Доставка и сборка</h3><p>Привезём и соберём по Алматы, отправим по Казахстану.</p></div>
+        <div class="rv"><b>04</b><h3>Ткани вживую</h3><p>Приезжайте в шоурум: посидите, потрогайте, выберите обивку.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="order">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow rv">Как заказать</p><h2 class="rv">Четыре шага до новой кровати</h2></div>
+      </div>
+      <div class="steps">
+        <div class="step rv"><h3>Напишите</h3><p>Отправьте в WhatsApp фото понравившейся модели и размер.</p></div>
+        <div class="step rv"><h3>Расчёт</h3><p>Посчитаем цену и сроки, предложим ткани и цвета.</p></div>
+        <div class="step rv"><h3>Пошив</h3><p>Шьём на своём производстве, держим в курсе по срокам.</p></div>
+        <div class="step rv"><h3>Доставка</h3><p>Привозим, собираем и проверяем вместе с вами.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reviews" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow rv">Отзывы из 2ГИС</p><div class="rev-top rv"><span class="rev-score">4.8</span><div><span class="stars">★★★★★</span><br><span style="color:var(--muted)">77 оценок, 60 отзывов</span></div></div></div>
+        <a class="btn btn-ghost rv" href="https://2gis.kz/almaty/geo/70000001069483710/tab/reviews" target="_blank" rel="noopener">Читать все отзывы</a>
+      </div>
+      <div class="reviews">
+        <div class="rev rv"><q>Качественная сборка, материалы добротные, ничего не скрипит.</q><span>Карина, 2ГИС</span></div>
+        <div class="rev rv"><q>Каждая строчка прошита на совесть!</q><span>Марина, 2ГИС</span></div>
+        <div class="rev rv" style="background:var(--forest);color:#fff;border-color:var(--forest)"><p class="eyebrow" style="color:var(--sand)">Чаще всего хвалят</p><p style="font-family:var(--f-d);font-size:26px;line-height:1.2">Пошив, сборку без скрипа, доставку в срок и менеджера Айгуль</p><span style="color:#B5C6BC">По отзывам в 2ГИС</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="showroom" style="padding-top:0">
+    <div class="wrap show">
+      <div class="card rv">
+        <p class="eyebrow">Шоурум</p>
+        <h3 style="margin-top:12px">Приезжайте посидеть на диване до покупки</h3>
+        <dl>
+          <dt>Адрес</dt><dd>ул. Утеген батыра, 26, мкр Тастак-1, Ауэзовский район</dd>
+          <dt>Часы</dt><dd>10:00–19:00</dd>
+          <dt>WhatsApp</dt><dd>+7 775 544 08 44</dd>
+          <dt>Instagram</dt><dd><a href="https://instagram.com/softlife_kz" target="_blank" rel="noopener">@softlife_kz</a></dd>
+        </dl>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a class="btn btn-wa" data-wa="Здравствуйте! Хочу приехать в шоурум, когда удобно?" href="#" target="_blank" rel="noopener">Записаться в шоурум</a>
+          <a class="btn btn-ghost" href="https://2gis.kz/almaty/geo/70000001069483710" target="_blank" rel="noopener">Маршрут в 2ГИС</a>
+        </div>
+      </div>
+      <a class="map rv" href="https://2gis.kz/almaty/geo/70000001069483710" target="_blank" rel="noopener" aria-label="Открыть на карте 2ГИС">
+        <svg viewBox="0 0 400 320" preserveAspectRatio="none"><g fill="none" stroke="#1f3a32" stroke-width="1.5"><path d="M0 80 L400 60"/><path d="M0 200 L400 230"/><path d="M120 0 L100 320"/><path d="M280 0 L300 320"/><path d="M0 140 Q200 120 400 150" stroke-dasharray="6 6"/></g></svg>
+        <span class="pin">📍 SoftLife · Утеген батыра, 26</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <h2 class="rv">Пришлите фото мебели мечты, посчитаем цену сегодня</h2>
+      <p class="rv">Ответим в WhatsApp в рабочее время. Без звонков и навязчивых продаж.</p>
+      <div class="cta rv">
+        <a class="btn btn-wa" data-wa="Здравствуйте! Отправляю фото мебели, посчитайте, пожалуйста." href="#" target="_blank" rel="noopener">Написать в WhatsApp</a>
+        <a class="btn btn-ghost" href="tel:+77755440844">Позвонить</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>SoftLife · мягкая мебель на заказ · Алматы</span>
+    <span>Демо-сайт: Damillion Agency · <a href="https://golden-scone-7ab7a0.netlify.app/" target="_blank" rel="noopener">damillion</a></span>
+  </div>
+</footer>
+
+<a class="fab-wa" data-wa="Здравствуйте! Хочу узнать цену." href="#" target="_blank" rel="noopener" aria-label="Написать в WhatsApp"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.3-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.6-.1l1.8.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg></a>
+
+<script>
+(() => {
+  const PHONE = '77755440844';
+  document.querySelectorAll('[data-wa]').forEach(a => { a.href = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(a.dataset.wa); });
+  const hdr = document.getElementById('hdr');
+  addEventListener('scroll', () => hdr.classList.toggle('scrolled', scrollY > 10), { passive: true });
+  document.documentElement.classList.add('js');
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.rv').forEach((el, i) => { el.style.transitionDelay = (i % 4) * 60 + 'ms'; io.observe(el); });
+})();
+</script>
+</body>
+</html>
