@@ -1,11 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
   <circle cx="100" cy="100" r="100" fill="#618869"/>
-  <g fill="none" stroke="#fff" stroke-linecap="round" stroke-width="2.2">
-    <path d="M70 70 C 92 38, 128 26, 146 30 C 140 52, 112 74, 74 74 Z" fill="#fff" stroke="none"/>
-    <path d="M60 80 C 82 70, 112 54, 140 34" stroke="#618869" stroke-width="2"/>
-    <path d="M60 80 L 54 84"/>
-    <path d="M96 60 l -6 -9 M110 52 l -5 -10 M122 45 l -3 -9" stroke="#618869" stroke-width="1.6"/>
-  </g>
-  <text x="100" y="122" text-anchor="middle" font-family="Cormorant, Georgia, serif" font-size="25" fill="#fff" letter-spacing="1">S<tspan font-size="19">OFTLIFE</tspan> KZ</text>
-  <text x="100" y="146" text-anchor="middle" font-family="Cormorant, Georgia, serif" font-size="13" fill="#fff" letter-spacing=".5">est. 2018</text>
+  <!-- перо: изогнутое опахало, разрезы на верхней кромке, стержень уходит влево вниз -->
+  <path d="M58 86 C 74 62, 108 36, 150 28 C 146 46, 132 62, 110 72 C 96 78, 80 82, 64 84 Z" fill="#fff"/>
+  <path d="M100 47 l 3 9 M116 39 l 2 9 M131 33 l 1 8 M86 57 l 4 8" stroke="#618869" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M66 82 C 92 70, 120 52, 146 31" fill="none" stroke="#618869" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M64 84 L 50 92" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+  <text x="100" y="124" text-anchor="middle" font-family="Cormorant, Georgia, serif" font-size="25" fill="#fff" letter-spacing="1">S<tspan font-size="19">OFTLIFE</tspan> KZ</text>
+  <text x="100" y="147" text-anchor="middle" font-family="Cormorant, Georgia, serif" font-size="13" fill="#fff" letter-spacing=".5">est. 2018</text>
 </svg>
