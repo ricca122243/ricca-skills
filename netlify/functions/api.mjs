@@ -54,6 +54,7 @@ export const DEFAULT_SETTINGS = {
 const LANGS = ["ru", "kz"];
 
 const env = (k) => (globalThis.Netlify?.env?.get?.(k) ?? process.env[k] ?? "").trim();
+const OWNER_NAME = "Азамат";
 const store = () => globalThis.__rassylkaStore || getStore({ name: "rassylka", consistency: "strong" });
 const json = (data, status = 200, headers = {}) =>
   new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...headers } });
@@ -223,14 +224,14 @@ export default async (req) => {
     else if (same(login, env("WORKER_LOGIN").toLowerCase()) && same(body.pass, env("WORKER_PASS"))) role = "worker";
     if (!role) return json({ error: "pass", message: "Неверный логин или пароль" }, 401);
     if (role === "worker" && !name) return json({ error: "name", message: "Введи своё имя" }, 400);
-    const session = { role, name: role === "owner" ? name || "Владелец" : name, exp: Date.now() + SESSION_DAYS * 86400000 };
+    const session = { role, name: role === "owner" ? name || OWNER_NAME : name, exp: Date.now() + SESSION_DAYS * 86400000 };
     return json({ ok: true, me: { role, name: session.name } }, 200, { "set-cookie": makeCookie(session) });
   }
   if (path === "/logout" && method === "POST") return json({ ok: true }, 200, { "set-cookie": "rs=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0" });
 
   const me = readSession(req);
   if (!me) return json({ error: "auth" }, 401);
-  const isOwner = me.role === "owner", who = me.name;
+  const isOwner = me.role === "owner", who = isOwner && (!me.name || me.name === "Владелец") ? OWNER_NAME : me.name;
 
   try {
     if (path === "/me" && method === "GET") return json({ me: { role: me.role, name: who } });
