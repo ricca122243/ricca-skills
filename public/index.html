@@ -63,7 +63,7 @@ h1{font-family:var(--f-display);font-weight:700;font-size:19px;letter-spacing:-.
 .f.due{border-color:var(--c-followup);color:var(--c-followup)}
 .f.due[aria-pressed="true"]{background:var(--c-followup);color:#fff}
 .list{display:flex;flex-direction:column;gap:10px}
-.row{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px 14px 20px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 14px;box-shadow:var(--shadow);transition:transform .12s,border-color .12s}
+.row{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px 14px 20px;display:grid;grid-template-columns:minmax(0,1fr) fit-content(440px);gap:10px 14px;box-shadow:var(--shadow);transition:transform .12s,border-color .12s}
 .row::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:0 4px 4px 0;background:var(--c-new);opacity:.35}
 .row.s-sent::before{background:var(--c-sent);opacity:1}.row.s-followup::before{background:var(--c-followup);opacity:1}.row.s-interested::before{background:var(--c-interested);opacity:1}.row.s-refused::before{background:var(--c-refused);opacity:1}.row.s-noreply::before{background:var(--c-noreply);opacity:1}.row.s-skip::before{background:var(--c-skip);opacity:1}
 @media (hover:hover){.row:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}}
@@ -75,11 +75,13 @@ h1{font-family:var(--f-display);font-weight:700;font-size:19px;letter-spacing:-.
 .meta .ph{font-family:var(--f-mono);font-size:13px;color:var(--ink)}
 .meta .star{color:var(--warn);font-weight:600}
 .tag{font-size:11px;border:1px solid var(--line);border-radius:4px;padding:1px 6px;margin-left:6px;color:var(--muted)}
-.act{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap;justify-content:flex-end}
+.act{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap;justify-content:flex-end;max-width:min(430px,100%)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 14px;cursor:pointer;text-decoration:none;color:var(--ink);font-weight:500;white-space:nowrap;font-size:14px;transition:transform .08s,box-shadow .12s,background .12s}
 .btn:active{transform:translateY(1px)}
 @media (hover:hover){.btn:hover{background:var(--surface2)}.btn.primary:hover{filter:brightness(1.06);background:var(--accent)}}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 8px 18px -10px var(--accent)}
+.btn.dev{background:var(--c-interested);border-color:var(--c-interested);color:#fff}
+.trace .devdone{color:var(--c-interested);font-weight:600}
 .btn.follow{background:var(--c-followup);border-color:var(--c-followup);color:#fff}
 .btn.danger{color:var(--c-refused)}
 .btn.small{padding:5px 9px;font-size:12.5px}
@@ -157,6 +159,7 @@ td.day{font-weight:600}
       </section>
 
       <div class="banner bad" id="seedWarn" hidden><b>Стартовый список не расшифрован.</b><span class="hint">На Netlify не задан или неверный SEED_KEY. Задай его в Environment variables и нажми Trigger deploy, либо загрузи клиентов файлом в «Настройках».</span></div>
+      <div class="banner good" id="devBanner" hidden><b id="devText"></b><button class="btn small" data-f="interested">Открыть «Интерес»</button></div>
       <div class="banner warn" id="dueBanner" hidden><b id="dueText"></b><button class="btn small" data-f="due">Открыть список</button></div>
       <div class="banner good" id="done" hidden><b id="doneText"></b><span class="hint">Все клиенты получили статус. Загрузи следующий список в «Настройках».</span></div>
 
@@ -217,6 +220,14 @@ td.day{font-weight:600}
           <label for="tplUk">Екінші хабарлама (дожим)</label><textarea id="tplUk"></textarea>
           <label for="hookWk">Зацепка с рейтингом</label><textarea id="hookWk" style="min-height:52px"></textarea>
           <label for="hookNk">Зацепка без рейтинга</label><textarea id="hookNk" style="min-height:52px"></textarea>
+          <h2 style="margin-top:6px">Сообщение от разработчика (только для вас)</h2>
+          <label>Кнопка «Написать как разработчик» появляется у клиентов со статусом «Интерес». Подставляются: <code>{manager}</code> ваше имя, <code>{worker}</code> менеджер, который говорил с клиентом, <code>{name}</code>, <code>{devhook}</code> фраза про рейтинг из 2ГИС.</label>
+          <label for="dvF">Мебель</label><textarea id="dvF"></textarea>
+          <label for="dvM">Массаж</label><textarea id="dvM"></textarea>
+          <label for="dvD">Остальные</label><textarea id="dvD"></textarea>
+          <label for="dvFk">Қазақша: жиһаз</label><textarea id="dvFk"></textarea>
+          <label for="dvMk">Қазақша: массаж</label><textarea id="dvMk"></textarea>
+          <label for="dvDk">Қазақша: қалғандары</label><textarea id="dvDk"></textarea>
           <div class="tools"><button class="btn primary" id="saveCfg">Сохранить</button><span class="hint">Пример для первого клиента в очереди: <button class="btn small" id="preview">показать</button></span></div>
           <p class="hint" id="previewBox" hidden></p>
         </div>
@@ -277,6 +288,19 @@ function hookFor(c){
 function tplFor(c){ const n=(c.niche||'').toLowerCase(), t=langOf(c)==='kz'?settings.templatesKz:settings.templates; if(n.includes('мебел')) return t.furniture; if(n.includes('массаж')) return t.massage; return t.default; }
 const msgFor = c => fill(String(tplFor(c)||'').replaceAll('{hook}',()=>hookFor(c)), c);
 function followFor(c){ const kz=langOf(c)==='kz', t=String((kz?settings.templatesKz:settings.templates).followup||''); return fill(GENERIC.test(c.name) ? t.replace(' для «{name}»','').replace('«{name}» үшін ','') : t, c); }
+function devHookFor(c){
+  const kz=langOf(c)==='kz', hasRev=parseFloat(c.rating)>=4.5 && +c.reviews>=5;
+  if(!hasRev) return kz ? 'Сайт сізге жаңа клиенттер әкеледі, ал біз оны түсінікті әрі әдемі етіп жасаймыз.' : 'Сайт приведёт к вам тех, кто ищет в Google, а мы сделаем его понятным и красивым.';
+  return kz ? `Рейтингіңіз ${c.rating}, ${reviewsText(c)} — бұл күшті, сайтта бұл клиентке сатады.` : `У вас ${c.rating} и ${reviewsText(c)}, это сильный аргумент, на сайте он будет продавать.`;
+}
+function devFor(c){
+  const kz=langOf(c)==='kz', t=(kz?settings.templatesDevKz:settings.templatesDev)||{}, n=(c.niche||'').toLowerCase();
+  let tpl = n.includes('мебел') ? t.furniture : n.includes('массаж') ? t.massage : t.default;
+  tpl = String(tpl||'');
+  const worker = (c.sentBy && c.sentBy!==me.name) ? c.sentBy.split(' ')[0] : '';
+  if (GENERIC.test(c.name)) tpl = tpl.replace(' для «{name}»','').replace('«{name}» үшін ','');
+  return fill(tpl.replaceAll('{devhook}',()=>devHookFor(c)).replaceAll('{worker}',()=>worker), c).replace(/ {2,}/g,' ');
+}
 const scriptText = (sc,c) => fill(langOf(c)==='kz' && sc.kz ? sc.kz : sc.ru, c);
 const waUrl = (c, text) => `https://wa.me/${c.phone}?text=${encodeURIComponent(text)}`;
 const gisUrl = c => c.firmId ? `https://2gis.kz/almaty/firm/${c.firmId}` : `https://2gis.kz/almaty/search/${c.phone}`;
@@ -314,6 +338,9 @@ function drawStats(){
   if(!owner && plan){ const p=Math.min(100,Math.round(100*mineToday/plan)); $('#planText').textContent = mineToday>=plan ? `План на сегодня выполнен: ${mineToday} из ${plan}` : `План на сегодня: ${mineToday} из ${plan}`; $('#planFill').style.width=p+'%'; }
   const due = contacts.filter(x=>isDue(x) && (owner || x.sentBy===me.name || !x.sentBy)).length;
   $('#dueBanner').hidden = !(due && filter!=='due');
+  const waitDev = owner ? contacts.filter(x=>stOf(x)==='interested' && !x.devAt).length : 0;
+  $('#devBanner').hidden = !(waitDev && filter!=='interested');
+  $('#devText').textContent = `Ждут разработчика: ${waitDev} ${plural(waitDev,['клиент','клиента','клиентов'])} с интересом`;
   $('#dueText').textContent = `Пора дожать: ${due} ${plural(due,['клиент','клиента','клиентов'])} без ответа больше ${settings.followupHours} ч`;
   const all = total>0 && c.new===0;
   $('#done').hidden = !(all && owner);
@@ -354,12 +381,15 @@ function drawQueue(){
   $('#list').innerHTML = arr.slice(0,shown).map(x=>{
     const st=stOf(x), done=st!=='new', taken=takenBy(x), due=isDue(x), stale=isStale(x);
     const chips=ST.map(([k,l])=>`<button class="chip s-${k}${st===k?' on':''}" data-st="${k}" data-id="${x.phone}">${l}</button>`).join('');
+    const devTrace = x.devAt ? `<span class="devdone">Разработчик написал ${dmy(x.devAt)} ${hhmm(x.devAt)}</span>` : '';
     const trace = (done && x.by) ? `<span>${LABEL[st]} · ${esc(x.by)} · ${dmy(x.at)} ${hhmm(x.at)}</span>` : taken ? `<span>в работе у ${esc(taken)}</span>` : '';
     const hint = due ? `<span class="hintdue">Без ответа ${Math.floor((serverNow-x.at)/3600000)} ч → напомни</span>` : stale ? `<span class="hintdue">Напоминали, ответа нет → поставь «Не ответил»</span>` : '';
     const main = due ? `<a class="btn follow" data-follow="${x.phone}" href="${esc(waUrl(x, followFor(x)))}" target="_blank" rel="noopener">Напомнить</a>` : `<a class="btn primary" data-open="${x.phone}" href="${esc(waUrl(x, msgFor(x)))}" target="_blank" rel="noopener">Открыть чат</a>`;
     const ig = x.instagram ? `<a class="btn" href="${esc(igUrl(x))}" target="_blank" rel="noopener">Instagram</a>` : '';
     const del = owner ? `<button class="btn danger" data-del="${x.phone}" title="Удалить из списка">✕</button>` : '';
     const lang = `<span class="lang" title="Язык сообщений"><button data-lang="ru" data-id="${x.phone}" aria-pressed="${langOf(x)==='ru'}">RU</button><button data-lang="kz" data-id="${x.phone}" aria-pressed="${langOf(x)==='kz'}">KZ</button></span>`;
+    const dev = (owner && st==='interested') ? `<a class="btn dev" data-dev="${x.phone}" href="${esc(waUrl(x, devFor(x)))}" target="_blank" rel="noopener">${x.devAt?'Ещё раз от разработчика':'Написать как разработчик'}</a>` : '';
+    const mainOrDev = dev || main;
     const scr = (settings.scripts||[]).length ? `<button class="btn" data-scripts="${x.phone}">Ответы</button>` : '';
     const panel = openScripts===x.phone ? `<div class="scripts">${(settings.scripts||[]).map((sc,i)=>`<a class="btn small" href="${esc(waUrl(x, scriptText(sc,x)))}" target="_blank" rel="noopener" data-script="${i}" data-id="${x.phone}">${esc(sc.title)}</a>`).join('')}</div>` : '';
     const extra = [x.rating?`<span class="star">★ ${esc(x.rating)}</span>${x.reviews?' · '+esc(reviewsText(x)):''}`:'', x.hours?esc(x.hours):'', x.category?esc(x.category):''].filter(Boolean).join(' · ');
@@ -367,9 +397,9 @@ function drawQueue(){
       <div><h3>${esc(x.name)}${lang}</h3>
         <p class="meta"><span class="ph">${fmtPhone(x.phone)}</span>${isMobile(x.phone)?'':'<span class="tag">городской</span>'}${x.niche?' · '+esc(x.niche):''}${x.address?' · '+esc(x.address):''}</p>
         ${extra?`<p class="meta">${extra}</p>`:''}</div>
-      <div class="act">${main}<a class="btn" href="${esc(gisUrl(x))}" target="_blank" rel="noopener">2ГИС</a>${ig}<button class="btn" data-copy="${x.phone}" data-kind="${due?'follow':'first'}">Копировать</button>${scr}${del}</div>
+      <div class="act">${mainOrDev}${dev?main.replace('btn primary','btn'):''}<a class="btn" href="${esc(gisUrl(x))}" target="_blank" rel="noopener">2ГИС</a>${ig}<button class="btn" data-copy="${x.phone}" data-kind="${due?'follow':'first'}">Копировать</button>${scr}${del}</div>
       <div class="chips">${chips}</div>${panel}
-      <div class="trace">${trace}${hint}<input data-note="${x.phone}" value="${esc(x.note||'')}" placeholder="Заметка (сохраняется сама)"></div></article>`;
+      <div class="trace">${trace}${devTrace}${hint}<input data-note="${x.phone}" value="${esc(x.note||'')}" placeholder="Заметка (сохраняется сама)"></div></article>`;
   }).join('');
   $('#more').hidden = arr.length<=shown;
 }
@@ -387,14 +417,14 @@ function drawTeam(){
 
 function drawReport(){
   const byDay = {};
-  for(const e of events){ if(e.status==='new') continue; const d=new Date(e.t); d.setHours(0,0,0,0); const k=d.getTime(); (byDay[k] ||= {}); const w=(byDay[k][e.who] ||= {sent:0,followup:0,interested:0,refused:0,noreply:0,skip:0}); if(w[e.status]!==undefined) w[e.status]++; }
+  for(const e of events){ if(e.status==='new') continue; const d=new Date(e.t); d.setHours(0,0,0,0); const k=d.getTime(); (byDay[k] ||= {}); const w=(byDay[k][e.who] ||= {sent:0,followup:0,interested:0,refused:0,noreply:0,skip:0,dev:0}); if(w[e.status]!==undefined) w[e.status]++; }
   const days=Object.keys(byDay).map(Number).sort((a,b)=>b-a).slice(0,14);
   const c=counts(contacts), contacted=contacts.length-c.new-c.skip;
   const todayE=events.filter(e=>e.t>=dayStart());
   $('#rstats').innerHTML=[[todayE.filter(e=>e.status==='sent').length,'написали сегодня'],[todayE.filter(e=>e.status==='interested').length,'интерес сегодня'],[contacted,'написали всего'],[c.interested,'интерес всего'],[(contacted?Math.round(100*c.interested/contacted):0)+'%','конверсия']].map(([v,l])=>`<div class="stat"><b>${esc(v)}</b><span>${l}</span></div>`).join('');
   if(!days.length){ $('#reportTable').innerHTML='<tr><td>Пока нет данных.</td></tr>'; return; }
-  let html='<tr><th>Дата</th><th>Сотрудник</th><th>Написал</th><th>Напомнил</th><th>Интерес</th><th>Отказ</th><th>Не ответил</th></tr>';
-  for(const k of days){ const ws=Object.entries(byDay[k]); ws.forEach(([w,s],i)=>{ html+=`<tr><td class="day">${i?'':dmy(k)}</td><td>${esc(w)}</td><td>${s.sent}</td><td>${s.followup}</td><td>${s.interested}</td><td>${s.refused}</td><td>${s.noreply}</td></tr>`; }); }
+  let html='<tr><th>Дата</th><th>Сотрудник</th><th>Написал</th><th>Напомнил</th><th>Интерес</th><th>Отказ</th><th>Не ответил</th><th>Разработчик</th></tr>';
+  for(const k of days){ const ws=Object.entries(byDay[k]); ws.forEach(([w,s],i)=>{ html+=`<tr><td class="day">${i?'':dmy(k)}</td><td>${esc(w)}</td><td>${s.sent}</td><td>${s.followup}</td><td>${s.interested}</td><td>${s.refused}</td><td>${s.noreply}</td><td>${s.dev||0}</td></tr>`; }); }
   $('#reportTable').innerHTML=html;
 }
 
@@ -404,7 +434,7 @@ async function load(){
     const d = await api('/state');
     me=d.me; contacts=d.contacts; settings=d.settings; presence=d.presence; events=d.events||[]; serverNow=d.now||Date.now(); seedError=d.seedError;
     render();
-    if(me.role==='owner' && !['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)){ const t=settings.templates, h=settings.hooks; $('#tplF').value=t.furniture||''; $('#tplM').value=t.massage||''; $('#tplD').value=t.default||''; $('#tplU').value=t.followup||''; $('#hookW').value=h.withReviews||''; $('#hookN').value=h.withoutReviews||''; const tk=settings.templatesKz||{}, hk=settings.hooksKz||{}; $('#tplFk').value=tk.furniture||''; $('#tplMk').value=tk.massage||''; $('#tplDk').value=tk.default||''; $('#tplUk').value=tk.followup||''; $('#hookWk').value=hk.withReviews||''; $('#hookNk').value=hk.withoutReviews||''; $('#scripts').value=(settings.scripts||[]).map(sc=>`${sc.title}\n${sc.ru}\n${sc.kz||''}`).join('\n\n'); $('#plan').value=settings.dailyPlan||60; $('#followupHours').value=settings.followupHours||48; $('#autoSent').checked=settings.autoSent!==false; }
+    if(me.role==='owner' && !['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)){ const t=settings.templates, h=settings.hooks; $('#tplF').value=t.furniture||''; $('#tplM').value=t.massage||''; $('#tplD').value=t.default||''; $('#tplU').value=t.followup||''; $('#hookW').value=h.withReviews||''; $('#hookN').value=h.withoutReviews||''; const tk=settings.templatesKz||{}, hk=settings.hooksKz||{}; $('#tplFk').value=tk.furniture||''; $('#tplMk').value=tk.massage||''; $('#tplDk').value=tk.default||''; $('#tplUk').value=tk.followup||''; $('#hookWk').value=hk.withReviews||''; $('#hookNk').value=hk.withoutReviews||''; const dv=settings.templatesDev||{}, dk=settings.templatesDevKz||{}; $('#dvF').value=dv.furniture||''; $('#dvM').value=dv.massage||''; $('#dvD').value=dv.default||''; $('#dvFk').value=dk.furniture||''; $('#dvMk').value=dk.massage||''; $('#dvDk').value=dk.default||''; $('#scripts').value=(settings.scripts||[]).map(sc=>`${sc.title}\n${sc.ru}\n${sc.kz||''}`).join('\n\n'); $('#plan').value=settings.dailyPlan||60; $('#followupHours').value=settings.followupHours||48; $('#autoSent').checked=settings.autoSent!==false; }
   }catch(e){ if(e.message!=='auth') toast(e.message||'Нет связи'); }
 }
 async function beat(){ try{ await api('/heartbeat',{visible:!document.hidden}); }catch{} }
@@ -433,6 +463,7 @@ document.addEventListener('click', async e=>{
     if(settings.autoSent!==false && stOf(c)==='new') setTimeout(()=>setStatus(c.phone,'sent',{toggle:false}),300);
     else { c.claimedBy=me.name; c.claimedAt=Date.now(); api('/claim',{phone:c.phone}).catch(()=>{}); }
     return; }
+  if(t.dataset.dev){ const c=contacts.find(x=>x.phone===t.dataset.dev); if(!c) return; copy(devFor(c)); api('/dev',{phone:c.phone}).then(r=>{ Object.assign(c, r.contact||{}); render(); toast(`${c.name}: отмечено, что вы написали`); }).catch(e=>toast(e.message||'Не сохранилось')); return; }
   if(t.dataset.follow){ const c=contacts.find(x=>x.phone===t.dataset.follow); if(!c) return; copy(followFor(c)); setTimeout(()=>setStatus(c.phone,'followup',{toggle:false}),300); return; }
   if(t.dataset.copy){ const c=contacts.find(x=>x.phone===t.dataset.copy); if(c) toast(await copy(t.dataset.kind==='follow'?followFor(c):msgFor(c)) ? 'Текст скопирован' : 'Не удалось скопировать'); return; }
   if(t.dataset.del){ const c=contacts.find(x=>x.phone===t.dataset.del); if(!c) return; if(t.dataset.sure!=='1'){ t.dataset.sure='1'; t.textContent='Точно?'; setTimeout(()=>{t.dataset.sure='';t.textContent='✕';},2500); return; } try{ await api('/remove',{phone:c.phone}); contacts=contacts.filter(x=>x.phone!==c.phone); render(); }catch(e){ toast(e.message); } return; }
@@ -457,7 +488,7 @@ $('#doImport').addEventListener('click',async()=>{
   catch(e){ toast(e.message); } finally{ $('#doImport').disabled=false; }
 });
 $('#saveCfg').addEventListener('click',async()=>{
-  try{ await api('/settings',{templates:{furniture:$('#tplF').value,massage:$('#tplM').value,default:$('#tplD').value,followup:$('#tplU').value},hooks:{withReviews:$('#hookW').value,withoutReviews:$('#hookN').value},templatesKz:{furniture:$('#tplFk').value,massage:$('#tplMk').value,default:$('#tplDk').value,followup:$('#tplUk').value},hooksKz:{withReviews:$('#hookWk').value,withoutReviews:$('#hookNk').value},dailyPlan:$('#plan').value,followupHours:$('#followupHours').value,autoSent:$('#autoSent').checked}); toast('Сохранено'); document.activeElement?.blur(); await load(); }
+  try{ await api('/settings',{templates:{furniture:$('#tplF').value,massage:$('#tplM').value,default:$('#tplD').value,followup:$('#tplU').value},hooks:{withReviews:$('#hookW').value,withoutReviews:$('#hookN').value},templatesKz:{furniture:$('#tplFk').value,massage:$('#tplMk').value,default:$('#tplDk').value,followup:$('#tplUk').value},hooksKz:{withReviews:$('#hookWk').value,withoutReviews:$('#hookNk').value},templatesDev:{furniture:$('#dvF').value,massage:$('#dvM').value,default:$('#dvD').value},templatesDevKz:{furniture:$('#dvFk').value,massage:$('#dvMk').value,default:$('#dvDk').value},dailyPlan:$('#plan').value,followupHours:$('#followupHours').value,autoSent:$('#autoSent').checked}); toast('Сохранено'); document.activeElement?.blur(); await load(); }
   catch(e){ toast(e.message); }
 });
 $('#saveScripts').addEventListener('click',async()=>{

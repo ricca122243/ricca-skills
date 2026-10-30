@@ -32,6 +32,16 @@ export const DEFAULT_SETTINGS = {
     withReviews: "2ГИС-те «{name}» рейтингі {rating}, {reviews}, бірақ сайты жоқ.",
     withoutReviews: "2ГИС-те «{name}» бар, бірақ сайты жоқ.",
   },
+  templatesDev: {
+    furniture: "Здравствуйте! Это {manager}, разработчик Damillion. Наш менеджер {worker} передал мне ваш запрос: вам интересен сайт для «{name}». Посмотрел вашу карточку в 2ГИС. {devhook} Предлагаю так: за сутки соберу черновую версию сайта с вашими фото и каталогом, бесплатно. Посмотрите вживую и решите, нужно ли. Подскажите одно: что важнее показать клиенту — готовые работы или каталог с ценами?",
+    massage: "Здравствуйте! Это {manager}, разработчик Damillion. Наш менеджер {worker} передал мне ваш запрос: вам интересен сайт для «{name}». Посмотрел вашу карточку в 2ГИС. {devhook} Предлагаю так: за сутки соберу черновую версию сайта с вашими услугами, ценами и кнопкой записи, бесплатно. Посмотрите вживую и решите. Подскажите одно: к вам чаще записываются по телефону или в WhatsApp?",
+    default: "Здравствуйте! Это {manager}, разработчик Damillion. Наш менеджер {worker} передал мне ваш запрос: вам интересен сайт для «{name}». Посмотрел вашу карточку в 2ГИС. {devhook} Предлагаю так: за сутки соберу черновую версию сайта, бесплатно. Посмотрите вживую и решите. Подскажите одно: сайт в первую очередь должен приводить заявки или показывать ваши работы?",
+  },
+  templatesDevKz: {
+    furniture: "Сәлеметсіз бе! Бұл {manager}, Damillion әзірлеушісі. Біздің менеджер {worker} сізбен сөйлескен, сізге «{name}» үшін сайт қызық екен. 2ГИС-тегі карточкаңызды қарадым. {devhook} Ұсынысым: бір тәулікте сіздің фотоларыңыз бен каталогыңызбен сайттың алғашқы нұсқасын тегін жасап беремін. Көріп, содан кейін шешесіз. Бір сұрақ: клиентке не маңыздырақ — дайын жұмыстар ма, әлде бағасы бар каталог па?",
+    massage: "Сәлеметсіз бе! Бұл {manager}, Damillion әзірлеушісі. Біздің менеджер {worker} сізбен сөйлескен, сізге «{name}» үшін сайт қызық екен. 2ГИС-тегі карточкаңызды қарадым. {devhook} Ұсынысым: бір тәулікте қызметтеріңіз, бағаларыңыз және жазылу батырмасы бар сайттың алғашқы нұсқасын тегін жасап беремін. Көріп, содан кейін шешесіз. Бір сұрақ: сізге көбіне телефон арқылы жазыла ма, әлде WhatsApp арқылы ма?",
+    default: "Сәлеметсіз бе! Бұл {manager}, Damillion әзірлеушісі. Біздің менеджер {worker} сізбен сөйлескен, сізге «{name}» үшін сайт қызық екен. 2ГИС-тегі карточкаңызды қарадым. {devhook} Ұсынысым: бір тәулікте сайттың алғашқы нұсқасын тегін жасап беремін. Көріп, содан кейін шешесіз. Бір сұрақ: сайт ең алдымен өтінім әкелуі керек пе, әлде жұмыстарыңызды көрсетуі керек пе?",
+  },
   scripts: [
     { title: "Дорого", ru: "Понимаю. Для старта хватает одностраничного сайта: каталог, фото работ и кнопка WhatsApp, это дешевле, чем кажется. Скажите, сколько у вас позиций, и я назову точную цену сегодня.", kz: "Түсінемін. Бастау үшін бір беттік сайт жеткілікті: каталог, жұмыс фотолары және WhatsApp батырмасы, бұл ойлағаннан арзан. Қанша позицияңыз бар екенін айтыңыз, бүгін нақты бағасын айтамын." },
     { title: "Есть Instagram", ru: "Instagram листают, а сайт находят: человек ищет в Google «кухня на заказ Алматы» и попадает к вам. Плюс ссылка на сайт с ценами в шапке Instagram, и вам перестанут писать «сколько стоит» по 50 раз в день.", kz: "Instagram-ды парақтайды, ал сайтты іздеп табады: адам Google-ден «Алматы жиһаз на заказ» деп іздеп, сізге келеді. Оған қоса Instagram шапкасына бағасы бар сайт сілтемесін қоясыз, күніне 50 рет «бағасы қанша» деп жазуды қояды." },
@@ -117,7 +127,7 @@ function normalize(data) {
   data.contacts ||= {};
   data.events ||= [];
   const d = DEFAULT_SETTINGS, st = data.settings || {};
-  data.settings = { ...d, ...st, templates: { ...d.templates, ...(st.templates || {}) }, hooks: { ...d.hooks, ...(st.hooks || {}) }, templatesKz: { ...d.templatesKz, ...(st.templatesKz || {}) }, hooksKz: { ...d.hooksKz, ...(st.hooksKz || {}) }, scripts: Array.isArray(st.scripts) && st.scripts.length ? st.scripts : d.scripts };
+  data.settings = { ...d, ...st, templates: { ...d.templates, ...(st.templates || {}) }, hooks: { ...d.hooks, ...(st.hooks || {}) }, templatesKz: { ...d.templatesKz, ...(st.templatesKz || {}) }, hooksKz: { ...d.hooksKz, ...(st.hooksKz || {}) }, templatesDev: { ...d.templatesDev, ...(st.templatesDev || {}) }, templatesDevKz: { ...d.templatesDevKz, ...(st.templatesDevKz || {}) }, scripts: Array.isArray(st.scripts) && st.scripts.length ? st.scripts : d.scripts };
   return data;
 }
 async function readState() {
@@ -284,6 +294,18 @@ export default async (req) => {
 
     if (!isOwner) return json({ error: "forbidden" }, 403);
 
+    if (path === "/dev" && method === "POST") {
+      const phone = normPhone(body.phone);
+      const state = await mutate((s) => {
+        const c = s.contacts[phone];
+        if (!c) return false;
+        c.devAt = Date.now(); c.devBy = who;
+        s.events.push({ t: c.devAt, who, phone, status: "dev" });
+        return s;
+      });
+      return json({ ok: true, contact: state.contacts[phone] });
+    }
+
     if (path === "/import" && method === "POST") {
       const rows = parseCsv(body.csv);
       let added = 0;
@@ -313,6 +335,8 @@ export default async (req) => {
           hooks: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.hooks).map((k) => [k, pick(h[k], cur.hooks[k])])),
           templatesKz: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.templatesKz).map((k) => [k, pick((body.templatesKz || {})[k], cur.templatesKz[k])])),
           hooksKz: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.hooksKz).map((k) => [k, pick((body.hooksKz || {})[k], cur.hooksKz[k])])),
+          templatesDev: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.templatesDev).map((k) => [k, pick((body.templatesDev || {})[k], cur.templatesDev[k])])),
+          templatesDevKz: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.templatesDevKz).map((k) => [k, pick((body.templatesDevKz || {})[k], cur.templatesDevKz[k])])),
           scripts: Array.isArray(body.scripts) ? body.scripts.filter((x) => x && x.title).slice(0, 20).map((x) => ({ title: String(x.title).slice(0, 60), ru: String(x.ru || "").slice(0, 1000), kz: String(x.kz || "").slice(0, 1000) })) : cur.scripts,
         };
         return s;
@@ -322,9 +346,9 @@ export default async (req) => {
 
     if (path === "/export" && method === "GET") {
       const { data } = await readState();
-      const lines = ["Название;Телефон;Ниша;Адрес;Язык;Рейтинг;Отзывы;Instagram;Часы;Статус;Кто отметил;Когда (Алматы);Кто написал первым;Когда написал;Напомнил;Заметка"];
+      const lines = ["Название;Телефон;Ниша;Адрес;Язык;Рейтинг;Отзывы;Instagram;Часы;Статус;Кто отметил;Когда (Алматы);Кто написал первым;Когда написал;Напомнил;Разработчик написал;Заметка"];
       for (const c of sorted(data)) {
-        lines.push([c.name, "+" + c.phone, c.niche, c.address, c.lang === "kz" ? "KZ" : "RU", c.rating, c.reviews || "", c.instagram, c.hours, LABEL[c.status || "new"], c.by || "", c.status !== "new" ? fmtAlmaty(c.at) : "", c.sentBy || "", fmtAlmaty(c.sentAt), fmtAlmaty(c.followAt), c.note || ""].map(csvCell).join(";"));
+        lines.push([c.name, "+" + c.phone, c.niche, c.address, c.lang === "kz" ? "KZ" : "RU", c.rating, c.reviews || "", c.instagram, c.hours, LABEL[c.status || "new"], c.by || "", c.status !== "new" ? fmtAlmaty(c.at) : "", c.sentBy || "", fmtAlmaty(c.sentAt), fmtAlmaty(c.followAt), c.devAt ? fmtAlmaty(c.devAt) + " (" + (c.devBy || "") + ")" : "", c.note || ""].map(csvCell).join(";"));
       }
       return new Response("﻿" + lines.join("\r\n"), { headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": 'attachment; filename="rassylka-damillion.csv"', "cache-control": "no-store" } });
     }
