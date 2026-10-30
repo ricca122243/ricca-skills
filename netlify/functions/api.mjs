@@ -296,6 +296,7 @@ export default async (req) => {
 
     if (path === "/dev" && method === "POST") {
       const phone = normPhone(body.phone);
+      if (!phone) return json({ error: "phone" }, 400);
       const state = await mutate((s) => {
         const c = s.contacts[phone];
         if (!c) return false;
@@ -303,6 +304,7 @@ export default async (req) => {
         s.events.push({ t: c.devAt, who, phone, status: "dev" });
         return s;
       });
+      if (!state.contacts[phone]) return json({ error: "not found" }, 404);
       return json({ ok: true, contact: state.contacts[phone] });
     }
 

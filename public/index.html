@@ -298,6 +298,7 @@ function devFor(c){
   let tpl = n.includes('мебел') ? t.furniture : n.includes('массаж') ? t.massage : t.default;
   tpl = String(tpl||'');
   const worker = (c.sentBy && c.sentBy!==me.name) ? c.sentBy.split(' ')[0] : '';
+  if(!me.name || /^владелец$/i.test(me.name.trim())) tpl = tpl.replace('{manager}, ','');
   if (GENERIC.test(c.name)) tpl = tpl.replace(' для «{name}»','').replace('«{name}» үшін ','');
   return fill(tpl.replaceAll('{devhook}',()=>devHookFor(c)).replaceAll('{worker}',()=>worker), c).replace(/ {2,}/g,' ');
 }
