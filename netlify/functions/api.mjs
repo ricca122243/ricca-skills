@@ -211,7 +211,7 @@ function parseCsv(text) {
     let p = line.split(/[;\t]/);
     if (p.length < 2) p = line.split(",");
     p = p.map((x) => x.trim().replace(/^"|"$/g, ""));
-    if (/^(название|name|компания)/i.test(p[0])) continue;
+    if (/^\uFEFF?(название|name|компания)$/i.test(p[0])) continue;
     const phone = normPhone(p[1]);
     if (!phone || !p[0]) continue;
     rows.push({ name: p[0], phone, niche: p[2] || "", address: p[3] || "", instagram: p[4] || "" });
