@@ -42,6 +42,26 @@ export const DEFAULT_SETTINGS = {
     massage: "Сәлеметсіз бе! Бұл {manager}, Damillion әзірлеушісі. Біздің менеджер {worker} сізбен сөйлескен, сізге «{name}» үшін сайт қызық екен. 2ГИС-тегі карточкаңызды қарадым. {devhook} Ұсынысым: бір тәулікте қызметтеріңіз, бағаларыңыз және жазылу батырмасы бар сайттың алғашқы нұсқасын тегін жасап беремін. Көріп, содан кейін шешесіз. Бір сұрақ: сізге көбіне телефон арқылы жазыла ма, әлде WhatsApp арқылы ма?",
     default: "Сәлеметсіз бе! Бұл {manager}, Damillion әзірлеушісі. Біздің менеджер {worker} сізбен сөйлескен, сізге «{name}» үшін сайт қызық екен. 2ГИС-тегі карточкаңызды қарадым. {devhook} Ұсынысым: бір тәулікте сайттың алғашқы нұсқасын тегін жасап беремін. Көріп, содан кейін шешесіз. Бір сұрақ: сайт ең алдымен өтінім әкелуі керек пе, әлде жұмыстарыңызды көрсетуі керек пе?",
   },
+  packages: [
+    { name: "Базовый", price: 45000, act: 60000 },
+    { name: "Для бизнеса", price: 100000, act: 125000 },
+    { name: "Премиум", price: 225000, act: 250000 },
+    { name: "Ультра", price: 450000, act: 450000 },
+  ],
+  templatesDeal: {
+    brief: "Отлично, начинаю. Чтобы черновик был про вас, а не шаблон, пришлите сюда:\n— 5–10 фото (работы, интерьер, команда)\n— услуги или товары с ценами\n— логотип, если есть\nМожно прямо с телефона. Тексты и дизайн беру на себя.",
+    draft: "Готово, вот черновик сайта для «{name}»: {link}\nОткройте с телефона, так его увидят ваши клиенты. Что поменять, пишите сюда, поправлю.",
+    nudge: "Здравствуйте! Успели посмотреть черновик? {link}\nЕсли что-то не нравится, скажите, переделаю.",
+    offer: "По цене: «{pkg}», {price} ₸. На каждый сайт даём гарантию. Как будете готовы, скину реквизиты, и доводим сайт до запуска.",
+    done: "Сайт «{name}» запущен: {link}\nСсылку можно поставить в Instagram, 2ГИС и WhatsApp. Если что-то перестанет работать, пишите сюда, гарантия на нас. И будем благодарны за пару слов отзыва, это нам очень поможет.",
+  },
+  templatesDealKz: {
+    brief: "Керемет, бастаймын. Алғашқы нұсқа шаблон емес, сіз туралы болуы үшін осында жіберіңізші:\n— 5–10 фото (жұмыстар, интерьер, команда)\n— қызметтер немесе тауарлар, бағасымен\n— логотип, болса\nТелефоннан түсірілген фото да болады. Мәтін мен дизайнды өзім жасаймын.",
+    draft: "Дайын, «{name}» сайтының алғашқы нұсқасы: {link}\nТелефоннан ашып көріңіз, клиенттеріңіз дәл солай көреді. Не өзгерту керек болса, осында жазыңыз, түзетемін.",
+    nudge: "Сәлеметсіз бе! Алғашқы нұсқаны көріп үлгердіңіз бе? {link}\nБірдеңе ұнамаса, айтыңыз, өзгертемін.",
+    offer: "Бағасы: «{pkg}», {price} ₸. Әр сайтқа кепілдік береміз. Дайын болғанда реквизиттерді жіберемін, сайтты іске қосуға дейін жеткіземіз.",
+    done: "«{name}» сайты іске қосылды: {link}\nСілтемені Instagram, 2ГИС және WhatsApp-қа қоюға болады. Бірдеңе істемей қалса, осында жазыңыз, кепілдік бізде. Қысқа пікір қалдырсаңыз, бізге көп көмектеседі.",
+  },
   scripts: [
     { title: "Дорого", ru: "Понимаю. Для старта хватает одностраничного сайта: каталог, фото работ и кнопка WhatsApp, это дешевле, чем кажется. Скажите, сколько у вас позиций, и я назову точную цену сегодня.", kz: "Түсінемін. Бастау үшін бір беттік сайт жеткілікті: каталог, жұмыс фотолары және WhatsApp батырмасы, бұл ойлағаннан арзан. Қанша позицияңыз бар екенін айтыңыз, бүгін нақты бағасын айтамын." },
     { title: "Есть Instagram", ru: "Instagram листают, а сайт находят: человек ищет в Google «кухня на заказ Алматы» и попадает к вам. Плюс ссылка на сайт с ценами в шапке Instagram, и вам перестанут писать «сколько стоит» по 50 раз в день.", kz: "Instagram-ды парақтайды, ал сайтты іздеп табады: адам Google-ден «Алматы жиһаз на заказ» деп іздеп, сізге келеді. Оған қоса Instagram шапкасына бағасы бар сайт сілтемесін қоясыз, күніне 50 рет «бағасы қанша» деп жазуды қояды." },
@@ -52,6 +72,13 @@ export const DEFAULT_SETTINGS = {
   ],
 };
 const LANGS = ["ru", "kz"];
+export const DEAL_STAGES = ["talk", "brief", "draft", "paid", "done", "lost"];
+const DEAL_LABEL = { talk: "На связи", brief: "Материалы получены", draft: "Черновик отправлен", paid: "Оплата получена", done: "Сайт сдан", lost: "Не купил" };
+const money = (v) => Math.max(0, Math.min(1e9, Math.round(Number(String(v ?? "").replace(/[^\d.]/g, "")) || 0)));
+function cleanPackages(arr) {
+  return (Array.isArray(arr) ? arr : []).filter((x) => x && String(x.name || "").trim()).slice(0, 12)
+    .map((x) => { const price = money(x.price); return { name: String(x.name).trim().slice(0, 40), price, act: money(x.act) || price }; });
+}
 
 const env = (k) => (globalThis.Netlify?.env?.get?.(k) ?? process.env[k] ?? "").trim();
 const OWNER_NAME = "Азамат";
@@ -128,7 +155,7 @@ function normalize(data) {
   data.contacts ||= {};
   data.events ||= [];
   const d = DEFAULT_SETTINGS, st = data.settings || {};
-  data.settings = { ...d, ...st, templates: { ...d.templates, ...(st.templates || {}) }, hooks: { ...d.hooks, ...(st.hooks || {}) }, templatesKz: { ...d.templatesKz, ...(st.templatesKz || {}) }, hooksKz: { ...d.hooksKz, ...(st.hooksKz || {}) }, templatesDev: { ...d.templatesDev, ...(st.templatesDev || {}) }, templatesDevKz: { ...d.templatesDevKz, ...(st.templatesDevKz || {}) }, scripts: Array.isArray(st.scripts) && st.scripts.length ? st.scripts : d.scripts };
+  data.settings = { ...d, ...st, templates: { ...d.templates, ...(st.templates || {}) }, hooks: { ...d.hooks, ...(st.hooks || {}) }, templatesKz: { ...d.templatesKz, ...(st.templatesKz || {}) }, hooksKz: { ...d.hooksKz, ...(st.hooksKz || {}) }, templatesDev: { ...d.templatesDev, ...(st.templatesDev || {}) }, templatesDevKz: { ...d.templatesDevKz, ...(st.templatesDevKz || {}) }, templatesDeal: { ...d.templatesDeal, ...(st.templatesDeal || {}) }, templatesDealKz: { ...d.templatesDealKz, ...(st.templatesDealKz || {}) }, packages: Array.isArray(st.packages) && st.packages.length ? st.packages : d.packages, scripts: Array.isArray(st.scripts) && st.scripts.length ? st.scripts : d.scripts };
   return data;
 }
 async function readState() {
@@ -249,7 +276,8 @@ export default async (req) => {
           return changed ? s : false;
         });
       }
-      return json({ me: { role: me.role, name: who }, contacts: sorted(data), settings: data.settings, presence, events: isOwner ? data.events : [], seedError: isOwner ? data.seedError || null : null, now: Date.now() });
+      const list = isOwner ? sorted(data) : sorted(data).map((c) => (c.deal ? { ...c, deal: { stage: c.deal.stage } } : c));
+      return json({ me: { role: me.role, name: who }, contacts: list, settings: data.settings, presence, events: isOwner ? data.events : [], seedError: isOwner ? data.seedError || null : null, now: Date.now() });
     }
 
     if (path === "/heartbeat" && method === "POST") {
@@ -302,7 +330,35 @@ export default async (req) => {
         const c = s.contacts[phone];
         if (!c) return false;
         c.devAt = Date.now(); c.devBy = who;
+        if (!c.deal) c.deal = { stage: "talk", at: { talk: c.devAt }, pkg: "", act: false, price: 0, paid: 0, link: "" };
         s.events.push({ t: c.devAt, who, phone, status: "dev" });
+        return s;
+      });
+      if (!state.contacts[phone]) return json({ error: "not found" }, 404);
+      return json({ ok: true, contact: state.contacts[phone] });
+    }
+
+    if (path === "/deal" && method === "POST") {
+      const phone = normPhone(body.phone);
+      if (!phone) return json({ error: "phone" }, 400);
+      if (body.stage !== undefined && !DEAL_STAGES.includes(body.stage)) return json({ error: "stage" }, 400);
+      const state = await mutate((s) => {
+        const c = s.contacts[phone];
+        if (!c) return false;
+        const now = Date.now();
+        const d = (c.deal ||= { stage: "talk", at: { talk: c.devAt || now }, pkg: "", act: false, price: 0, paid: 0, link: "" });
+        d.at ||= {};
+        if (body.stage !== undefined && body.stage !== d.stage) {
+          if (d.stage !== "lost") d.prev = d.stage;
+          d.stage = body.stage; d.at[body.stage] = now;
+          s.events.push({ t: now, who, phone, status: "deal_" + body.stage });
+        }
+        if (body.pkg !== undefined) d.pkg = String(body.pkg || "").slice(0, 40);
+        if (body.act !== undefined) d.act = !!body.act;
+        if (body.price !== undefined) d.price = money(body.price);
+        if (body.paid !== undefined) d.paid = money(body.paid);
+        if (body.link !== undefined) { const l = String(body.link || "").trim().slice(0, 300); d.link = !l || /^https?:\/\//i.test(l) ? l : "https://" + l; }
+        d.by = who; d.upd = now;
         return s;
       });
       if (!state.contacts[phone]) return json({ error: "not found" }, 404);
@@ -340,6 +396,9 @@ export default async (req) => {
           hooksKz: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.hooksKz).map((k) => [k, pick((body.hooksKz || {})[k], cur.hooksKz[k])])),
           templatesDev: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.templatesDev).map((k) => [k, pick((body.templatesDev || {})[k], cur.templatesDev[k])])),
           templatesDevKz: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.templatesDevKz).map((k) => [k, pick((body.templatesDevKz || {})[k], cur.templatesDevKz[k])])),
+          templatesDeal: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.templatesDeal).map((k) => [k, pick((body.templatesDeal || {})[k], cur.templatesDeal[k])])),
+          templatesDealKz: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.templatesDealKz).map((k) => [k, pick((body.templatesDealKz || {})[k], cur.templatesDealKz[k])])),
+          packages: Array.isArray(body.packages) && cleanPackages(body.packages).length ? cleanPackages(body.packages) : cur.packages,
           scripts: Array.isArray(body.scripts) ? body.scripts.filter((x) => x && x.title).slice(0, 20).map((x) => ({ title: String(x.title).slice(0, 60), ru: String(x.ru || "").slice(0, 1000), kz: String(x.kz || "").slice(0, 1000) })) : cur.scripts,
         };
         return s;
@@ -349,9 +408,9 @@ export default async (req) => {
 
     if (path === "/export" && method === "GET") {
       const { data } = await readState();
-      const lines = ["Название;Телефон;Ниша;Адрес;Язык;Рейтинг;Отзывы;Instagram;Часы;Статус;Кто отметил;Когда (Алматы);Кто написал первым;Когда написал;Напомнил;Разработчик написал;Заметка"];
+      const lines = ["Название;Телефон;Ниша;Адрес;Язык;Рейтинг;Отзывы;Instagram;Часы;Статус;Кто отметил;Когда (Алматы);Кто написал первым;Когда написал;Напомнил;Разработчик написал;Этап разработки;Пакет;Цена;Оплачено;Осталось;Ссылка на сайт;Заметка"];
       for (const c of sorted(data)) {
-        lines.push([c.name, "+" + c.phone, c.niche, c.address, c.lang === "kz" ? "KZ" : "RU", c.rating, c.reviews || "", c.instagram, c.hours, LABEL[c.status || "new"], c.by || "", c.status !== "new" ? fmtAlmaty(c.at) : "", c.sentBy || "", fmtAlmaty(c.sentAt), fmtAlmaty(c.followAt), c.devAt ? fmtAlmaty(c.devAt) + " (" + (c.devBy || "") + ")" : "", c.note || ""].map(csvCell).join(";"));
+        lines.push([c.name, "+" + c.phone, c.niche, c.address, c.lang === "kz" ? "KZ" : "RU", c.rating, c.reviews || "", c.instagram, c.hours, LABEL[c.status || "new"], c.by || "", c.status !== "new" ? fmtAlmaty(c.at) : "", c.sentBy || "", fmtAlmaty(c.sentAt), fmtAlmaty(c.followAt), c.devAt ? fmtAlmaty(c.devAt) + " (" + (c.devBy || "") + ")" : "", c.deal ? DEAL_LABEL[c.deal.stage] || "" : "", c.deal?.pkg ? c.deal.pkg + (c.deal.act ? " + активация" : "") : "", c.deal?.price || "", c.deal?.paid || "", c.deal && c.deal.stage !== "lost" && c.deal.price ? Math.max(0, c.deal.price - (c.deal.paid || 0)) : "", c.deal?.link || "", c.note || ""].map(csvCell).join(";"));
       }
       return new Response("﻿" + lines.join("\r\n"), { headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": 'attachment; filename="rassylka-damillion.csv"', "cache-control": "no-store" } });
     }

@@ -124,6 +124,26 @@ td.day{font-weight:600}
 .err{color:var(--c-refused);font-size:13px;min-height:1em}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;font-size:14px;z-index:20;max-width:92vw;display:flex;gap:12px;align-items:center}
 .toast button{background:none;border:0;color:var(--accent);font-weight:600;cursor:pointer;padding:0}
+.row.d-wait::before{background:var(--c-new);opacity:1}.row.d-talk::before{background:var(--c-interested);opacity:1}.row.d-brief::before{background:var(--c-sent);opacity:1}.row.d-draft::before{background:var(--c-followup);opacity:1}.row.d-paid::before{background:var(--warn);opacity:1}.row.d-done::before{background:var(--online);opacity:1}.row.d-lost::before{background:var(--c-refused);opacity:1}
+.row.d-lost,.row.d-done{opacity:.85}
+.steps{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.step{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;font-size:11.5px;text-align:left;cursor:pointer;color:var(--muted);line-height:1.3;min-width:0}
+.step b{display:block;font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step span{font-variant-numeric:tabular-nums}
+.step.past{background:color-mix(in srgb,var(--accent) 9%,var(--surface));border-color:color-mix(in srgb,var(--accent) 35%,var(--line));color:var(--ink)}
+.step.cur{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 6px 14px -8px var(--accent)}
+.dfields{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr) minmax(0,.9fr) minmax(0,1.6fr);gap:8px}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld>span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.fld input,.fld select{width:100%;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px;min-width:0}
+.fld input:focus,.fld select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.fld .cb{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer}
+.fld .cb input{width:auto;padding:0;margin:0;accent-color:var(--accent)}
+#dstats{grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}
+#dstats .stat b{white-space:nowrap;font-size:22px}
+.money{font-variant-numeric:tabular-nums;color:var(--ink)}
+.debt{color:var(--c-refused)}
+@media (max-width:560px){.dfields{grid-template-columns:1fr 1fr}.dfields .wide,.dfields .fld:first-child{grid-column:1/-1}.steps{grid-template-columns:repeat(3,minmax(0,1fr))}}
 [hidden]{display:none!important}
 @media (max-width:560px){.row{grid-template-columns:1fr}.act{justify-content:stretch}.act .btn{flex:1 1 auto}.btn{padding:10px 12px}}
 </style>
@@ -159,12 +179,13 @@ td.day{font-weight:600}
       </section>
 
       <div class="banner bad" id="seedWarn" hidden><b>Стартовый список не расшифрован.</b><span class="hint">На Netlify не задан или неверный SEED_KEY. Задай его в Environment variables и нажми Trigger deploy, либо загрузи клиентов файлом в «Настройках».</span></div>
-      <div class="banner good" id="devBanner" hidden><b id="devText"></b><button class="btn small" data-f="interested">Открыть «Интерес»</button></div>
+      <div class="banner good" id="devBanner" hidden><b id="devText"></b><button class="btn small" data-goto="deals">Открыть «Разработку»</button></div>
       <div class="banner warn" id="dueBanner" hidden><b id="dueText"></b><button class="btn small" data-f="due">Открыть список</button></div>
       <div class="banner good" id="done" hidden><b id="doneText"></b><span class="hint">Все клиенты получили статус. Загрузи следующий список в «Настройках».</span></div>
 
       <nav class="tabs" role="tablist">
         <button class="tab" role="tab" aria-selected="true" data-tab="queue">Очередь</button>
+        <button class="tab owner" role="tab" aria-selected="false" data-tab="deals" hidden>Разработка</button>
         <button class="tab owner" role="tab" aria-selected="false" data-tab="team" hidden>Команда</button>
         <button class="tab owner" role="tab" aria-selected="false" data-tab="report" hidden>Отчёт</button>
         <button class="tab owner" role="tab" aria-selected="false" data-tab="set" hidden>Настройки</button>
@@ -180,6 +201,13 @@ td.day{font-weight:600}
         <div class="list" id="list"></div>
         <button class="btn more" id="more" hidden>Показать ещё</button>
       </main>
+
+      <section id="p-deals" class="sect" hidden>
+        <section class="panel" aria-label="Деньги и этапы"><div class="stats" id="dstats"></div>
+          <p class="hint" style="margin-top:12px">Клиент с «Интересом» попадает сюда сам. Жми кнопку этапа: WhatsApp откроется с готовым текстом, этап сдвинется сам. Этап можно поставить и вручную, кликом по шагу. Пакеты и тексты в «Настройках».</p></section>
+        <div class="filters" id="dfilters"></div>
+        <div class="list" id="dlist"></div>
+      </section>
 
       <section id="p-team" class="panel sect" hidden>
         <h2>Работа сотрудников</h2>
@@ -230,6 +258,23 @@ td.day{font-weight:600}
           <label for="dvDk">Қазақша: қалғандары</label><textarea id="dvDk"></textarea>
           <div class="tools"><button class="btn primary" id="saveCfg">Сохранить</button><span class="hint">Пример для первого клиента в очереди: <button class="btn small" id="preview">показать</button></span></div>
           <p class="hint" id="previewBox" hidden></p>
+        </div>
+        <div class="panel form">
+          <h2>Разработка: пакеты и сообщения</h2>
+          <p class="hint">Пакеты: по строке на пакет, <code>Название; цена; цена с активацией</code>. В сообщениях подставляются <code>{name}</code> название фирмы, <code>{link}</code> ссылка из карточки, <code>{pkg}</code> пакет, <code>{price}</code> цена.</p>
+          <label for="pkgs">Пакеты и цены</label><textarea id="pkgs" style="min-height:110px"></textarea>
+          <label for="dlB">Попросить фото и цены (этап «На связи»)</label><textarea id="dlB"></textarea>
+          <label for="dlD">Отправить черновик (нужна ссылка)</label><textarea id="dlD"></textarea>
+          <label for="dlN">Напомнить про черновик</label><textarea id="dlN" style="min-height:60px"></textarea>
+          <label for="dlO">Отправить цену (нужен пакет или цена)</label><textarea id="dlO" style="min-height:60px"></textarea>
+          <label for="dlF">Сдать сайт (нужна ссылка)</label><textarea id="dlF"></textarea>
+          <h2 style="margin-top:6px">Қазақша</h2>
+          <label for="dlBk">Фото мен бағаларды сұрау</label><textarea id="dlBk"></textarea>
+          <label for="dlDk">Алғашқы нұсқаны жіберу</label><textarea id="dlDk"></textarea>
+          <label for="dlNk">Еске салу</label><textarea id="dlNk" style="min-height:60px"></textarea>
+          <label for="dlOk">Бағасын жіберу</label><textarea id="dlOk" style="min-height:60px"></textarea>
+          <label for="dlFk">Сайтты тапсыру</label><textarea id="dlFk"></textarea>
+          <div class="tools"><button class="btn primary" id="saveDeal">Сохранить</button></div>
         </div>
         <div class="panel form">
           <h2>Ответы на возражения</h2>
@@ -302,6 +347,25 @@ function devFor(c){
   if (GENERIC.test(c.name)) tpl = tpl.replace(' для «{name}»','').replace('«{name}» үшін ','');
   return fill(tpl.replaceAll('{devhook}',()=>devHookFor(c)).replaceAll('{worker}',()=>worker), c).replace(/ {2,}/g,' ');
 }
+/* ---------- разработка: этапы ---------- */
+const DS = [['talk','На связи'],['brief','Материалы'],['draft','Черновик'],['paid','Оплата'],['done','Сдан']];
+const DLABEL = {wait:'Ждёт разработчика', talk:'На связи', brief:'Материалы получены', draft:'Черновик отправлен', paid:'Оплата получена', done:'Сайт сдан', lost:'Не купил'};
+const DSHORT = {wait:'Ждут', talk:'На связи', brief:'Материалы', draft:'Черновик', paid:'Оплата', done:'Сдан', lost:'Не купил'};
+const DORDER = ['wait','talk','brief','draft','paid','done','lost'];
+let dfilter = 'active';
+const emptyDeal = (stage, at) => ({stage, at: at||{}, pkg:'', act:false, price:0, paid:0, link:''});
+function dealOf(c){ if(c.deal) return c.deal; if(c.devAt) return emptyDeal('talk',{talk:c.devAt}); if(stOf(c)==='interested') return emptyDeal('wait'); return null; }
+const rub = n => Math.round(+n||0).toLocaleString('ru-RU');
+const pkgOf = name => (settings.packages||[]).find(p=>p.name===name);
+const pkgText = d => d.pkg ? d.pkg + (d.act ? ' + активация' : '') : '';
+const owes = d => d && d.stage!=='lost' && +d.price>0 ? Math.max(0, +d.price - (+d.paid||0)) : 0;
+function dealMsg(c, kind){
+  const d=dealOf(c)||emptyDeal('talk'), kz=langOf(c)==='kz', t=(kz?settings.templatesDealKz:settings.templatesDeal)||{};
+  let tpl=String(t[kind]||'');
+  if(GENERIC.test(c.name)) tpl=tpl.replace(/«\{name\}» сайтының/g,'сайттың').replace(/«\{name\}» сайты/g,'Сайт').replace(/ для «\{name\}»/g,'').replace(/ «\{name\}»/g,'');
+  return fill(tpl.replaceAll('{link}',()=>d.link||'').replaceAll('{pkg}',()=>pkgText(d)).replaceAll('{price}',()=>rub(d.price)), c).replace(/[ \t]{2,}/g,' ').trim();
+}
+const editing = sel => { const a=document.activeElement; return !!(a && a.matches('input,select,textarea') && a.closest(sel)); };
 const scriptText = (sc,c) => fill(langOf(c)==='kz' && sc.kz ? sc.kz : sc.ru, c);
 const waUrl = (c, text) => `https://wa.me/${c.phone}?text=${encodeURIComponent(text)}`;
 const gisUrl = c => c.firmId ? `https://2gis.kz/almaty/firm/${c.firmId}` : `https://2gis.kz/almaty/search/${c.phone}`;
@@ -322,7 +386,7 @@ async function api(path, body){
 
 function counts(arr){ const o={new:0,sent:0,followup:0,noreply:0,interested:0,refused:0,skip:0}; arr.forEach(c=>o[stOf(c) in o ? stOf(c) : 'new']++); return o; }
 let rq=0; function render(){ cancelAnimationFrame(rq); rq=requestAnimationFrame(draw); }
-function draw(){ drawStats(); drawOnline(); drawQueue(); if(!$('#p-team').hidden) drawTeam(); if(!$('#p-report').hidden) drawReport(); }
+function draw(){ drawStats(); drawOnline(); drawQueue(); if(!$('#p-deals').hidden) drawDeals(); if(!$('#p-team').hidden) drawTeam(); if(!$('#p-report').hidden) drawReport(); }
 
 function drawStats(){
   const c=counts(contacts), total=contacts.length, done=total-c.new, ds=dayStart(), owner=me.role==='owner';
@@ -340,7 +404,7 @@ function drawStats(){
   const due = contacts.filter(x=>isDue(x) && (owner || x.sentBy===me.name || !x.sentBy)).length;
   $('#dueBanner').hidden = !(due && filter!=='due');
   const waitDev = owner ? contacts.filter(x=>stOf(x)==='interested' && !x.devAt).length : 0;
-  $('#devBanner').hidden = !(waitDev && filter!=='interested');
+  $('#devBanner').hidden = !(waitDev && $('#p-deals').hidden);
   $('#devText').textContent = `Ждут разработчика: ${waitDev} ${plural(waitDev,['клиент','клиента','клиентов'])} с интересом`;
   $('#dueText').textContent = `Пора дожать: ${due} ${plural(due,['клиент','клиента','клиентов'])} без ответа больше ${settings.followupHours} ч`;
   const all = total>0 && c.new===0;
@@ -362,6 +426,7 @@ function drawOnline(){
 }
 
 function drawQueue(){
+  if(editing('#list')) return;
   const c=counts(contacts), owner=me.role==='owner';
   const niches=[...new Set(contacts.map(x=>x.niche).filter(Boolean))].sort();
   const sel=$('#niche'), cur=sel.value;
@@ -382,7 +447,7 @@ function drawQueue(){
   $('#list').innerHTML = arr.slice(0,shown).map(x=>{
     const st=stOf(x), done=st!=='new', taken=takenBy(x), due=isDue(x), stale=isStale(x);
     const chips=ST.map(([k,l])=>`<button class="chip s-${k}${st===k?' on':''}" data-st="${k}" data-id="${x.phone}">${l}</button>`).join('');
-    const devTrace = x.devAt ? `<span class="devdone">Разработчик написал ${dmy(x.devAt)} ${hhmm(x.devAt)}</span>` : '';
+    const devTrace = x.deal ? `<span class="devdone">Разработка: ${DLABEL[x.deal.stage]||''}</span>` : x.devAt ? `<span class="devdone">Разработчик написал ${dmy(x.devAt)} ${hhmm(x.devAt)}</span>` : '';
     const trace = (done && x.by) ? `<span>${LABEL[st]} · ${esc(x.by)} · ${dmy(x.at)} ${hhmm(x.at)}</span>` : taken ? `<span>в работе у ${esc(taken)}</span>` : '';
     const hint = due ? `<span class="hintdue">Без ответа ${Math.floor((serverNow-x.at)/3600000)} ч → напомни</span>` : stale ? `<span class="hintdue">Напоминали, ответа нет → поставь «Не ответил»</span>` : '';
     const main = due ? `<a class="btn follow" data-follow="${x.phone}" href="${esc(waUrl(x, followFor(x)))}" target="_blank" rel="noopener">Напомнить</a>` : `<a class="btn primary" data-open="${x.phone}" href="${esc(waUrl(x, msgFor(x)))}" target="_blank" rel="noopener">Открыть чат</a>`;
@@ -405,15 +470,77 @@ function drawQueue(){
   $('#more').hidden = arr.length<=shown;
 }
 
+function drawDealStats(){
+  const all=contacts.map(dealOf).filter(Boolean), n=k=>all.filter(d=>d.stage===k).length;
+  const talks=all.filter(d=>['talk','brief','draft'].includes(d.stage)), sumTalk=talks.reduce((s,d)=>s+(+d.price||0),0);
+  const got=all.filter(d=>d.stage!=='lost').reduce((s,d)=>s+(+d.paid||0),0), left=all.filter(d=>['paid','done'].includes(d.stage)).reduce((s,d)=>s+owes(d),0);
+  $('#dstats').innerHTML=[[n('wait'),'ждут разработчика'],[talks.length,'в переговорах'],[rub(sumTalk)+' ₸','сумма переговоров'],[n('paid'),'в разработке'],[n('done'),'сайтов сдано'],[rub(got)+' ₸','получено'],[rub(left)+' ₸','осталось получить']].map(([v,l])=>`<div class="stat"><b>${esc(v)}</b><span>${l}</span></div>`).join('');
+}
+function drawDeals(){
+  drawDealStats();
+  if(editing('#dlist')) return;
+  const all=contacts.map(c=>[c,dealOf(c)]).filter(([,d])=>d), cnt=Object.fromEntries(DORDER.map(k=>[k,0]));
+  all.forEach(([,d])=>cnt[d.stage]=(cnt[d.stage]||0)+1);
+  const isAct = d => !['done','lost'].includes(d.stage);
+  const fl=[['active','Активные',all.filter(([,d])=>isAct(d)).length],...DORDER.map(k=>[k,DSHORT[k],cnt[k]]),['all','Все',all.length]];
+  $('#dfilters').innerHTML = fl.map(([k,l,v])=>`<button class="f" data-df="${k}" aria-pressed="${dfilter===k}">${l}<small>${v}</small></button>`).join('');
+  if(!all.length){ $('#dlist').innerHTML='<div class="panel empty"><h2>Пока нет клиентов с интересом</h2><p>Когда работник поставит клиенту «Интерес», он появится здесь.</p></div>'; return; }
+  const arr=all.filter(([,d])=>dfilter==='all' || (dfilter==='active' ? isAct(d) : d.stage===dfilter))
+    .sort((a,b)=>DORDER.indexOf(a[1].stage)-DORDER.indexOf(b[1].stage) || (b[1].upd||b[0].at||0)-(a[1].upd||a[0].at||0));
+  if(!arr.length){ $('#dlist').innerHTML='<div class="panel empty"><h2>Здесь пусто</h2><p>Смени фильтр.</p></div>'; return; }
+  const pk=settings.packages||[];
+  $('#dlist').innerHTML = arr.map(([x,d])=>{
+    const st=d.stage, i=DS.findIndex(s=>s[0]===st);
+    const wa=(kind,label,next,cls='')=>`<a class="btn ${cls}" data-dwa="${kind}" data-id="${x.phone}"${next?` data-next="${next}"`:''} href="${esc(waUrl(x, dealMsg(x,kind)))}" target="_blank" rel="noopener">${label}</a>`;
+    const go=(stage,label,cls='')=>`<button class="btn ${cls}" data-dstage="${stage}" data-id="${x.phone}">${label}</button>`;
+    let main='';
+    if(st==='wait') main=`<a class="btn dev" data-dev="${x.phone}" href="${esc(waUrl(x, devFor(x)))}" target="_blank" rel="noopener">Написать как разработчик</a>`;
+    else if(st==='talk') main=wa('brief','Попросить фото и цены','','primary')+go('brief','Материалы получены →');
+    else if(st==='brief') main=wa('draft','Отправить черновик','draft','primary');
+    else if(st==='draft') main=wa('offer','Отправить цену','','primary')+wa('nudge','Напомнить')+go('paid','Оплата получена →');
+    else if(st==='paid') main=wa('done','Сдать сайт','done','primary');
+    else if(st==='done') main=d.link?`<a class="btn primary" href="${esc(d.link)}" target="_blank" rel="noopener">Открыть сайт</a>`:'';
+    else if(st==='lost') main=go(d.prev||'talk','Вернуть в работу','primary');
+    const lostBtn=['talk','brief','draft'].includes(st) ? go('lost','Не купил','danger') : '';
+    const steps = st==='wait' ? '' : `<div class="steps">${DS.map(([k,l],j)=>`<button class="step${i>=0&&j<i?' past':j===i?' cur':''}" data-dstage="${k}" data-id="${x.phone}" aria-pressed="${j===i}" title="Поставить этап «${DLABEL[k]}»"><b>${j+1}. ${l}</b><span>${d.at&&d.at[k]?dmy(d.at[k]):'&nbsp;'}</span></button>`).join('')}</div>`;
+    const opts='<option value="">не выбран</option>'+pk.map(p=>`<option value="${esc(p.name)}"${p.name===d.pkg?' selected':''}>${esc(p.name)} · ${rub(p.price)}</option>`).join('')+(d.pkg&&!pkgOf(d.pkg)?`<option selected value="${esc(d.pkg)}">${esc(d.pkg)}</option>`:'');
+    const fields = st==='wait' ? '' : `<div class="dfields">
+        <div class="fld"><span>Пакет</span><select data-dpkg="${x.phone}" aria-label="Пакет">${opts}</select><label class="cb"><input type="checkbox" data-dact="${x.phone}"${d.act?' checked':''}> с активацией</label></div>
+        <label class="fld"><span>Цена, ₸</span><input data-dprice="${x.phone}" inputmode="numeric" value="${d.price?rub(d.price):''}" placeholder="0"></label>
+        <label class="fld"><span>Оплачено, ₸</span><input data-dpaid="${x.phone}" inputmode="numeric" value="${d.paid?rub(d.paid):''}" placeholder="0"></label>
+        <label class="fld wide"><span>Ссылка на черновик или сайт</span><input data-dlink="${x.phone}" type="url" inputmode="url" value="${esc(d.link||'')}" placeholder="https://…"></label></div>`;
+    const o=owes(d);
+    const money = +d.price ? `<span class="money">${pkgText(d)?esc(pkgText(d))+' · ':''}оплачено ${rub(d.paid)} из ${rub(d.price)} ₸${o&&['paid','done'].includes(st)?` · <b class="debt">осталось ${rub(o)} ₸</b>`:''}</span>` : '';
+    const found = x.sentBy ? `<span>Нашёл: ${esc(x.sentBy)}</span>` : '';
+    const dw = x.devAt ? `<span class="devdone">Разработчик написал ${dmy(x.devAt)}</span>` : '';
+    const lang = `<span class="lang" title="Язык сообщений"><button data-lang="ru" data-id="${x.phone}" aria-pressed="${langOf(x)==='ru'}">RU</button><button data-lang="kz" data-id="${x.phone}" aria-pressed="${langOf(x)==='kz'}">KZ</button></span>`;
+    return `<article class="row d-${st}">
+      <div><h3>${esc(x.name)}${st==='lost'?'<span class="tag">не купил</span>':''}${lang}</h3>
+        <p class="meta"><span class="ph">${fmtPhone(x.phone)}</span>${x.niche?' · '+esc(x.niche):''}${x.rating?` · <span class="star">★ ${esc(x.rating)}</span>`:''}</p></div>
+      <div class="act">${main}<a class="btn" href="https://wa.me/${x.phone}" target="_blank" rel="noopener">Чат</a><a class="btn" href="${esc(gisUrl(x))}" target="_blank" rel="noopener">2ГИС</a>${lostBtn}</div>
+      ${steps}${fields}
+      <div class="trace">${found}${dw}${money}<input data-note="${x.phone}" value="${esc(x.note||'')}" placeholder="Заметка (сохраняется сама)"></div></article>`;
+  }).join('');
+}
+async function moveDeal(c, stage){
+  const prev=(dealOf(c)||{}).stage;
+  if(!c.deal) c.deal=dealOf(c)||emptyDeal('talk');
+  c.deal.stage=stage; (c.deal.at ||= {})[stage]=Date.now(); render();
+  try{ const r=await api('/deal',{phone:c.phone, stage}); Object.assign(c, r.contact||{}); render();
+    toast(`${c.name}: ${DLABEL[stage]}`, prev && prev!=='wait' && prev!==stage ? 'Отменить' : '', ()=>moveDeal(c, prev)); }
+  catch(e){ toast(e.message||'Не сохранилось'); load(); }
+}
+
 function drawTeam(){
   const ds=dayStart(), names=[...new Set(contacts.flatMap(x=>[x.sentBy,x.by]).filter(Boolean).concat(Object.keys(presence)))].filter(n=>n!==me.name || presence[n]?.role==='worker');
   if(!names.length){ $('#teamTable').innerHTML='<tr><td>Пока никто не заходил и не отмечал клиентов.</td></tr>'; return; }
   const rows=names.map(n=>{
     const mine=contacts.filter(x=>x.sentBy===n), c=counts(mine), contacted=mine.length, conv=contacted?Math.round(100*c.interested/contacted):0;
     const last=Math.max(0,...contacts.filter(x=>x.by===n).map(x=>x.at||0)), p=presence[n], st=p?onlineState(p):null;
-    return `<tr><td><i class="dot ${st||''}"></i> ${esc(n)}</td><td>${mine.filter(x=>x.sentAt>=ds).length}</td><td>${contacted}</td><td>${c.followup}</td><td>${c.interested}</td><td>${conv}%</td><td>${c.refused}</td><td>${c.noreply}</td><td>${st==='on'?'онлайн':st==='idle'?'в фоне':p?ago(p.t):last?ago(last):'—'}</td></tr>`;
+    const bought=mine.filter(x=>x.deal && ['paid','done'].includes(x.deal.stage)).length;
+    return `<tr><td><i class="dot ${st||''}"></i> ${esc(n)}</td><td>${mine.filter(x=>x.sentAt>=ds).length}</td><td>${contacted}</td><td>${c.followup}</td><td>${c.interested}</td><td>${bought}</td><td>${conv}%</td><td>${c.refused}</td><td>${c.noreply}</td><td>${st==='on'?'онлайн':st==='idle'?'в фоне':p?ago(p.t):last?ago(last):'—'}</td></tr>`;
   }).join('');
-  $('#teamTable').innerHTML=`<tr><th>Сотрудник</th><th>Сегодня</th><th>Написал всего</th><th>Напомнил</th><th>Интерес</th><th>Конверсия</th><th>Отказ</th><th>Не ответ.</th><th>Был активен</th></tr>${rows}`;
+  $('#teamTable').innerHTML=`<tr><th>Сотрудник</th><th>Сегодня</th><th>Написал всего</th><th>Напомнил</th><th>Интерес</th><th>Оплатили</th><th>Конверсия</th><th>Отказ</th><th>Не ответ.</th><th>Был активен</th></tr>${rows}`;
 }
 
 function drawReport(){
@@ -435,8 +562,13 @@ async function load(){
     const d = await api('/state');
     me=d.me; contacts=d.contacts; settings=d.settings; presence=d.presence; events=d.events||[]; serverNow=d.now||Date.now(); seedError=d.seedError;
     render();
-    if(me.role==='owner' && !['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)){ const t=settings.templates, h=settings.hooks; $('#tplF').value=t.furniture||''; $('#tplM').value=t.massage||''; $('#tplD').value=t.default||''; $('#tplU').value=t.followup||''; $('#hookW').value=h.withReviews||''; $('#hookN').value=h.withoutReviews||''; const tk=settings.templatesKz||{}, hk=settings.hooksKz||{}; $('#tplFk').value=tk.furniture||''; $('#tplMk').value=tk.massage||''; $('#tplDk').value=tk.default||''; $('#tplUk').value=tk.followup||''; $('#hookWk').value=hk.withReviews||''; $('#hookNk').value=hk.withoutReviews||''; const dv=settings.templatesDev||{}, dk=settings.templatesDevKz||{}; $('#dvF').value=dv.furniture||''; $('#dvM').value=dv.massage||''; $('#dvD').value=dv.default||''; $('#dvFk').value=dk.furniture||''; $('#dvMk').value=dk.massage||''; $('#dvDk').value=dk.default||''; $('#scripts').value=(settings.scripts||[]).map(sc=>`${sc.title}\n${sc.ru}\n${sc.kz||''}`).join('\n\n'); $('#plan').value=settings.dailyPlan||60; $('#followupHours').value=settings.followupHours||48; $('#autoSent').checked=settings.autoSent!==false; }
+    if(me.role==='owner' && !['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)){ const t=settings.templates, h=settings.hooks; $('#tplF').value=t.furniture||''; $('#tplM').value=t.massage||''; $('#tplD').value=t.default||''; $('#tplU').value=t.followup||''; $('#hookW').value=h.withReviews||''; $('#hookN').value=h.withoutReviews||''; const tk=settings.templatesKz||{}, hk=settings.hooksKz||{}; $('#tplFk').value=tk.furniture||''; $('#tplMk').value=tk.massage||''; $('#tplDk').value=tk.default||''; $('#tplUk').value=tk.followup||''; $('#hookWk').value=hk.withReviews||''; $('#hookNk').value=hk.withoutReviews||''; const dv=settings.templatesDev||{}, dk=settings.templatesDevKz||{}; $('#dvF').value=dv.furniture||''; $('#dvM').value=dv.massage||''; $('#dvD').value=dv.default||''; $('#dvFk').value=dk.furniture||''; $('#dvMk').value=dk.massage||''; $('#dvDk').value=dk.default||''; $('#scripts').value=(settings.scripts||[]).map(sc=>`${sc.title}\n${sc.ru}\n${sc.kz||''}`).join('\n\n'); fillDealCfg(); $('#plan').value=settings.dailyPlan||60; $('#followupHours').value=settings.followupHours||48; $('#autoSent').checked=settings.autoSent!==false; }
   }catch(e){ if(e.message!=='auth') toast(e.message||'Нет связи'); }
+}
+function fillDealCfg(){
+  const t=settings.templatesDeal||{}, k=settings.templatesDealKz||{};
+  $('#pkgs').value=(settings.packages||[]).map(p=>`${p.name}; ${p.price}; ${p.act}`).join('\n');
+  [['B','brief'],['D','draft'],['N','nudge'],['O','offer'],['F','done']].forEach(([s,key])=>{ $('#dl'+s).value=t[key]||''; $('#dl'+s+'k').value=k[key]||''; });
 }
 async function beat(){ try{ await api('/heartbeat',{visible:!document.hidden}); }catch{} }
 
@@ -452,13 +584,44 @@ async function setStatus(phone, st, {toggle=true, silent=false}={}){
 async function copy(text){ try{ await navigator.clipboard.writeText(text); return true; }catch{ return false; } }
 
 /* ---------- события ---------- */
+const TABS=['queue','deals','team','report','set'];
+function showTab(name){ document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===name))); TABS.forEach(k=>$('#p-'+k).hidden=k!==name); render(); }
+document.addEventListener('change', async e=>{
+  const el=e.target, id=el.dataset.dpkg||el.dataset.dact||el.dataset.dprice||el.dataset.dpaid||el.dataset.dlink;
+  if(!id) return;
+  const c=contacts.find(x=>x.phone===id); if(!c) return;
+  if(!c.deal) c.deal=dealOf(c)||emptyDeal('talk');
+  const d=c.deal, patch={}, card=el.closest('.row');
+  if(el.dataset.dpkg!==undefined || el.dataset.dact!==undefined){
+    const sel=card.querySelector('[data-dpkg]'), cb=card.querySelector('[data-dact]'), p=pkgOf(sel.value);
+    d.pkg=patch.pkg=sel.value; d.act=patch.act=cb.checked;
+    if(p){ d.price=patch.price=(cb.checked?p.act:p.price)||p.price; card.querySelector('[data-dprice]').value=rub(d.price); }
+  }
+  if(el.dataset.dprice!==undefined){ d.price=patch.price=+el.value.replace(/\D/g,'')||0; el.value=d.price?rub(d.price):''; }
+  if(el.dataset.dpaid!==undefined){ d.paid=patch.paid=+el.value.replace(/\D/g,'')||0; el.value=d.paid?rub(d.paid):''; }
+  if(el.dataset.dlink!==undefined){ let l=el.value.trim(); if(l && !/^https?:\/\//i.test(l)) l='https://'+l; d.link=patch.link=l; el.value=l; }
+  drawDealStats();
+  try{ const r=await api('/deal',{phone:c.phone, ...patch}); Object.assign(c, r.contact||{}); }catch(err){ toast(err.message||'Не сохранилось'); }
+});
 document.addEventListener('click', async e=>{
   const t=e.target.closest('button,a'); if(!t) return;
   if(t.dataset.tab){
     if(t.dataset.tab==='out'){ await api('/logout',{}).catch(()=>{}); showLogin(); return; }
-    document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b===t)); ['queue','team','report','set'].forEach(k=>$('#p-'+k).hidden=k!==t.dataset.tab); render(); return;
+    showTab(t.dataset.tab); return;
   }
-  if(t.dataset.f){ filter=t.dataset.f; shown=60; render(); window.scrollTo({top:0}); return; }
+  if(t.dataset.goto){ if(t.dataset.goto==='deals') dfilter='wait'; showTab(t.dataset.goto); window.scrollTo({top:0}); return; }
+  if(t.dataset.df){ dfilter=t.dataset.df; render(); return; }
+  if(t.dataset.dwa){ const c=contacts.find(x=>x.phone===t.dataset.id); if(!c) return; const d=dealOf(c)||{}, kind=t.dataset.dwa;
+    const need = ['draft','nudge','done'].includes(kind) && !d.link ? 'link' : kind==='offer' && !(+d.price>0) ? 'price' : '';
+    if(need){ e.preventDefault(); toast(need==='link'?'Сначала вставь ссылку на сайт в карточке':'Сначала выбери пакет или впиши цену'); document.querySelector(`[data-d${need}="${c.phone}"]`)?.focus(); return; }
+    const text=dealMsg(c,kind); t.href=waUrl(c,text); copy(text);
+    if(t.dataset.next) moveDeal(c, t.dataset.next); else toast('Текст скопирован, чат открыт');
+    return; }
+  if(t.dataset.dstage){ const c=contacts.find(x=>x.phone===t.dataset.id); if(!c) return; const d=dealOf(c)||{};
+    if(t.dataset.dstage===d.stage) return;
+    if(t.dataset.dstage==='paid' && t.classList.contains('btn') && !(+d.paid>0)){ toast('Впиши в «Оплачено», сколько получил'); document.querySelector(`[data-dpaid="${c.phone}"]`)?.focus(); return; }
+    moveDeal(c, t.dataset.dstage); return; }
+  if(t.dataset.f){ filter=t.dataset.f; shown=60; if($('#p-queue').hidden) showTab('queue'); render(); window.scrollTo({top:0}); return; }
   if(t.dataset.st){ setStatus(t.dataset.id, t.dataset.st); return; }
   if(t.dataset.open){ const c=contacts.find(x=>x.phone===t.dataset.open); if(!c) return; copy(msgFor(c));
     if(settings.autoSent!==false && stOf(c)==='new') setTimeout(()=>setStatus(c.phone,'sent',{toggle:false}),300);
@@ -491,6 +654,12 @@ $('#doImport').addEventListener('click',async()=>{
 $('#saveCfg').addEventListener('click',async()=>{
   try{ await api('/settings',{templates:{furniture:$('#tplF').value,massage:$('#tplM').value,default:$('#tplD').value,followup:$('#tplU').value},hooks:{withReviews:$('#hookW').value,withoutReviews:$('#hookN').value},templatesKz:{furniture:$('#tplFk').value,massage:$('#tplMk').value,default:$('#tplDk').value,followup:$('#tplUk').value},hooksKz:{withReviews:$('#hookWk').value,withoutReviews:$('#hookNk').value},templatesDev:{furniture:$('#dvF').value,massage:$('#dvM').value,default:$('#dvD').value},templatesDevKz:{furniture:$('#dvFk').value,massage:$('#dvMk').value,default:$('#dvDk').value},dailyPlan:$('#plan').value,followupHours:$('#followupHours').value,autoSent:$('#autoSent').checked}); toast('Сохранено'); document.activeElement?.blur(); await load(); }
   catch(e){ toast(e.message); }
+});
+$('#saveDeal').addEventListener('click',async()=>{
+  const packages=$('#pkgs').value.split('\n').map(l=>l.split(';').map(x=>x.trim())).filter(l=>l[0]&&l[1]).map(([name,price,act])=>({name,price:+String(price).replace(/\D/g,'')||0,act:+String(act||'').replace(/\D/g,'')||0}));
+  if(!packages.length){ toast('Нужен хотя бы один пакет: Название; цена'); return; }
+  const tt={}, tk={}; [['B','brief'],['D','draft'],['N','nudge'],['O','offer'],['F','done']].forEach(([s,key])=>{ tt[key]=$('#dl'+s).value; tk[key]=$('#dl'+s+'k').value; });
+  try{ await api('/settings',{packages, templatesDeal:tt, templatesDealKz:tk}); toast('Сохранено'); document.activeElement?.blur(); await load(); }catch(e){ toast(e.message); }
 });
 $('#saveScripts').addEventListener('click',async()=>{
   const scripts=$('#scripts').value.split(/\n\s*\n/).map(b=>b.split('\n').map(l=>l.trim())).filter(l=>l[0]&&l[1]).map(l=>({title:l[0],ru:l[1],kz:l[2]||''}));
