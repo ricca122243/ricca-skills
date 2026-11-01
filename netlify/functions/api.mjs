@@ -10,6 +10,7 @@ const EVENTS_CAP = 4000;
 
 export const DEFAULT_SETTINGS = {
   dailyPlan: 60,
+  devs: [],
   autoSent: true,
   followupHours: 48,
   templates: {
@@ -82,6 +83,52 @@ function cleanPackages(arr) {
 
 const env = (k) => (globalThis.Netlify?.env?.get?.(k) ?? process.env[k] ?? "").trim();
 const OWNER_NAME = "Азамат";
+// Владелец мог заходить как «Aza», «aza», «Владелец»: это всё один человек.
+const OWNER_ALIAS = /^(aza|азамат|владелец)$/i;
+const ownerName = (n) => (!n || OWNER_ALIAS.test(String(n).trim()) ? OWNER_NAME : String(n).trim());
+const isDevName = (s, n) => (s.settings.devs || []).some((d) => d.toLowerCase() === String(n || "").toLowerCase());
+// Уровень клиента: крупный / средний / малый (та же формула в public/index.html).
+const GENERIC_NAME = /^(массажный кабинет|массаж|massage)$|^мебель( на заказ| и двери)?(\s|\(|$)/i;
+const BIG_HINT = /(трц|тц |бц |шоу-?рум|showroom|фабрик|factory|производ|premium|премиум|luxury|lux|vip)/i;
+export function tierScore(c) {
+  const r = +c.reviews || 0, x = parseFloat(c.rating) || 0;
+  let s = r >= 100 ? 40 : r >= 40 ? 28 : r >= 15 ? 16 : r >= 5 ? 8 : 0;
+  if (r >= 5) s += x >= 4.7 ? 12 : x >= 4.3 ? 6 : x < 3.5 ? -12 : 0;
+  if (c.instagram) s += 12;
+  if ((+c.branches || 1) >= 2) s += 15;
+  if (BIG_HINT.test(`${c.name} ${c.category || ""} ${c.address || ""}`)) s += 10;
+  if (GENERIC_NAME.test(c.name || "")) s -= 15;
+  return s;
+}
+// Внутри каждой ниши: верхние 25% «Крупный», следующие 40% «Средний», остальные «Малый» (и есть нижние пороги очков).
+export function rankTiers(list) {
+  const by = {}, out = new Map();
+  for (const c of list) (by[c.niche || ""] ||= []).push([c, tierScore(c)]);
+  for (const a of Object.values(by)) {
+    a.sort((x, y) => y[1] - x[1] || (+y[0].reviews || 0) - (+x[0].reviews || 0));
+    a.forEach(([c, sc], i) => { const q = i / a.length; out.set(c.phone, q < 0.25 && sc >= 40 ? "big" : q < 0.65 && sc >= 15 ? "mid" : "small"); });
+  }
+  return out;
+}
+export const tierOf = (c, map) => (["big", "mid", "small"].includes(c.tier) ? c.tier : (map && map.get(c.phone)) || "small");
+const TIER_LABEL = { big: "Крупный", mid: "Средний", small: "Малый" };
+const str = (v, n) => String(v ?? "").trim().slice(0, n);
+function cleanRow(r) {
+  if (!r || typeof r !== "object") return null;
+  const phone = normPhone(r.phone), name = str(r.name, 120);
+  if (!phone || !name) return null;
+  return { name, phone, niche: str(r.niche, 40), address: str(r.address, 200), instagram: str(r.instagram, 80), rating: str(r.rating, 5), reviews: Math.max(0, parseInt(r.reviews) || 0), hours: str(r.hours, 80), category: str(r.category, 80), firmId: str(r.firmId, 30).replace(/\D/g, ""), branches: Math.max(1, parseInt(r.branches) || 1), wa: r.wa ? 1 : 0 };
+}
+function addRows(s, rows) {
+  let ord = Math.max(0, ...Object.values(s.contacts).map((c) => c.ord || 0)), added = 0;
+  const ids = new Set(Object.values(s.contacts).map((c) => c.firmId).filter(Boolean));
+  for (const r of rows) {
+    if (!r || s.contacts[r.phone] || (r.firmId && ids.has(r.firmId))) continue;
+    s.contacts[r.phone] = fresh(r, ++ord); added++;
+    if (r.firmId) ids.add(r.firmId);
+  }
+  return added;
+}
 const store = () => globalThis.__rassylkaStore || getStore({ name: "rassylka", consistency: "strong" });
 const json = (data, status = 200, headers = {}) =>
   new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...headers } });
@@ -131,7 +178,7 @@ export function decryptSeed() {
   }
 }
 function fresh(r, ord) {
-  return { name: r.name, phone: r.phone, niche: r.niche || "", address: r.address || "", rating: r.rating || "", reviews: r.reviews || 0, instagram: r.instagram || "", hours: r.hours || "", category: r.category || "", firmId: r.firmId || "", status: "new", ord, by: null, at: null, sentBy: null, sentAt: null, followAt: null, note: "", lang: /[әғқңөұүһі]/i.test(r.name || "") ? "kz" : "ru" };
+  return { name: r.name, phone: r.phone, niche: r.niche || "", address: r.address || "", rating: r.rating || "", reviews: r.reviews || 0, instagram: r.instagram || "", hours: r.hours || "", category: r.category || "", firmId: r.firmId || "", branches: r.branches || 1, wa: r.wa ? 1 : 0, status: "new", ord, by: null, at: null, sentBy: null, sentAt: null, followAt: null, note: "", lang: /[әғқңөұүһі]/i.test(r.name || "") ? "kz" : "ru" };
 }
 // Добавляет новых клиентов из стартового списка и дополняет карточки (рейтинг, Instagram...), статусы не трогает.
 function applySeed(s) {
@@ -151,6 +198,14 @@ function applySeed(s) {
 }
 
 /* ---------- хранилище ---------- */
+function migrate(data) {
+  if ((data.mig || 0) >= 1) return false;
+  const fix = (v) => (v && OWNER_ALIAS.test(String(v).trim()) ? OWNER_NAME : v);
+  for (const c of Object.values(data.contacts)) { for (const k of ["sentBy", "by", "devBy", "claimedBy"]) if (c[k]) c[k] = fix(c[k]); if (c.deal && c.deal.by) c.deal.by = fix(c.deal.by); }
+  for (const e of data.events) e.who = fix(e.who);
+  data.mig = 1;
+  return true;
+}
 function normalize(data) {
   data.contacts ||= {};
   data.events ||= [];
@@ -162,14 +217,15 @@ async function readState() {
   const r = await store().getWithMetadata("state", { type: "json" });
   if (!r || !r.data) {
     const data = normalize({ contacts: {}, events: [] });
-    applySeed(data);
+    applySeed(data); migrate(data);
     const res = await store().setJSON("state", data, { onlyIfNew: true });
     if (res && res.modified === false) return readState();
     return { data, etag: (res && res.etag) || null };
   }
   const data = normalize(r.data);
   let etag = r.etag || null;
-  if (applySeed(data)) {
+  const seeded = applySeed(data), migrated = migrate(data);
+  if (seeded || migrated) {
     const res = await store().setJSON("state", data, etag ? { onlyIfMatch: etag } : {});
     if (res && res.modified === false) return readState();
     etag = (res && res.etag) || etag;
@@ -192,7 +248,11 @@ async function mutate(fn) {
 async function readPresence() {
   const out = {};
   const { blobs } = await store().list({ prefix: "p/" });
-  await Promise.all((blobs || []).map(async (b) => { const v = await store().get(b.key, { type: "json" }); if (v) out[b.key.slice(2)] = v; }));
+  await Promise.all((blobs || []).map(async (b) => {
+    const name = b.key.slice(2);
+    if (name !== OWNER_NAME && OWNER_ALIAS.test(name)) { try { await store().delete(b.key); } catch {} return; }
+    const v = await store().get(b.key, { type: "json" }); if (v) out[name] = v;
+  }));
   return out;
 }
 
@@ -251,17 +311,30 @@ export default async (req) => {
     else if (same(login, env("WORKER_LOGIN").toLowerCase()) && same(body.pass, env("WORKER_PASS"))) role = "worker";
     if (!role) return json({ error: "pass", message: "Неверный логин или пароль" }, 401);
     if (role === "worker" && !name) return json({ error: "name", message: "Введи своё имя" }, 400);
-    const session = { role, name: role === "owner" ? name || OWNER_NAME : name, exp: Date.now() + SESSION_DAYS * 86400000 };
+    const session = { role, name: role === "owner" ? ownerName(name) : name, exp: Date.now() + SESSION_DAYS * 86400000 };
     return json({ ok: true, me: { role, name: session.name } }, 200, { "set-cookie": makeCookie(session) });
+  }
+  // Приём новых клиентов со страницы 2ГИС (сборщик в браузере владельца). Доступ по ключу на час.
+  if (path === "/import-rows") {
+    const cors = { "access-control-allow-origin": "https://2gis.kz", "access-control-allow-methods": "POST", "access-control-allow-headers": "content-type" };
+    if (method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+    const [p, sig] = String(body.token || "").split(".");
+    let ok = false;
+    try { const good = Buffer.from(sign(p || "")), given = Buffer.from(sig || ""); ok = !!p && good.length === given.length && timingSafeEqual(good, given); const t = ok && JSON.parse(Buffer.from(p, "base64url").toString("utf8")); ok = ok && t.k === "imp" && t.exp > Date.now(); } catch { ok = false; }
+    if (!ok) return json({ error: "token" }, 401, cors);
+    const rows = (Array.isArray(body.rows) ? body.rows.slice(0, 3000) : []).map(cleanRow).filter(Boolean);
+    let added = 0;
+    await mutate((s) => { added = addRows(s, rows); return added ? s : false; });
+    return json({ ok: true, parsed: rows.length, added }, 200, cors);
   }
   if (path === "/logout" && method === "POST") return json({ ok: true }, 200, { "set-cookie": "rs=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0" });
 
   const me = readSession(req);
   if (!me) return json({ error: "auth" }, 401);
-  const isOwner = me.role === "owner", who = isOwner && (!me.name || me.name === "Владелец") ? OWNER_NAME : me.name;
+  const isOwner = me.role === "owner", who = isOwner ? ownerName(me.name) : me.name;
 
   try {
-    if (path === "/me" && method === "GET") return json({ me: { role: me.role, name: who } });
+    if (path === "/me" && method === "GET") { const { data } = await readState(); return json({ me: { role: me.role, name: who, dev: !isOwner && isDevName(data, who) } }); }
 
     if (path === "/state" && method === "GET") {
       let [{ data }, presence] = await Promise.all([readState(), readPresence()]);
@@ -276,8 +349,9 @@ export default async (req) => {
           return changed ? s : false;
         });
       }
-      const list = isOwner ? sorted(data) : sorted(data).map((c) => (c.deal ? { ...c, deal: { stage: c.deal.stage } } : c));
-      return json({ me: { role: me.role, name: who }, contacts: list, settings: data.settings, presence, events: isOwner ? data.events : [], seedError: isOwner ? data.seedError || null : null, now: Date.now() });
+      const isDev = !isOwner && isDevName(data, who);
+      const list = isOwner ? sorted(data) : sorted(data).map((c) => (c.deal && !(isDev && (!c.devBy || c.devBy === who)) ? { ...c, deal: { stage: c.deal.stage } } : c));
+      return json({ me: { role: me.role, name: who, dev: isDev }, contacts: list, settings: data.settings, presence, events: isOwner ? data.events : [], seedError: isOwner ? data.seedError || null : null, now: Date.now() });
     }
 
     if (path === "/heartbeat" && method === "POST") {
@@ -321,19 +395,21 @@ export default async (req) => {
       return json({ ok: true });
     }
 
-    if (!isOwner) return json({ error: "forbidden" }, 403);
-
     if (path === "/dev" && method === "POST") {
       const phone = normPhone(body.phone);
       if (!phone) return json({ error: "phone" }, 400);
+      let err = null;
       const state = await mutate((s) => {
         const c = s.contacts[phone];
         if (!c) return false;
+        if (!isOwner && !isDevName(s, who)) { err = [403, "Это может только разработчик"]; return false; }
+        if (!isOwner && c.devBy && c.devBy !== who) { err = [409, `Этого клиента уже ведёт ${c.devBy}`]; return false; }
         c.devAt = Date.now(); c.devBy = who;
         if (!c.deal) c.deal = { stage: "talk", at: { talk: c.devAt }, pkg: "", act: false, price: 0, paid: 0, link: "" };
         s.events.push({ t: c.devAt, who, phone, status: "dev" });
         return s;
       });
+      if (err) return json({ error: "forbidden", message: err[1] }, err[0]);
       if (!state.contacts[phone]) return json({ error: "not found" }, 404);
       return json({ ok: true, contact: state.contacts[phone] });
     }
@@ -342,9 +418,13 @@ export default async (req) => {
       const phone = normPhone(body.phone);
       if (!phone) return json({ error: "phone" }, 400);
       if (body.stage !== undefined && !DEAL_STAGES.includes(body.stage)) return json({ error: "stage" }, 400);
+      let err = null;
       const state = await mutate((s) => {
         const c = s.contacts[phone];
         if (!c) return false;
+        if (!isOwner && !isDevName(s, who)) { err = [403, "Это может только разработчик"]; return false; }
+        if (!isOwner && c.devBy && c.devBy !== who) { err = [409, `Этого клиента уже ведёт ${c.devBy}`]; return false; }
+        if (!c.devBy) c.devBy = who;
         const now = Date.now();
         const d = (c.deal ||= { stage: "talk", at: { talk: c.devAt || now }, pkg: "", act: false, price: 0, paid: 0, link: "" });
         d.at ||= {};
@@ -361,19 +441,29 @@ export default async (req) => {
         d.by = who; d.upd = now;
         return s;
       });
+      if (err) return json({ error: "forbidden", message: err[1] }, err[0]);
       if (!state.contacts[phone]) return json({ error: "not found" }, 404);
       return json({ ok: true, contact: state.contacts[phone] });
     }
 
+    if (!isOwner) return json({ error: "forbidden" }, 403);
+
     if (path === "/import" && method === "POST") {
-      const rows = parseCsv(body.csv);
+      const rows = Array.isArray(body.rows) ? body.rows.slice(0, 3000).map(cleanRow).filter(Boolean) : parseCsv(body.csv);
       let added = 0;
-      await mutate((s) => {
-        let ord = Math.max(0, ...Object.values(s.contacts).map((c) => c.ord || 0));
-        for (const r of rows) { if (s.contacts[r.phone]) continue; s.contacts[r.phone] = fresh(r, ++ord); added++; }
-        return s;
-      });
+      await mutate((s) => { added = addRows(s, rows); return added ? s : false; });
       return json({ ok: true, parsed: rows.length, added });
+    }
+
+    if (path === "/import-token" && method === "GET") {
+      const p = Buffer.from(JSON.stringify({ k: "imp", exp: Date.now() + 3600000 })).toString("base64url");
+      return json({ token: p + "." + sign(p) });
+    }
+
+    if (path === "/tier" && method === "POST") {
+      const phone = normPhone(body.phone), tier = ["big", "mid", "small"].includes(body.tier) ? body.tier : "";
+      const state = await mutate((s) => { const c = s.contacts[phone]; if (!c) return false; c.tier = tier; return s; });
+      return json({ ok: true, contact: state.contacts[phone] || null });
     }
 
     if (path === "/remove" && method === "POST") {
@@ -388,6 +478,7 @@ export default async (req) => {
         const pick = (v, old) => (String(v || "").trim() || old).slice(0, 1500);
         s.settings = {
           dailyPlan: Math.max(1, parseInt(body.dailyPlan) || cur.dailyPlan),
+          devs: Array.isArray(body.devs) ? [...new Set(body.devs.map((x) => str(x, 40)).filter(Boolean))].slice(0, 30) : cur.devs || [],
           autoSent: body.autoSent === undefined ? cur.autoSent : !!body.autoSent,
           followupHours: Math.max(1, parseInt(body.followupHours) || cur.followupHours),
           templates: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.templates).map((k) => [k, pick(t[k], cur.templates[k])])),
@@ -408,9 +499,10 @@ export default async (req) => {
 
     if (path === "/export" && method === "GET") {
       const { data } = await readState();
-      const lines = ["Название;Телефон;Ниша;Адрес;Язык;Рейтинг;Отзывы;Instagram;Часы;Статус;Кто отметил;Когда (Алматы);Кто написал первым;Когда написал;Напомнил;Разработчик написал;Этап разработки;Пакет;Цена;Оплачено;Осталось;Ссылка на сайт;Заметка"];
+      const lines = ["Название;Телефон;Ниша;Адрес;Язык;Рейтинг;Отзывы;Instagram;Часы;Статус;Кто отметил;Когда (Алматы);Кто написал первым;Когда написал;Напомнил;Разработчик написал;Этап разработки;Пакет;Цена;Оплачено;Осталось;Ссылка на сайт;Уровень;Филиалов;Ведёт разработчик;Заметка"];
+      const tiers = rankTiers(Object.values(data.contacts));
       for (const c of sorted(data)) {
-        lines.push([c.name, "+" + c.phone, c.niche, c.address, c.lang === "kz" ? "KZ" : "RU", c.rating, c.reviews || "", c.instagram, c.hours, LABEL[c.status || "new"], c.by || "", c.status !== "new" ? fmtAlmaty(c.at) : "", c.sentBy || "", fmtAlmaty(c.sentAt), fmtAlmaty(c.followAt), c.devAt ? fmtAlmaty(c.devAt) + " (" + (c.devBy || "") + ")" : "", c.deal ? DEAL_LABEL[c.deal.stage] || "" : "", c.deal?.pkg ? c.deal.pkg + (c.deal.act ? " + активация" : "") : "", c.deal?.price || "", c.deal?.paid || "", c.deal && c.deal.stage !== "lost" && c.deal.price ? Math.max(0, c.deal.price - (c.deal.paid || 0)) : "", c.deal?.link || "", c.note || ""].map(csvCell).join(";"));
+        lines.push([c.name, "+" + c.phone, c.niche, c.address, c.lang === "kz" ? "KZ" : "RU", c.rating, c.reviews || "", c.instagram, c.hours, LABEL[c.status || "new"], c.by || "", c.status !== "new" ? fmtAlmaty(c.at) : "", c.sentBy || "", fmtAlmaty(c.sentAt), fmtAlmaty(c.followAt), c.devAt ? fmtAlmaty(c.devAt) + " (" + (c.devBy || "") + ")" : "", c.deal ? DEAL_LABEL[c.deal.stage] || "" : "", c.deal?.pkg ? c.deal.pkg + (c.deal.act ? " + активация" : "") : "", c.deal?.price || "", c.deal?.paid || "", c.deal && c.deal.stage !== "lost" && c.deal.price ? Math.max(0, c.deal.price - (c.deal.paid || 0)) : "", c.deal?.link || "", TIER_LABEL[tierOf(c, tiers)], c.branches || "", c.devBy || "", c.note || ""].map(csvCell).join(";"));
       }
       return new Response("﻿" + lines.join("\r\n"), { headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": 'attachment; filename="rassylka-damillion.csv"', "cache-control": "no-store" } });
     }

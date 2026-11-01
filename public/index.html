@@ -144,6 +144,17 @@ td.day{font-weight:600}
 .money{font-variant-numeric:tabular-nums;color:var(--ink)}
 .debt{color:var(--c-refused)}
 @media (max-width:560px){.dfields{grid-template-columns:1fr 1fr}.dfields .wide,.dfields .fld:first-child{grid-column:1/-1}.steps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tier{display:inline-flex;align-items:center;gap:4px;font:600 11px/1 var(--f-body);letter-spacing:.02em;border-radius:999px;padding:4px 9px;margin-left:8px;vertical-align:middle;border:1px solid transparent;white-space:nowrap}
+button.tier{cursor:pointer}
+.tier.t-big{background:color-mix(in srgb,var(--warn) 20%,var(--surface));color:var(--warn);border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
+.tier.t-mid{background:color-mix(in srgb,var(--c-sent) 12%,var(--surface));color:var(--c-sent);border-color:color-mix(in srgb,var(--c-sent) 40%,var(--line))}
+.tier.t-small{background:var(--surface2);color:var(--muted);border-color:var(--line)}
+.tier.manual::after{content:"•";margin-left:2px}
+.why{font-size:12.5px;color:var(--muted);margin-top:4px}
+.why b{color:var(--ink);font-weight:600}
+.row.t-big{border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
+.legend{font-size:12.5px;color:var(--muted);display:grid;gap:5px;line-height:1.5}
+.legend .tier{margin:0 6px 0 0;padding:2px 8px}
 [hidden]{display:none!important}
 @media (max-width:560px){.row{grid-template-columns:1fr}.act{justify-content:stretch}.act .btn{flex:1 1 auto}.btn{padding:10px 12px}}
 </style>
@@ -185,7 +196,7 @@ td.day{font-weight:600}
 
       <nav class="tabs" role="tablist">
         <button class="tab" role="tab" aria-selected="true" data-tab="queue">Очередь</button>
-        <button class="tab owner" role="tab" aria-selected="false" data-tab="deals" hidden>Разработка</button>
+        <button class="tab devtab" role="tab" aria-selected="false" data-tab="deals" hidden>Разработка</button>
         <button class="tab owner" role="tab" aria-selected="false" data-tab="team" hidden>Команда</button>
         <button class="tab owner" role="tab" aria-selected="false" data-tab="report" hidden>Отчёт</button>
         <button class="tab owner" role="tab" aria-selected="false" data-tab="set" hidden>Настройки</button>
@@ -196,7 +207,9 @@ td.day{font-weight:600}
         <div class="tools">
           <input id="q" type="search" placeholder="Поиск: название, телефон, адрес" aria-label="Поиск">
           <select id="niche" aria-label="Ниша"><option value="">Все ниши</option></select>
+          <select id="tierSel" aria-label="Уровень клиента"><option value="">Все уровни</option></select>
         </div>
+        <div class="legend"><span><span class="tier t-big">Крупный</span> четверть самых сильных в нише: отзывы, рейтинг, Instagram, филиалы, производство. Они сверху очереди.</span><span><span class="tier t-mid">Средний</span> обычный бизнес.</span><span><span class="tier t-small">Малый</span> частник или мало данных в 2ГИС.</span></div>
         <div class="filters" id="filters"></div>
         <div class="list" id="list"></div>
         <button class="btn more" id="more" hidden>Показать ещё</button>
@@ -212,6 +225,7 @@ td.day{font-weight:600}
       <section id="p-team" class="panel sect" hidden>
         <h2>Работа сотрудников</h2>
         <div class="scroll"><table id="teamTable"></table></div>
+        <p class="hint">«Разработчик»: работник получает вкладку «Разработка» и кнопку «Написать как разработчик», сообщения уходят от его имени. Клиента, которого взял один разработчик, другой не видит.</p>
         <p class="hint">«Написал» засчитывается по нажатию кнопки или по открытию чата (если включено в настройках). Сайт не видит, ушло ли сообщение в WhatsApp на самом деле.</p>
       </section>
 
@@ -365,6 +379,44 @@ function dealMsg(c, kind){
   if(GENERIC.test(c.name)) tpl=tpl.replace(/«\{name\}» сайтының/g,'сайттың').replace(/«\{name\}» сайты/g,'Сайт').replace(/ для «\{name\}»/g,'').replace(/ «\{name\}»/g,'');
   return fill(tpl.replaceAll('{link}',()=>d.link||'').replaceAll('{pkg}',()=>pkgText(d)).replaceAll('{price}',()=>rub(d.price)), c).replace(/[ \t]{2,}/g,' ').trim();
 }
+const canDev = () => !!me && (me.role==='owner' || !!me.dev);
+const mineDeal = c => me.role==='owner' || !c.devBy || c.devBy===me.name;
+const BIG_HINT = /(трц|тц |бц |шоу-?рум|showroom|фабрик|factory|производ|premium|премиум|luxury|lux|vip)/i;
+function tierScore(c){
+  const r=+c.reviews||0, x=parseFloat(c.rating)||0;
+  let s = r>=100?40 : r>=40?28 : r>=15?16 : r>=5?8 : 0;
+  if(r>=5) s += x>=4.7?12 : x>=4.3?6 : x<3.5?-12 : 0;
+  if(c.instagram) s+=12;
+  if((+c.branches||1)>=2) s+=15;
+  if(BIG_HINT.test(`${c.name} ${c.category||''} ${c.address||''}`)) s+=10;
+  if(GENERIC.test(c.name||'')) s-=15;
+  return s;
+}
+// Внутри каждой ниши: верхние 25% «Крупный», следующие 40% «Средний», остальные «Малый».
+let tierMap = new Map(), tierKey = '';
+function rankTiers(){
+  const key = contacts.length+':'+contacts.reduce((s,c)=>s+(+c.reviews||0)+(c.instagram?1:0),0); if(key===tierKey) return; tierKey=key;
+  const by={}; tierMap=new Map();
+  contacts.forEach(c=>(by[c.niche||'']||=[]).push([c,tierScore(c)]));
+  Object.values(by).forEach(a=>{ a.sort((x,y)=>y[1]-x[1] || (+y[0].reviews||0)-(+x[0].reviews||0)); a.forEach(([c,sc],i)=>{ const q=i/a.length; tierMap.set(c.phone, q<0.25&&sc>=40?'big' : q<0.65&&sc>=15?'mid' : 'small'); }); });
+}
+const autoTier = c => { rankTiers(); return tierMap.get(c.phone)||'small'; };
+const tierOf = c => ['big','mid','small'].includes(c.tier) ? c.tier : autoTier(c);
+const TIER = {big:'Крупный', mid:'Средний', small:'Малый'}, TRANK = {big:0, mid:1, small:2};
+function tierWhy(c){
+  const r=+c.reviews||0, w=[];
+  if(r>=40) w.push('много отзывов'); else if(r<5) w.push('почти нет отзывов');
+  if(c.instagram) w.push('есть Instagram');
+  if((+c.branches||1)>=2) w.push(`${c.branches} ${plural(+c.branches,['филиал','филиала','филиалов'])}`);
+  if(/(трц|тц |бц )/i.test(c.address||'')) w.push('в ТЦ/БЦ');
+  if(/(производ|фабрик|factory)/i.test(`${c.name} ${c.category||''}`)) w.push('производство');
+  if(GENERIC.test(c.name||'')) w.push('частный мастер');
+  if(!w.length) w.push('обычная карточка в 2ГИС');
+  return w.join(' · ');
+}
+function tierPkg(t){ const p=(settings.packages||[]).map(x=>`«${x.name}»`); return t==='big' ? [p[1],p[2]].filter(Boolean).join(' или ') : t==='mid' ? (p[1]||'') : (p[0]||''); }
+function tierBadge(c){ const t=tierOf(c), man=['big','mid','small'].includes(c.tier), title=`${TIER[t]}: ${tierWhy(c)}${man?' (поставлено вручную)':''}`;
+  return me.role==='owner' ? `<button class="tier t-${t}${man?' manual':''}" data-tier="${c.phone}" title="${esc(title)}. Нажми, чтобы сменить уровень">${TIER[t]}</button>` : `<span class="tier t-${t}" title="${esc(title)}">${TIER[t]}</span>`; }
 const editing = sel => { const a=document.activeElement; return !!(a && a.matches('input,select,textarea') && a.closest(sel)); };
 const scriptText = (sc,c) => fill(langOf(c)==='kz' && sc.kz ? sc.kz : sc.ru, c);
 const waUrl = (c, text) => `https://wa.me/${c.phone}?text=${encodeURIComponent(text)}`;
@@ -403,7 +455,7 @@ function drawStats(){
   if(!owner && plan){ const p=Math.min(100,Math.round(100*mineToday/plan)); $('#planText').textContent = mineToday>=plan ? `План на сегодня выполнен: ${mineToday} из ${plan}` : `План на сегодня: ${mineToday} из ${plan}`; $('#planFill').style.width=p+'%'; }
   const due = contacts.filter(x=>isDue(x) && (owner || x.sentBy===me.name || !x.sentBy)).length;
   $('#dueBanner').hidden = !(due && filter!=='due');
-  const waitDev = owner ? contacts.filter(x=>stOf(x)==='interested' && !x.devAt).length : 0;
+  const waitDev = canDev() ? contacts.filter(x=>stOf(x)==='interested' && !x.devAt && mineDeal(x)).length : 0;
   $('#devBanner').hidden = !(waitDev && $('#p-deals').hidden);
   $('#devText').textContent = `Ждут разработчика: ${waitDev} ${plural(waitDev,['клиент','клиента','клиентов'])} с интересом`;
   $('#dueText').textContent = `Пора дожать: ${due} ${plural(due,['клиент','клиента','клиентов'])} без ответа больше ${settings.followupHours} ч`;
@@ -434,9 +486,12 @@ function drawQueue(){
   const dueN = contacts.filter(isDue).length;
   const fl=[['new','Новые',c.new],['due','Дожать',dueN],['all','Все',contacts.length],...ST.map(([k,l])=>[k,l,c[k]])];
   $('#filters').innerHTML = fl.map(([k,l,n])=>`<button class="f${k==='due'?' due':''}" data-f="${k}" aria-pressed="${filter===k}">${l}<small>${n}</small></button>`).join('');
-  const q=$('#q').value.trim().toLowerCase(), nf=sel.value;
-  let arr=contacts.filter(x=>(filter==='all'||(filter==='due'?isDue(x):stOf(x)===filter))&&(!nf||x.niche===nf)&&(!q||(x.name+' '+x.phone+' '+(x.address||'')).toLowerCase().includes(q)));
-  if(filter==='new') arr.sort((a,b)=>(takenBy(a)?1:0)-(takenBy(b)?1:0) || (a.ord||0)-(b.ord||0));
+  const q=$('#q').value.trim().toLowerCase(), nf=sel.value, ts=$('#tierSel'), tf=ts.value;
+  const inF = x => (filter==='all'||(filter==='due'?isDue(x):stOf(x)===filter))&&(!nf||x.niche===nf)&&(!q||(x.name+' '+x.phone+' '+(x.address||'')).toLowerCase().includes(q));
+  const tc={big:0,mid:0,small:0}; contacts.forEach(x=>{ if(inF(x)) tc[tierOf(x)]++; });
+  ts.innerHTML = `<option value="">Все уровни</option>`+['big','mid','small'].map(k=>`<option value="${k}"${tf===k?' selected':''}>${TIER[k]} (${tc[k]})</option>`).join('');
+  let arr=contacts.filter(x=>inF(x) && (!tf||tierOf(x)===tf));
+  if(filter==='new') arr.sort((a,b)=>(takenBy(a)?1:0)-(takenBy(b)?1:0) || TRANK[tierOf(a)]-TRANK[tierOf(b)] || (a.ord||0)-(b.ord||0));
   else if(filter==='due') arr.sort((a,b)=>(a.at||0)-(b.at||0));
   else arr.sort((a,b)=>(a.ord||0)-(b.ord||0));
   if(!contacts.length){
@@ -447,22 +502,25 @@ function drawQueue(){
   $('#list').innerHTML = arr.slice(0,shown).map(x=>{
     const st=stOf(x), done=st!=='new', taken=takenBy(x), due=isDue(x), stale=isStale(x);
     const chips=ST.map(([k,l])=>`<button class="chip s-${k}${st===k?' on':''}" data-st="${k}" data-id="${x.phone}">${l}</button>`).join('');
-    const devTrace = x.deal ? `<span class="devdone">Разработка: ${DLABEL[x.deal.stage]||''}</span>` : x.devAt ? `<span class="devdone">Разработчик написал ${dmy(x.devAt)} ${hhmm(x.devAt)}</span>` : '';
+    const devBy = x.devBy && x.devBy!==me.name ? ` · ведёт ${esc(x.devBy)}` : '';
+    const devTrace = x.deal ? `<span class="devdone">Разработка: ${DLABEL[x.deal.stage]||''}${devBy}</span>` : x.devAt ? `<span class="devdone">Разработчик написал ${dmy(x.devAt)} ${hhmm(x.devAt)}</span>` : '';
     const trace = (done && x.by) ? `<span>${LABEL[st]} · ${esc(x.by)} · ${dmy(x.at)} ${hhmm(x.at)}</span>` : taken ? `<span>в работе у ${esc(taken)}</span>` : '';
     const hint = due ? `<span class="hintdue">Без ответа ${Math.floor((serverNow-x.at)/3600000)} ч → напомни</span>` : stale ? `<span class="hintdue">Напоминали, ответа нет → поставь «Не ответил»</span>` : '';
     const main = due ? `<a class="btn follow" data-follow="${x.phone}" href="${esc(waUrl(x, followFor(x)))}" target="_blank" rel="noopener">Напомнить</a>` : `<a class="btn primary" data-open="${x.phone}" href="${esc(waUrl(x, msgFor(x)))}" target="_blank" rel="noopener">Открыть чат</a>`;
     const ig = x.instagram ? `<a class="btn" href="${esc(igUrl(x))}" target="_blank" rel="noopener">Instagram</a>` : '';
     const del = owner ? `<button class="btn danger" data-del="${x.phone}" title="Удалить из списка">✕</button>` : '';
     const lang = `<span class="lang" title="Язык сообщений"><button data-lang="ru" data-id="${x.phone}" aria-pressed="${langOf(x)==='ru'}">RU</button><button data-lang="kz" data-id="${x.phone}" aria-pressed="${langOf(x)==='kz'}">KZ</button></span>`;
-    const dev = (owner && st==='interested') ? `<a class="btn dev" data-dev="${x.phone}" href="${esc(waUrl(x, devFor(x)))}" target="_blank" rel="noopener">${x.devAt?'Ещё раз от разработчика':'Написать как разработчик'}</a>` : '';
+    const dev = (canDev() && st==='interested' && mineDeal(x)) ? `<a class="btn dev" data-dev="${x.phone}" href="${esc(waUrl(x, devFor(x)))}" target="_blank" rel="noopener">${x.devAt?'Ещё раз от разработчика':'Написать как разработчик'}</a>` : '';
     const mainOrDev = dev || main;
     const scr = (settings.scripts||[]).length ? `<button class="btn" data-scripts="${x.phone}">Ответы</button>` : '';
     const panel = openScripts===x.phone ? `<div class="scripts">${(settings.scripts||[]).map((sc,i)=>`<a class="btn small" href="${esc(waUrl(x, scriptText(sc,x)))}" target="_blank" rel="noopener" data-script="${i}" data-id="${x.phone}">${esc(sc.title)}</a>`).join('')}</div>` : '';
     const extra = [x.rating?`<span class="star">★ ${esc(x.rating)}</span>${x.reviews?' · '+esc(reviewsText(x)):''}`:'', x.hours?esc(x.hours):'', x.category?esc(x.category):''].filter(Boolean).join(' · ');
-    return `<article class="row s-${st}${done?' done':''}${taken?' taken':''}${due?' due':''}">
-      <div><h3>${esc(x.name)}${lang}</h3>
+    const tier=tierOf(x), pk=tierPkg(tier);
+    return `<article class="row s-${st}${done?' done':''}${taken?' taken':''}${due?' due':''} t-${tier}">
+      <div><h3>${esc(x.name)}${tierBadge(x)}${lang}</h3>
         <p class="meta"><span class="ph">${fmtPhone(x.phone)}</span>${isMobile(x.phone)?'':'<span class="tag">городской</span>'}${x.niche?' · '+esc(x.niche):''}${x.address?' · '+esc(x.address):''}</p>
-        ${extra?`<p class="meta">${extra}</p>`:''}</div>
+        ${extra?`<p class="meta">${extra}</p>`:''}
+        <p class="why">${TIER[tier]}: ${esc(tierWhy(x))}${pk?` → предлагай <b>${esc(pk)}</b>`:''}</p></div>
       <div class="act">${mainOrDev}${dev?main.replace('btn primary','btn'):''}<a class="btn" href="${esc(gisUrl(x))}" target="_blank" rel="noopener">2ГИС</a>${ig}<button class="btn" data-copy="${x.phone}" data-kind="${due?'follow':'first'}">Копировать</button>${scr}${del}</div>
       <div class="chips">${chips}</div>${panel}
       <div class="trace">${trace}${devTrace}${hint}<input data-note="${x.phone}" value="${esc(x.note||'')}" placeholder="Заметка (сохраняется сама)"></div></article>`;
@@ -471,7 +529,7 @@ function drawQueue(){
 }
 
 function drawDealStats(){
-  const all=contacts.map(dealOf).filter(Boolean), n=k=>all.filter(d=>d.stage===k).length;
+  const all=contacts.filter(mineDeal).map(dealOf).filter(Boolean), n=k=>all.filter(d=>d.stage===k).length;
   const talks=all.filter(d=>['talk','brief','draft'].includes(d.stage)), sumTalk=talks.reduce((s,d)=>s+(+d.price||0),0);
   const got=all.filter(d=>d.stage!=='lost').reduce((s,d)=>s+(+d.paid||0),0), left=all.filter(d=>['paid','done'].includes(d.stage)).reduce((s,d)=>s+owes(d),0);
   $('#dstats').innerHTML=[[n('wait'),'ждут разработчика'],[talks.length,'в переговорах'],[rub(sumTalk)+' ₸','сумма переговоров'],[n('paid'),'в разработке'],[n('done'),'сайтов сдано'],[rub(got)+' ₸','получено'],[rub(left)+' ₸','осталось получить']].map(([v,l])=>`<div class="stat"><b>${esc(v)}</b><span>${l}</span></div>`).join('');
@@ -479,7 +537,7 @@ function drawDealStats(){
 function drawDeals(){
   drawDealStats();
   if(editing('#dlist')) return;
-  const all=contacts.map(c=>[c,dealOf(c)]).filter(([,d])=>d), cnt=Object.fromEntries(DORDER.map(k=>[k,0]));
+  const all=contacts.filter(mineDeal).map(c=>[c,dealOf(c)]).filter(([,d])=>d), cnt=Object.fromEntries(DORDER.map(k=>[k,0]));
   all.forEach(([,d])=>cnt[d.stage]=(cnt[d.stage]||0)+1);
   const isAct = d => !['done','lost'].includes(d.stage);
   const fl=[['active','Активные',all.filter(([,d])=>isAct(d)).length],...DORDER.map(k=>[k,DSHORT[k],cnt[k]]),['all','Все',all.length]];
@@ -511,11 +569,11 @@ function drawDeals(){
         <label class="fld wide"><span>Ссылка на черновик или сайт</span><input data-dlink="${x.phone}" type="url" inputmode="url" value="${esc(d.link||'')}" placeholder="https://…"></label></div>`;
     const o=owes(d);
     const money = +d.price ? `<span class="money">${pkgText(d)?esc(pkgText(d))+' · ':''}оплачено ${rub(d.paid)} из ${rub(d.price)} ₸${o&&['paid','done'].includes(st)?` · <b class="debt">осталось ${rub(o)} ₸</b>`:''}</span>` : '';
-    const found = x.sentBy ? `<span>Нашёл: ${esc(x.sentBy)}</span>` : '';
+    const found = (x.sentBy ? `<span>Нашёл: ${esc(x.sentBy)}</span>` : '') + (x.devBy && x.devBy!==me.name ? `<span>Ведёт: <b>${esc(x.devBy)}</b></span>` : '');
     const dw = x.devAt ? `<span class="devdone">Разработчик написал ${dmy(x.devAt)}</span>` : '';
     const lang = `<span class="lang" title="Язык сообщений"><button data-lang="ru" data-id="${x.phone}" aria-pressed="${langOf(x)==='ru'}">RU</button><button data-lang="kz" data-id="${x.phone}" aria-pressed="${langOf(x)==='kz'}">KZ</button></span>`;
     return `<article class="row d-${st}">
-      <div><h3>${esc(x.name)}${st==='lost'?'<span class="tag">не купил</span>':''}${lang}</h3>
+      <div><h3>${esc(x.name)}${tierBadge(x)}${st==='lost'?'<span class="tag">не купил</span>':''}${lang}</h3>
         <p class="meta"><span class="ph">${fmtPhone(x.phone)}</span>${x.niche?' · '+esc(x.niche):''}${x.rating?` · <span class="star">★ ${esc(x.rating)}</span>`:''}</p></div>
       <div class="act">${main}<a class="btn" href="https://wa.me/${x.phone}" target="_blank" rel="noopener">Чат</a><a class="btn" href="${esc(gisUrl(x))}" target="_blank" rel="noopener">2ГИС</a>${lostBtn}</div>
       ${steps}${fields}
@@ -532,15 +590,16 @@ async function moveDeal(c, stage){
 }
 
 function drawTeam(){
-  const ds=dayStart(), names=[...new Set(contacts.flatMap(x=>[x.sentBy,x.by]).filter(Boolean).concat(Object.keys(presence)))].filter(n=>n!==me.name || presence[n]?.role==='worker');
+  const ds=dayStart(), names=[...new Set(contacts.flatMap(x=>[x.sentBy,x.by,x.devBy]).filter(Boolean).concat(Object.keys(presence)))].filter(n=>n!=='авто' && (n!==me.name || presence[n]?.role==='worker'));
+  const devs=(settings.devs||[]).map(d=>d.toLowerCase());
   if(!names.length){ $('#teamTable').innerHTML='<tr><td>Пока никто не заходил и не отмечал клиентов.</td></tr>'; return; }
   const rows=names.map(n=>{
     const mine=contacts.filter(x=>x.sentBy===n), c=counts(mine), contacted=mine.length, conv=contacted?Math.round(100*c.interested/contacted):0;
     const last=Math.max(0,...contacts.filter(x=>x.by===n).map(x=>x.at||0)), p=presence[n], st=p?onlineState(p):null;
     const bought=mine.filter(x=>x.deal && ['paid','done'].includes(x.deal.stage)).length;
-    return `<tr><td><i class="dot ${st||''}"></i> ${esc(n)}</td><td>${mine.filter(x=>x.sentAt>=ds).length}</td><td>${contacted}</td><td>${c.followup}</td><td>${c.interested}</td><td>${bought}</td><td>${conv}%</td><td>${c.refused}</td><td>${c.noreply}</td><td>${st==='on'?'онлайн':st==='idle'?'в фоне':p?ago(p.t):last?ago(last):'—'}</td></tr>`;
+    return `<tr><td><i class="dot ${st||''}"></i> ${esc(n)}</td><td>${mine.filter(x=>x.sentAt>=ds).length}</td><td>${contacted}</td><td>${c.followup}</td><td>${c.interested}</td><td>${bought}</td><td>${conv}%</td><td>${c.refused}</td><td>${c.noreply}</td><td>${st==='on'?'онлайн':st==='idle'?'в фоне':p?ago(p.t):last?ago(last):'—'}</td><td>${p?.role==='owner'?'владелец':`<button class="btn small${devs.includes(n.toLowerCase())?' dev':''}" data-devtoggle="${esc(n)}">${devs.includes(n.toLowerCase())?'Разработчик ✓':'Сделать разработчиком'}</button>`}</td></tr>`;
   }).join('');
-  $('#teamTable').innerHTML=`<tr><th>Сотрудник</th><th>Сегодня</th><th>Написал всего</th><th>Напомнил</th><th>Интерес</th><th>Оплатили</th><th>Конверсия</th><th>Отказ</th><th>Не ответ.</th><th>Был активен</th></tr>${rows}`;
+  $('#teamTable').innerHTML=`<tr><th>Сотрудник</th><th>Сегодня</th><th>Написал всего</th><th>Напомнил</th><th>Интерес</th><th>Оплатили</th><th>Конверсия</th><th>Отказ</th><th>Не ответ.</th><th>Был активен</th><th>Роль</th></tr>${rows}`;
 }
 
 function drawReport(){
@@ -561,6 +620,7 @@ async function load(){
   try{
     const d = await api('/state');
     me=d.me; contacts=d.contacts; settings=d.settings; presence=d.presence; events=d.events||[]; serverNow=d.now||Date.now(); seedError=d.seedError;
+    document.querySelectorAll('.tab.devtab').forEach(b=>b.hidden=!canDev());
     render();
     if(me.role==='owner' && !['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)){ const t=settings.templates, h=settings.hooks; $('#tplF').value=t.furniture||''; $('#tplM').value=t.massage||''; $('#tplD').value=t.default||''; $('#tplU').value=t.followup||''; $('#hookW').value=h.withReviews||''; $('#hookN').value=h.withoutReviews||''; const tk=settings.templatesKz||{}, hk=settings.hooksKz||{}; $('#tplFk').value=tk.furniture||''; $('#tplMk').value=tk.massage||''; $('#tplDk').value=tk.default||''; $('#tplUk').value=tk.followup||''; $('#hookWk').value=hk.withReviews||''; $('#hookNk').value=hk.withoutReviews||''; const dv=settings.templatesDev||{}, dk=settings.templatesDevKz||{}; $('#dvF').value=dv.furniture||''; $('#dvM').value=dv.massage||''; $('#dvD').value=dv.default||''; $('#dvFk').value=dk.furniture||''; $('#dvMk').value=dk.massage||''; $('#dvDk').value=dk.default||''; $('#scripts').value=(settings.scripts||[]).map(sc=>`${sc.title}\n${sc.ru}\n${sc.kz||''}`).join('\n\n'); fillDealCfg(); $('#plan').value=settings.dailyPlan||60; $('#followupHours').value=settings.followupHours||48; $('#autoSent').checked=settings.autoSent!==false; }
   }catch(e){ if(e.message!=='auth') toast(e.message||'Нет связи'); }
@@ -611,6 +671,14 @@ document.addEventListener('click', async e=>{
   }
   if(t.dataset.goto){ if(t.dataset.goto==='deals') dfilter='wait'; showTab(t.dataset.goto); window.scrollTo({top:0}); return; }
   if(t.dataset.df){ dfilter=t.dataset.df; render(); return; }
+  if(t.dataset.tier){ const c=contacts.find(x=>x.phone===t.dataset.tier); if(!c) return; const order=['big','mid','small']; const cur=tierOf(c), man=order.includes(c.tier);
+    const next = !man ? order[(order.indexOf(cur)+1)%3] : (order.indexOf(c.tier)===2 ? '' : order[order.indexOf(c.tier)+1]);
+    const nextShown = next || autoTier(c);
+    c.tier=next; render(); toast(`${c.name}: ${TIER[nextShown]}${next?'':' (авто)'}`);
+    api('/tier',{phone:c.phone,tier:next}).catch(e=>toast(e.message||'Не сохранилось')); return; }
+  if(t.dataset.devtoggle){ const n=t.dataset.devtoggle, cur=settings.devs||[], on=cur.some(d=>d.toLowerCase()===n.toLowerCase());
+    const devs = on ? cur.filter(d=>d.toLowerCase()!==n.toLowerCase()) : [...cur, n];
+    try{ await api('/settings',{devs}); settings.devs=devs; render(); toast(on?`${n} больше не разработчик`:`${n} теперь разработчик`); }catch(e){ toast(e.message); } return; }
   if(t.dataset.dwa){ const c=contacts.find(x=>x.phone===t.dataset.id); if(!c) return; const d=dealOf(c)||{}, kind=t.dataset.dwa;
     const need = ['draft','nudge','done'].includes(kind) && !d.link ? 'link' : kind==='offer' && !(+d.price>0) ? 'price' : '';
     if(need){ e.preventDefault(); toast(need==='link'?'Сначала вставь ссылку на сайт в карточке':'Сначала выбери пакет или впиши цену'); document.querySelector(`[data-d${need}="${c.phone}"]`)?.focus(); return; }
@@ -644,6 +712,7 @@ document.addEventListener('change', async e=>{
 });
 $('#q').addEventListener('input',()=>{ shown=60; render(); });
 $('#niche').addEventListener('change',()=>{ shown=60; render(); });
+$('#tierSel').addEventListener('change',()=>{ shown=60; render(); });
 $('#file').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ $('#paste').value=String(r.result||''); }; r.readAsText(f); });
 $('#doImport').addEventListener('click',async()=>{
   const csv=$('#paste').value; if(!csv.trim()){ toast('Сначала выбери файл или вставь строки'); return; }
@@ -681,7 +750,8 @@ async function showApp(){
   $('#v-login').hidden=true; $('#v-app').hidden=false;
   const owner=me.role==='owner';
   document.querySelectorAll('.tab.owner').forEach(b=>b.hidden=!owner);
-  $('#sub').textContent = owner ? 'Режим владельца' : `Привет, ${me.name}. Жми «Открыть чат», отправляй, дальше всё само.`;
+  document.querySelectorAll('.tab.devtab').forEach(b=>b.hidden=!canDev());
+  $('#sub').textContent = owner ? 'Режим владельца' : me.dev ? `Привет, ${me.name}. Ты разработчик: клиенты с интересом во вкладке «Разработка».` : `Привет, ${me.name}. Жми «Открыть чат», отправляй, дальше всё само.`;
   await load(); beat();
   clearInterval(pollTimer); pollTimer=setInterval(()=>{ load(); beat(); }, 20000);
 }
