@@ -7,7 +7,13 @@
 <title>Рассылка Damillion</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<script>
+/* Сторож: если основной код не запустился (старый браузер, обрыв), показываем понятное сообщение и шлём ошибку владельцу. Написано на старом JS, чтобы работало везде. */
+(function(){var n=0;function rep(m,s){if(window.__booted||n++>4)return;try{var x=new XMLHttpRequest();x.open('POST','/api/log');x.setRequestHeader('content-type','application/json');x.send(JSON.stringify({kind:'boot',msg:String(m).slice(0,500),stack:String(s||'').slice(0,1200),ua:navigator.userAgent,url:location.href}));}catch(e){}}
+window.addEventListener('error',function(e){rep(e.message,(e.filename||'')+':'+(e.lineno||'')+' '+(e.error&&e.error.stack||''));});
+setTimeout(function(){if(!window.__booted){var b=document.getElementById('bootFail');if(b){b.hidden=false;}var l=document.getElementById('v-load');if(l){l.hidden=true;}rep('main script did not start','');}},12000);})();
+</script>
 <style>
 :root{
   --bg:#EDF0F3; --surface:#FFFFFF; --surface2:#F4F6F8; --ink:#11161D; --muted:#5B6672; --line:#D9DFE5;
@@ -155,12 +161,76 @@ button.tier{cursor:pointer}
 .row.t-big{border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
 .legend{font-size:12.5px;color:var(--muted);display:grid;gap:5px;line-height:1.5}
 .legend .tier{margin:0 6px 0 0;padding:2px 8px}
+/* загрузка, связь, следующий клиент */
+.loading{max-width:380px;margin:60px auto 0;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.banner.net{background:color-mix(in srgb,var(--c-refused) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--c-refused) 35%,var(--line));padding:9px 14px;font-size:13.5px}
+.nextbar{position:fixed;left:0;right:0;bottom:0;z-index:15;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:10px max(14px,env(safe-area-inset-left,0px)) calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:12px;align-items:center;justify-content:center}
+.nextbar .nb{min-width:0;flex:0 1 420px}
+.nextbar small{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.nextbar b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}
+.nextbar .btn{flex:none;padding:12px 18px;font-size:15px}
+.toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+/* карточка клиента: главное крупно, остальное мелко */
+.row .info{min-width:0}
+.meta.addr{font-size:12.5px}
+.mini{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;align-items:center}
+.mini .btn{padding:6px 10px;font-size:13px;border-radius:8px}
+.mini .lang{margin-left:0}
+.act{flex-direction:column;align-items:stretch}
+.act .btn.big{padding:12px 18px;font-size:15px}
+.chips .lbl{font-size:12px;color:var(--muted);margin-right:2px}
+.stat.go{background:none;border:0;padding:0;text-align:left;cursor:pointer;color:inherit;font:inherit}
+.stat.go b{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:5px}
+.stats.w4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.chip.more{border-style:dashed;color:var(--muted)}
+details.legend{font-size:12.5px;color:var(--muted)}
+details.legend summary{cursor:pointer;list-style:none;display:inline-flex;gap:6px;align-items:center;font-size:13px}
+details.legend summary::-webkit-details-marker{display:none}
+details.legend summary::before{content:"?";display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--line);font-size:11px;font-weight:700}
+details.legend[open] .lg{display:grid;gap:5px;margin-top:8px;line-height:1.5}
+details.legend .lg{display:none}
+.pwd{position:relative}
+.pwd input{padding-right:84px}
+.pwd button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--accent);font-weight:600;cursor:pointer;padding:6px 8px;font-size:13px}
+.errlog td{white-space:normal;font-size:12.5px;vertical-align:top}
+.errlog td.msg{font-family:var(--f-mono);font-size:12px;max-width:420px;overflow-wrap:anywhere}
 [hidden]{display:none!important}
-@media (max-width:560px){.row{grid-template-columns:1fr}.act{justify-content:stretch}.act .btn{flex:1 1 auto}.btn{padding:10px 12px}}
+@media (max-width:560px){
+  body{font-size:15px;padding-top:12px}
+  .row{grid-template-columns:1fr;padding:12px 12px 12px 16px}
+  .act .btn.big{width:100%}
+  .mini{justify-content:flex-start}
+  .btn{padding:10px 12px}
+  .stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .stat b{font-size:20px}
+  .stat span{font-size:10.5px;letter-spacing:.04em}
+  .panel{padding:12px 14px}
+  .filters{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .f{white-space:nowrap}
+  .tools input[type=search]{flex:1 1 100%}
+  .tools select{flex:1 1 0}
+  header .online{display:none}
+  .sub{font-size:12.5px}
+}
 </style>
 </head>
 <body>
 <div class="wrap" id="app">
+
+  <section class="loading" id="v-load">
+    <h1 style="justify-content:center"><span class="mark">D</span>Рассылка Damillion</h1>
+    <div class="spin" id="loadSpin" aria-hidden="true"></div>
+    <p class="sub" id="loadText">Загружаю список…</p>
+    <button class="btn primary" id="loadRetry" hidden>Повторить</button>
+  </section>
+  <section class="loading panel" id="bootFail" hidden>
+    <h2 style="font-family:var(--f-display);font-weight:500;font-size:17px">Сайт не загрузился</h2>
+    <p class="hint">Проверь интернет и нажми «Обновить». Если не помогло, открой ссылку в Chrome или Safari последней версии (не во встроенном браузере Instagram/Telegram).</p>
+    <button class="btn primary" onclick="location.reload()">Обновить</button>
+  </section>
 
   <section class="login" id="v-login" hidden>
     <div style="text-align:center"><h1 style="justify-content:center"><span class="mark">D</span>Рассылка Damillion</h1><p class="sub">Вход для владельца и работников</p></div>
@@ -168,7 +238,7 @@ button.tier{cursor:pointer}
       <label for="llogin" class="hint">Логин</label>
       <input id="llogin" autocomplete="username" autocapitalize="off" spellcheck="false">
       <label for="lpass" class="hint">Пароль</label>
-      <input id="lpass" type="password" autocomplete="current-password">
+      <div class="pwd"><input id="lpass" type="password" autocomplete="current-password"><button type="button" id="lshow">Показать</button></div>
       <label for="lname" class="hint">Твоё имя (так тебя видно в сводке)</label>
       <input id="lname" autocomplete="nickname" placeholder="Даниал">
       <p class="err" id="lerr"></p>
@@ -183,6 +253,7 @@ button.tier{cursor:pointer}
         <div class="online" id="online"></div>
       </header>
 
+      <div class="banner net" id="netBanner" hidden><span>Нет связи с сервером. Показываю последний сохранённый список, отметки отправятся сами, когда появится интернет.</span><button class="btn small" id="netRetry">Повторить</button></div>
       <section class="panel" aria-label="Прогресс">
         <div class="stats" id="stats"></div>
         <div class="bar" id="bar" role="img" aria-label="Распределение статусов"></div>
@@ -209,7 +280,7 @@ button.tier{cursor:pointer}
           <select id="niche" aria-label="Ниша"><option value="">Все ниши</option></select>
           <select id="tierSel" aria-label="Уровень клиента"><option value="">Все уровни</option></select>
         </div>
-        <div class="legend"><span><span class="tier t-big">Крупный</span> четверть самых сильных в нише: отзывы, рейтинг, Instagram, филиалы, производство. Они сверху очереди.</span><span><span class="tier t-mid">Средний</span> обычный бизнес.</span><span><span class="tier t-small">Малый</span> частник или мало данных в 2ГИС.</span></div>
+        <details class="legend"><summary>Что значит Крупный / Средний / Малый</summary><div class="lg"><span><span class="tier t-big">Крупный</span> четверть самых сильных в нише: отзывы, рейтинг, Instagram, филиалы, производство. Они сверху очереди.</span><span><span class="tier t-mid">Средний</span> обычный бизнес.</span><span><span class="tier t-small">Малый</span> частник или мало данных в 2ГИС.</span></div></details>
         <div class="filters" id="filters"></div>
         <div class="list" id="list"></div>
         <button class="btn more" id="more" hidden>Показать ещё</button>
@@ -226,6 +297,10 @@ button.tier{cursor:pointer}
         <h2>Работа сотрудников</h2>
         <div class="scroll"><table id="teamTable"></table></div>
         <p class="hint">«Разработчик»: работник получает вкладку «Разработка» и кнопку «Написать как разработчик», сообщения уходят от его имени. Клиента, которого взял один разработчик, другой не видит.</p>
+        <h2 style="margin-top:8px">Ошибки на устройствах</h2>
+        <p class="hint">Если у работника что-то не открывается или не нажимается, его телефон сам присылает сюда, что случилось.</p>
+        <div class="scroll"><table class="errlog" id="errTable"></table></div>
+        <div class="tools"><button class="btn small" id="errReload">Обновить</button><button class="btn small" id="errClear">Очистить</button></div>
         <p class="hint">«Написал» засчитывается по нажатию кнопки или по открытию чата (если включено в настройках). Сайт не видит, ушло ли сообщение в WhatsApp на самом деле.</p>
       </section>
 
@@ -315,9 +390,11 @@ button.tier{cursor:pointer}
     </div>
   </section>
 </div>
+<div class="nextbar" id="nextBar" hidden><div class="nb"><small>Следующий клиент</small><b id="nbName"></b></div><a class="btn primary" id="nbGo" target="_blank" rel="noopener">Открыть чат</a></div>
 <div class="toast" id="toast" hidden><span id="toastText"></span><button id="toastBtn" hidden></button></div>
 
 <script>
+window.__booted = true;
 const ST = [['sent','Написал'],['followup','Напомнил'],['noreply','Не ответил'],['interested','Интерес'],['refused','Отказал'],['skip','Нет WhatsApp']];
 const LABEL = Object.fromEntries(ST); LABEL.new = 'Новый';
 const CLAIM_MS = 30*60*1000;
@@ -328,6 +405,18 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 let me = null, contacts = [], settings = {templates:{}, hooks:{}, dailyPlan:60, autoSent:true, followupHours:48}, presence = {}, events = [], serverNow = Date.now(), seedError = null;
 let filter = 'new', shown = 60, pollTimer = null, prevDone = null, openScripts = null;
 const busy = new Set();
+let ver = '', loading = false, netOk = true, netDownAt = 0, touchAt = 0, lastList = '', lastFilters = '', openAll = new Set();
+
+/* ---------- журнал ошибок: что сломалось у работника, видно владельцу во вкладке «Команда» ---------- */
+const sentErr = new Set();
+function logErr(msg, extra, kind){
+  const k=String(msg).slice(0,140); if(sentErr.has(k) || sentErr.size>25) return; sentErr.add(k);
+  try{ fetch('/api/log',{method:'POST',headers:{'content-type':'application/json'},keepalive:true,body:JSON.stringify({kind:kind||'js',msg:String(msg).slice(0,500),stack:String(extra||'').slice(0,1500),ua:navigator.userAgent,url:location.pathname,who:(me&&me.name)||'',role:(me&&me.role)||''})}).catch(()=>{}); }catch(e){}
+}
+window.addEventListener('error', e=>logErr(e.message, `${e.filename||''}:${e.lineno||''}:${e.colno||''} ${(e.error&&e.error.stack)||''}`));
+window.addEventListener('unhandledrejection', e=>{ const r=e.reason||{}; if(r.auth||r.net) return; logErr('promise: '+(r.message||r), r.stack||''); });
+/* Пока палец на экране или идёт прокрутка, список фоном не перерисовываем: иначе кнопка «уезжает» из-под пальца. */
+['touchstart','scroll','wheel'].forEach(ev=>addEventListener(ev, ()=>{ touchAt=Date.now(); }, {passive:true}));
 
 function toast(t, btnText, btnFn){ const el=$('#toast'); $('#toastText').textContent=t; const b=$('#toastBtn'); b.hidden=!btnText; if(btnText){ b.textContent=btnText; b.onclick=()=>{ el.hidden=true; btnFn&&btnFn(); }; } el.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>el.hidden=true, btnText?5000:2600); }
 const dayStart = () => { const d=new Date(); d.setHours(0,0,0,0); return d.getTime(); };
@@ -399,14 +488,13 @@ function tierScore(c){
   return s;
 }
 // Внутри каждой ниши: верхние 25% «Крупный», следующие 40% «Средний», остальные «Малый».
-let tierMap = new Map(), tierKey = '';
+let tierMap = new Map();
 function rankTiers(){
-  const key = contacts.length+':'+contacts.reduce((s,c)=>s+(+c.reviews||0)+(c.instagram?1:0),0); if(key===tierKey) return; tierKey=key;
   const by={}; tierMap=new Map();
-  contacts.forEach(c=>(by[c.niche||'']||=[]).push([c,tierScore(c)]));
+  contacts.forEach(c=>{ const k=c.niche||''; (by[k] = by[k] || []).push([c,tierScore(c)]); });
   Object.values(by).forEach(a=>{ a.sort((x,y)=>y[1]-x[1] || (+y[0].reviews||0)-(+x[0].reviews||0)); a.forEach(([c,sc],i)=>{ const q=i/a.length; tierMap.set(c.phone, q<0.25&&sc>=40?'big' : q<0.65&&sc>=15?'mid' : 'small'); }); });
 }
-const autoTier = c => { rankTiers(); return tierMap.get(c.phone)||'small'; };
+const autoTier = c => tierMap.get(c.phone)||'small';
 const tierOf = c => ['big','mid','small'].includes(c.tier) ? c.tier : autoTier(c);
 const TIER = {big:'Крупный', mid:'Средний', small:'Малый'}, TRANK = {big:0, mid:1, small:2};
 function tierWhy(c){
@@ -437,33 +525,64 @@ const dueMs = () => (settings.followupHours||48)*3600000;
 const isDue = c => stOf(c)==='sent' && serverNow-(c.at||0) >= dueMs();
 const isStale = c => stOf(c)==='followup' && serverNow-(c.followAt||c.at||0) >= dueMs()*1.5;
 
-async function api(path, body){
-  const r = await fetch('/api'+path, body ? {method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(body)} : {});
+async function api(path, body, opt={}){
+  const ctrl = ('AbortController' in window) ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(()=>ctrl.abort(), opt.timeout||20000) : 0;
+  let r;
+  try{
+    r = await fetch('/api'+path, { method: body ? 'POST' : 'GET', headers: body ? {'content-type':'application/json'} : {}, body: body ? JSON.stringify(body) : undefined, cache:'no-store', keepalive: !!opt.keepalive, signal: ctrl ? ctrl.signal : undefined });
+  }catch(e){ clearTimeout(timer); throw Object.assign(new Error('Нет связи с сервером. Проверь интернет.'), {net:true}); }
+  clearTimeout(timer);
   const data = await r.json().catch(()=>({}));
-  if(r.status===401 && path!=='/login'){ showLogin(); throw new Error('auth'); }
-  if(!r.ok){ throw Object.assign(new Error(data.message||'Ошибка'), data); }
+  if(r.status===401 && path!=='/login'){ showLogin(); throw Object.assign(new Error('auth'), {auth:true}); }
+  if(!r.ok){ if(r.status>=500) logErr(`api ${path} ${r.status}`, data.message||'', 'api'); throw Object.assign(new Error(data.message||('Ошибка сервера '+r.status)), data, {status:r.status}); }
   return data;
+}
+/* Связь: баннер «нет связи», запись в журнал, когда связь вернулась. */
+function setNet(ok){
+  if(ok && !netOk && netDownAt){ const sec=Math.round((Date.now()-netDownAt)/1000); if(sec>=30) logErr(`Связи не было ${sec} с`, '', 'net'); }
+  if(!ok && netOk) netDownAt=Date.now();
+  netOk=ok; const b=$('#netBanner'); if(b) b.hidden=ok;
+}
+/* Последний список хранится в телефоне: открывается сразу, даже при плохом интернете. */
+const CACHE_KEY='rs_cache_v1', OUT_KEY='rs_outbox_v1';
+function saveCache(d){ try{ localStorage.setItem(CACHE_KEY, JSON.stringify(d)); }catch(e){} }
+function readCache(){ try{ return JSON.parse(localStorage.getItem(CACHE_KEY)||'null'); }catch(e){ return null; } }
+/* Отметки, которые не ушли из-за связи, ждут здесь и отправляются при первой возможности. */
+function outbox(){ try{ return JSON.parse(localStorage.getItem(OUT_KEY)||'[]'); }catch(e){ return []; } }
+function saveOutbox(a){ try{ localStorage.setItem(OUT_KEY, JSON.stringify(a.slice(-300))); }catch(e){} }
+async function flushOutbox(){
+  const a=outbox(); if(!a.length) return;
+  const rest=[];
+  for(const x of a){ try{ const r=await api('/status', x, {keepalive:true}); const c=contacts.find(y=>y.phone===x.phone); if(c&&r.contact) Object.assign(c, r.contact); }catch(e){ if(e.net) rest.push(x); } }
+  saveOutbox(rest); if(rest.length<a.length) render();
 }
 
 function counts(arr){ const o={new:0,sent:0,followup:0,noreply:0,interested:0,refused:0,skip:0}; arr.forEach(c=>o[stOf(c) in o ? stOf(c) : 'new']++); return o; }
-let rq=0; function render(){ cancelAnimationFrame(rq); rq=requestAnimationFrame(draw); }
+let rq=0, rqLater=0;
+function render(bg){
+  if(bg && Date.now()-touchAt < 900){ clearTimeout(rqLater); rqLater=setTimeout(()=>render(true), 900); return; }
+  cancelAnimationFrame(rq); rq=requestAnimationFrame(()=>{ try{ draw(); }catch(e){ logErr('draw: '+e.message, e.stack); } });
+}
 function draw(){ drawStats(); drawOnline(); drawQueue(); if(!$('#p-deals').hidden) drawDeals(); if(!$('#p-team').hidden) drawTeam(); if(!$('#p-report').hidden) drawReport(); }
 
 function drawStats(){
   const c=counts(contacts), total=contacts.length, done=total-c.new, ds=dayStart(), owner=me.role==='owner';
   const mineToday = contacts.filter(x=>x.sentAt>=ds && x.sentBy && (owner || x.sentBy===me.name)).length;
   const contacted = total-c.new-c.skip, conv = contacted ? Math.round(100*c.interested/contacted) : 0;
-  $('#stats').innerHTML = [
-    [done+' / '+total,'обработано'],
-    [mineToday, owner?'написали сегодня':'вы сегодня'],
-    [c.interested,'интерес'], [conv+'%','конверсия'], [c.refused,'отказ']
-  ].map(([v,l])=>`<div class="stat"><b>${esc(v)}</b><span>${l}</span></div>`).join('');
+  const dueAll = contacts.filter(x=>isDue(x) && (owner || x.sentBy===me.name || !x.sentBy)).length;
+  const myInt = contacts.filter(x=>stOf(x)==='interested' && (owner || x.sentBy===me.name)).length;
+  const tiles = owner ? [[done+' / '+total,'обработано'],[mineToday,'написали сегодня'],[c.interested,'интерес'],[conv+'%','конверсия'],[c.refused,'отказ']]
+                      : [[mineToday,'сегодня'],[myInt,'интерес','interested'],[dueAll,'дожать','due'],[c.new,'в очереди','new']];
+  const html = tiles.map(([v,l,f])=>f ? `<button class="stat go" data-f="${f}"><b>${esc(v)}</b><span>${l}</span></button>` : `<div class="stat"><b>${esc(v)}</b><span>${l}</span></div>`).join('');
+  $('#stats').classList.toggle('w4', !owner); $('#bar').hidden = !owner;
+  if($('#stats').innerHTML!==html) $('#stats').innerHTML = html;
   $('#bar').innerHTML = total ? ST.map(([k])=>`<i style="width:${c[k]/total*100}%;background:var(--c-${k})"></i>`).join('') : '';
   const plan=settings.dailyPlan||0;
   $('#planBox').hidden = owner || !plan;
   if(!owner && plan){ const p=Math.min(100,Math.round(100*mineToday/plan)); $('#planText').textContent = mineToday>=plan ? `План на сегодня выполнен: ${mineToday} из ${plan}` : `План на сегодня: ${mineToday} из ${plan}`; $('#planFill').style.width=p+'%'; }
   const due = contacts.filter(x=>isDue(x) && (owner || x.sentBy===me.name || !x.sentBy)).length;
-  $('#dueBanner').hidden = !(due && filter!=='due');
+  $('#dueBanner').hidden = !(owner && due && filter!=='due');
   const waitDev = canDev() ? contacts.filter(x=>stOf(x)==='interested' && !x.devAt && mineDeal(x)).length : 0;
   $('#devBanner').hidden = !(waitDev && $('#p-deals').hidden);
   $('#devText').textContent = `Ждут разработчика: ${waitDev} ${plural(waitDev,['клиент','клиента','клиентов'])} с интересом`;
@@ -494,23 +613,30 @@ function drawQueue(){
   if(sel.options.length-1!==niches.length){ sel.innerHTML='<option value="">Все ниши</option>'+niches.map(n=>`<option>${esc(n)}</option>`).join(''); sel.value=niches.includes(cur)?cur:''; }
   const dueN = contacts.filter(isDue).length;
   const fl=[['new','Новые',c.new],['due','Дожать',dueN],['all','Все',contacts.length],...ST.map(([k,l])=>[k,l,c[k]])];
-  $('#filters').innerHTML = fl.map(([k,l,n])=>`<button class="f${k==='due'?' due':''}" data-f="${k}" aria-pressed="${filter===k}">${l}<small>${n}</small></button>`).join('');
+  const fh = fl.map(([k,l,n])=>`<button class="f${k==='due'?' due':''}" data-f="${k}" aria-pressed="${filter===k}">${l}<small>${n}</small></button>`).join('');
+  if(fh!==lastFilters){ $('#filters').innerHTML = fh; lastFilters=fh; }
   const q=$('#q').value.trim().toLowerCase(), nf=sel.value, ts=$('#tierSel'), tf=ts.value;
   const inF = x => (filter==='all'||(filter==='due'?isDue(x):stOf(x)===filter))&&(!nf||x.niche===nf)&&(!q||(x.name+' '+x.phone+' '+(x.address||'')).toLowerCase().includes(q));
   const tc={big:0,mid:0,small:0}; contacts.forEach(x=>{ if(inF(x)) tc[tierOf(x)]++; });
-  ts.innerHTML = `<option value="">Все уровни</option>`+['big','mid','small'].map(k=>`<option value="${k}"${tf===k?' selected':''}>${TIER[k]} (${tc[k]})</option>`).join('');
+  const th = `<option value="">Все уровни</option>`+['big','mid','small'].map(k=>`<option value="${k}"${tf===k?' selected':''}>${TIER[k]} (${tc[k]})</option>`).join('');
+  if(ts.innerHTML!==th) ts.innerHTML = th;
   let arr=contacts.filter(x=>inF(x) && (!tf||tierOf(x)===tf));
   if(filter==='new') arr.sort((a,b)=>(takenBy(a)?1:0)-(takenBy(b)?1:0) || TRANK[tierOf(a)]-TRANK[tierOf(b)] || (a.ord||0)-(b.ord||0));
   else if(filter==='due') arr.sort((a,b)=>(a.at||0)-(b.at||0));
   else arr.sort((a,b)=>(a.ord||0)-(b.ord||0));
+  drawNext(filter==='new' ? arr.find(x=>!takenBy(x)) : null);
   if(!contacts.length){
-    $('#list').innerHTML = owner ? '<div class="panel empty"><h2>Клиентов пока нет</h2><p>Открой «Настройки» и загрузи список.</p></div>' : '<div class="panel empty"><h2>Список пустой</h2><p>Владелец ещё не загрузил клиентов. Загляни позже.</p></div>';
+    lastList=''; $('#list').innerHTML = owner ? '<div class="panel empty"><h2>Клиентов пока нет</h2><p>Открой «Настройки» и загрузи список.</p></div>' : '<div class="panel empty"><h2>Список пустой</h2><p>Владелец ещё не загрузил клиентов. Загляни позже.</p></div>';
     $('#more').hidden=true; return;
   }
-  if(!arr.length){ $('#list').innerHTML=`<div class="panel empty"><h2>${filter==='new'?'Новых клиентов нет':filter==='due'?'Дожимать пока некого':'Здесь пусто'}</h2><p>${filter==='new'&&dueN?'Есть кого дожать: открой «Дожать».':'Смени фильтр или очисти поиск.'}</p></div>`; $('#more').hidden=true; return; }
-  $('#list').innerHTML = arr.slice(0,shown).map(x=>{
+  if(!arr.length){ lastList=''; $('#list').innerHTML=`<div class="panel empty"><h2>${filter==='new'?'Новых клиентов нет':filter==='due'?'Дожимать пока некого':'Здесь пусто'}</h2><p>${filter==='new'&&dueN?'Есть кого дожать: открой «Дожать».':'Смени фильтр или очисти поиск.'}</p></div>`; $('#more').hidden=true; return; }
+  const html = arr.slice(0,shown).map(x=>{
     const st=stOf(x), done=st!=='new', taken=takenBy(x), due=isDue(x), stale=isStale(x);
-    const chips=ST.map(([k,l])=>`<button class="chip s-${k}${st===k?' on':''}" data-st="${k}" data-id="${x.phone}">${l}</button>`).join('');
+    // Статусы по ситуации: новому только «Написал» и «Нет WhatsApp», после сообщения: чем ответили. Остальное под «…».
+    const QUICK={new:['sent','skip'], sent:['interested','refused','noreply'], followup:['interested','refused','noreply'], noreply:['interested','refused'], interested:['refused'], refused:['interested'], skip:['sent']};
+    const all=openAll.has(x.phone), keys=all ? ST.map(([k])=>k) : [...new Set([...(done?[st]:[]), ...(QUICK[st]||[])])];
+    const lbl = st==='new' ? '' : `<span class="lbl">${['sent','followup'].includes(st)?'Ответили?':'Итог:'}</span>`;
+    const chips=lbl+keys.map(k=>`<button class="chip s-${k}${st===k?' on':''}" data-st="${k}" data-id="${x.phone}">${LABEL[k]}</button>`).join('')+(all?'':`<button class="chip more" data-allst="${x.phone}" title="Все статусы">…</button>`);
     const devBy = x.devBy && x.devBy!==me.name ? ` · ведёт ${esc(x.devBy)}` : '';
     const devTrace = x.deal ? `<span class="devdone">Разработка: ${DLABEL[x.deal.stage]||''}${devBy}</span>` : x.devAt ? `<span class="devdone">Разработчик написал ${dmy(x.devAt)} ${hhmm(x.devAt)}</span>` : '';
     const trace = (done && x.by) ? `<span>${LABEL[st]} · ${esc(x.by)} · ${dmy(x.at)} ${hhmm(x.at)}</span>` : taken ? `<span>в работе у ${esc(taken)}</span>` : '';
@@ -518,25 +644,36 @@ function drawQueue(){
     const main = due ? `<a class="btn follow" data-follow="${x.phone}" href="${esc(waUrl(x, followFor(x)))}" target="_blank" rel="noopener">Напомнить</a>` : `<a class="btn primary" data-open="${x.phone}" href="${esc(waUrl(x, msgFor(x)))}" target="_blank" rel="noopener">Открыть чат</a>`;
     const ig = x.instagram ? `<a class="btn" href="${esc(igUrl(x))}" target="_blank" rel="noopener">Instagram</a>` : '';
     const del = owner ? `<button class="btn danger" data-del="${x.phone}" title="Удалить из списка">✕</button>` : '';
+    const mainBig = main.replace('class="btn ','class="btn big ');
     const lang = `<span class="lang" title="Язык сообщений"><button data-lang="ru" data-id="${x.phone}" aria-pressed="${langOf(x)==='ru'}">RU</button><button data-lang="kz" data-id="${x.phone}" aria-pressed="${langOf(x)==='kz'}">KZ</button></span>`;
     const dev = (canDev() && st==='interested' && mineDeal(x)) ? `<a class="btn dev" data-dev="${x.phone}" href="${esc(waUrl(x, devFor(x)))}" target="_blank" rel="noopener">${x.devAt?'Ещё раз от разработчика':'Написать как разработчик'}</a>` : '';
-    const mainOrDev = dev || main;
     const scr = (settings.scripts||[]).length ? `<button class="btn" data-scripts="${x.phone}">Ответы</button>` : '';
     const panel = openScripts===x.phone ? `<div class="scripts">${scriptsFor(x).map(([i,sc])=>`<a class="btn small" href="${esc(waUrl(x, scriptText(sc,x)))}" target="_blank" rel="noopener" data-script="${i}" data-id="${x.phone}">${esc(sc.title)}</a>`).join('')}</div>` : '';
-    const extra = [x.rating?`<span class="star">★ ${esc(x.rating)}</span>${x.reviews?' · '+esc(reviewsText(x)):''}`:'', x.hours?esc(x.hours):'', x.category?esc(x.category):''].filter(Boolean).join(' · ');
+    const rate = x.rating ? ` · <span class="star">★ ${esc(x.rating)}</span>${x.reviews?' · '+esc(reviewsText(x)):''}` : '';
+    const addr = [x.address, x.hours, x.category].filter(Boolean).map(esc).join(' · ');
     const tier=tierOf(x), pk=tierPkg(tier);
+    const note = (done || x.note) ? `<input data-note="${x.phone}" value="${esc(x.note||'')}" placeholder="Заметка (сохраняется сама)">` : '';
     return `<article class="row s-${st}${done?' done':''}${taken?' taken':''}${due?' due':''} t-${tier}">
-      <div><h3>${esc(x.name)}${tierBadge(x)}${lang}</h3>
-        <p class="meta"><span class="ph">${fmtPhone(x.phone)}</span>${isMobile(x.phone)?'':'<span class="tag">городской</span>'}${x.niche?' · '+esc(x.niche):''}${x.address?' · '+esc(x.address):''}</p>
-        ${extra?`<p class="meta">${extra}</p>`:''}
+      <div class="info"><h3>${esc(x.name)}${tierBadge(x)}</h3>
+        <p class="meta"><span class="ph">${fmtPhone(x.phone)}</span>${isMobile(x.phone)?'':'<span class="tag">городской</span>'}${x.niche?' · '+esc(x.niche):''}${rate}</p>
+        ${addr?`<p class="meta addr">${addr}</p>`:''}
         <p class="why">${TIER[tier]}: ${esc(tierWhy(x))}${pk?` → предлагай <b>${esc(pk)}</b>`:''}</p></div>
-      <div class="act">${mainOrDev}${dev?main.replace('btn primary','btn'):''}<a class="btn" href="${esc(gisUrl(x))}" target="_blank" rel="noopener">2ГИС</a>${ig}<button class="btn" data-copy="${x.phone}" data-kind="${due?'follow':'first'}">Копировать</button>${scr}${del}</div>
+      <div class="act">${dev ? dev.replace('class="btn ','class="btn big ') : mainBig}
+        <div class="mini">${dev?main.replace('btn primary','btn'):''}${scr}<button class="btn" data-copy="${x.phone}" data-kind="${due?'follow':'first'}">Копировать</button><a class="btn" href="${esc(gisUrl(x))}" target="_blank" rel="noopener">2ГИС</a>${ig}${lang}${del}</div></div>
       <div class="chips">${chips}</div>${panel}
-      <div class="trace">${trace}${devTrace}${hint}<input data-note="${x.phone}" value="${esc(x.note||'')}" placeholder="Заметка (сохраняется сама)"></div></article>`;
+      ${(trace||devTrace||hint||note)?`<div class="trace">${trace}${devTrace}${hint}${note}</div>`:''}</article>`;
   }).join('');
+  if(html!==lastList){ $('#list').innerHTML = html; lastList=html; }
   $('#more').hidden = arr.length<=shown;
 }
 
+function drawNext(c){
+  const bar=$('#nextBar'), show = !!c && !$('#p-queue').hidden && filter==='new';
+  bar.hidden=!show; if(!show) return;
+  const name = `${c.name} · ${TIER[tierOf(c)]}`;
+  if($('#nbName').textContent!==name) $('#nbName').textContent=name;
+  const go=$('#nbGo'); go.dataset.open=c.phone; go.href=waUrl(c, msgFor(c));
+}
 function drawDealStats(){
   const all=contacts.filter(mineDeal).map(dealOf).filter(Boolean), n=k=>all.filter(d=>d.stage===k).length;
   const talks=all.filter(d=>['talk','brief','draft'].includes(d.stage)), sumTalk=talks.reduce((s,d)=>s+(+d.price||0),0);
@@ -592,7 +729,7 @@ function drawDeals(){
 async function moveDeal(c, stage){
   const prev=(dealOf(c)||{}).stage;
   if(!c.deal) c.deal=dealOf(c)||emptyDeal('talk');
-  c.deal.stage=stage; (c.deal.at ||= {})[stage]=Date.now(); render();
+  c.deal.stage=stage; c.deal.at = c.deal.at || {}; c.deal.at[stage]=Date.now(); render();
   try{ const r=await api('/deal',{phone:c.phone, stage}); Object.assign(c, r.contact||{}); render();
     toast(`${c.name}: ${DLABEL[stage]}`, prev && prev!=='wait' && prev!==stage ? 'Отменить' : '', ()=>moveDeal(c, prev)); }
   catch(e){ toast(e.message||'Не сохранилось'); load(); }
@@ -613,7 +750,7 @@ function drawTeam(){
 
 function drawReport(){
   const byDay = {};
-  for(const e of events){ if(e.status==='new') continue; const d=new Date(e.t); d.setHours(0,0,0,0); const k=d.getTime(); (byDay[k] ||= {}); const w=(byDay[k][e.who] ||= {sent:0,followup:0,interested:0,refused:0,noreply:0,skip:0,dev:0}); if(w[e.status]!==undefined) w[e.status]++; }
+  for(const e of events){ if(e.status==='new') continue; const d=new Date(e.t); d.setHours(0,0,0,0); const k=d.getTime(); (byDay[k] = byDay[k] || {}); const w=(byDay[k][e.who] ||= {sent:0,followup:0,interested:0,refused:0,noreply:0,skip:0,dev:0}); if(w[e.status]!==undefined) w[e.status]++; }
   const days=Object.keys(byDay).map(Number).sort((a,b)=>b-a).slice(0,14);
   const c=counts(contacts), contacted=contacts.length-c.new-c.skip;
   const todayE=events.filter(e=>e.t>=dayStart());
@@ -625,15 +762,26 @@ function drawReport(){
 }
 
 /* ---------- данные ---------- */
-async function load(){
-  try{
-    const d = await api('/state');
-    me=d.me; contacts=d.contacts; settings=d.settings; presence=d.presence; events=d.events||[]; serverNow=d.now||Date.now(); seedError=d.seedError;
-    document.querySelectorAll('.tab.devtab').forEach(b=>b.hidden=!canDev());
-    render();
-    if(me.role==='owner' && !['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)){ const t=settings.templates, h=settings.hooks; $('#tplF').value=t.furniture||''; $('#tplM').value=t.massage||''; $('#tplD').value=t.default||''; $('#tplU').value=t.followup||''; $('#hookW').value=h.withReviews||''; $('#hookN').value=h.withoutReviews||''; const tk=settings.templatesKz||{}, hk=settings.hooksKz||{}; $('#tplFk').value=tk.furniture||''; $('#tplMk').value=tk.massage||''; $('#tplDk').value=tk.default||''; $('#tplUk').value=tk.followup||''; $('#hookWk').value=hk.withReviews||''; $('#hookNk').value=hk.withoutReviews||''; const dv=settings.templatesDev||{}, dk=settings.templatesDevKz||{}; $('#dvF').value=dv.furniture||''; $('#dvM').value=dv.massage||''; $('#dvD').value=dv.default||''; $('#dvFk').value=dk.furniture||''; $('#dvMk').value=dk.massage||''; $('#dvDk').value=dk.default||''; $('#scripts').value=(settings.scripts||[]).map(sc=>`${sc.niche==='furniture'?'мебель: ':sc.niche==='massage'?'массаж: ':''}${sc.title}\n${sc.ru.replace(/\n/g,' / ')}\n${(sc.kz||'').replace(/\n/g,' / ')}`).join('\n\n'); const ex=settings.examples||{}; $('#exF').value=ex.furniture||''; $('#exM').value=ex.massage||''; $('#exD').value=ex.default||''; fillDealCfg(); $('#plan').value=settings.dailyPlan||60; $('#followupHours').value=settings.followupHours||48; $('#autoSent').checked=settings.autoSent!==false; }
-  }catch(e){ if(e.message!=='auth') toast(e.message||'Нет связи'); }
+function applyState(d){
+  me=d.me; contacts=d.contacts||[]; settings=d.settings||settings; presence=d.presence||{}; events=d.events||[]; serverNow=d.now||Date.now(); seedError=d.seedError; ver=d.v||'';
+  rankTiers();
+  document.querySelectorAll('.tab.devtab').forEach(b=>b.hidden=!canDev());
+  if(me.role==='owner' && !['TEXTAREA','INPUT'].includes(document.activeElement && document.activeElement.tagName)) fillOwnerCfg();
 }
+async function load(){
+  if(loading) return; loading=true;
+  try{
+    const d = await api('/state'+(ver ? '?v='+encodeURIComponent(ver) : ''));
+    if(!d.same && !Array.isArray(d.contacts)) throw Object.assign(new Error('Сервер ответил без списка'), {net:true});
+    setNet(true);
+    if(d.same){ me=d.me||me; presence=d.presence||presence; serverNow=d.now||Date.now(); }
+    else { applyState(d); saveCache(d); }
+    render(true);
+    flushOutbox();
+  }catch(e){ if(!e.auth) setNet(false); }
+  finally{ loading=false; }
+}
+function fillOwnerCfg(){ const t=settings.templates, h=settings.hooks; $('#tplF').value=t.furniture||''; $('#tplM').value=t.massage||''; $('#tplD').value=t.default||''; $('#tplU').value=t.followup||''; $('#hookW').value=h.withReviews||''; $('#hookN').value=h.withoutReviews||''; const tk=settings.templatesKz||{}, hk=settings.hooksKz||{}; $('#tplFk').value=tk.furniture||''; $('#tplMk').value=tk.massage||''; $('#tplDk').value=tk.default||''; $('#tplUk').value=tk.followup||''; $('#hookWk').value=hk.withReviews||''; $('#hookNk').value=hk.withoutReviews||''; const dv=settings.templatesDev||{}, dk=settings.templatesDevKz||{}; $('#dvF').value=dv.furniture||''; $('#dvM').value=dv.massage||''; $('#dvD').value=dv.default||''; $('#dvFk').value=dk.furniture||''; $('#dvMk').value=dk.massage||''; $('#dvDk').value=dk.default||''; $('#scripts').value=(settings.scripts||[]).map(sc=>`${sc.niche==='furniture'?'мебель: ':sc.niche==='massage'?'массаж: ':''}${sc.title}\n${sc.ru.replace(/\n/g,' / ')}\n${(sc.kz||'').replace(/\n/g,' / ')}`).join('\n\n'); const ex=settings.examples||{}; $('#exF').value=ex.furniture||''; $('#exM').value=ex.massage||''; $('#exD').value=ex.default||''; fillDealCfg(); $('#plan').value=settings.dailyPlan||60; $('#followupHours').value=settings.followupHours||48; $('#autoSent').checked=settings.autoSent!==false; }
 function fillDealCfg(){
   const t=settings.templatesDeal||{}, k=settings.templatesDealKz||{};
   $('#pkgs').value=(settings.packages||[]).map(p=>`${p.name}; ${p.price}; ${p.act}`).join('\n');
@@ -645,12 +793,31 @@ async function setStatus(phone, st, {toggle=true, silent=false}={}){
   const c=contacts.find(x=>x.phone===phone); if(!c||busy.has(phone)) return;
   busy.add(phone);
   const cur=stOf(c), next=(toggle && cur===st)?'new':st, prev={status:c.status,by:c.by,at:c.at,sentBy:c.sentBy,sentAt:c.sentAt,followAt:c.followAt};
-  try{ const r=await api('/status',{phone,status:next}); Object.assign(c, r.contact||{});
+  // Сразу показываем на экране, не ждём сервер.
+  const now=Date.now(); c.status=next; c.by=me.name; c.at=now;
+  if(next==='sent' && !c.sentBy){ c.sentBy=me.name; c.sentAt=now; }
+  if(next==='followup') c.followAt=now;
+  render();
+  try{ const r=await api('/status',{phone,status:next},{keepalive:true}); Object.assign(c, r.contact||{});
     if(!silent && next!=='new') toast(`${c.name}: ${LABEL[next]}`, 'Отменить', ()=>setStatus(phone, prev.status||'new', {toggle:false, silent:true}));
-  }catch(e){ toast(e.message||'Не сохранилось'); }
+  }catch(e){
+    if(e.net){ const a=outbox().filter(x=>x.phone!==phone); a.push({phone,status:next}); saveOutbox(a); setNet(false); toast('Нет связи: отметка сохранится сама, когда появится интернет'); }
+    else { Object.assign(c, prev); toast(e.message||'Не сохранилось'); }
+  }
   finally{ busy.delete(phone); render(); }
 }
 async function copy(text){ try{ await navigator.clipboard.writeText(text); return true; }catch{ return false; } }
+
+/* ---------- ошибки с устройств (владелец) ---------- */
+function uaShort(u){ u=u||''; const ios=(u.match(/OS (\d+)_/)||[])[1], and=(u.match(/Android (\d+)/)||[])[1];
+  const os=/iPhone|iPad/.test(u)?'iPhone'+(ios?' iOS '+ios:''):/Android/.test(u)?'Android'+(and?' '+and:''):/Windows/.test(u)?'Windows':/Mac OS/.test(u)?'Mac':'?';
+  const br=/Instagram|FBAN|FBAV|Telegram|WhatsApp|; wv\)/.test(u)?'встроенный браузер':/CriOS|Chrome\//.test(u)&&!/Edg/.test(u)?'Chrome':/FxiOS|Firefox/.test(u)?'Firefox':/Edg/.test(u)?'Edge':/Safari\//.test(u)?'Safari':'браузер';
+  return os+' · '+br; }
+async function loadErrors(){
+  try{ const r=await api('/log'); const list=r.list||[];
+    $('#errTable').innerHTML = list.length ? `<tr><th>Когда</th><th>Кто</th><th>Устройство</th><th>Что случилось</th></tr>`+list.slice(0,40).map(e=>`<tr><td>${dmy(e.t)} ${hhmm(e.t)}</td><td>${esc(e.who||'—')}</td><td>${esc(uaShort(e.ua))}</td><td class="msg">${esc(e.msg)}</td></tr>`).join('') : '<tr><td>Ошибок нет</td></tr>';
+  }catch(e){ $('#errTable').innerHTML='<tr><td>Не удалось загрузить</td></tr>'; }
+}
 
 /* ---------- события ---------- */
 const TABS=['queue','deals','team','report','set'];
@@ -675,8 +842,8 @@ document.addEventListener('change', async e=>{
 document.addEventListener('click', async e=>{
   const t=e.target.closest('button,a'); if(!t) return;
   if(t.dataset.tab){
-    if(t.dataset.tab==='out'){ await api('/logout',{}).catch(()=>{}); showLogin(); return; }
-    showTab(t.dataset.tab); return;
+    if(t.dataset.tab==='out'){ await api('/logout',{}).catch(()=>{}); try{ localStorage.removeItem(CACHE_KEY); }catch(e){} ver=''; showLogin(); return; }
+    showTab(t.dataset.tab); if(t.dataset.tab==='team') loadErrors(); return;
   }
   if(t.dataset.goto){ if(t.dataset.goto==='deals') dfilter='wait'; showTab(t.dataset.goto); window.scrollTo({top:0}); return; }
   if(t.dataset.df){ dfilter=t.dataset.df; render(); return; }
@@ -701,11 +868,12 @@ document.addEventListener('click', async e=>{
   if(t.dataset.f){ filter=t.dataset.f; shown=60; if($('#p-queue').hidden) showTab('queue'); render(); window.scrollTo({top:0}); return; }
   if(t.dataset.st){ setStatus(t.dataset.id, t.dataset.st); return; }
   if(t.dataset.open){ const c=contacts.find(x=>x.phone===t.dataset.open); if(!c) return; copy(msgFor(c));
-    if(settings.autoSent!==false && stOf(c)==='new') setTimeout(()=>setStatus(c.phone,'sent',{toggle:false}),300);
+    if(settings.autoSent!==false && stOf(c)==='new') setStatus(c.phone,'sent',{toggle:false});
     else { c.claimedBy=me.name; c.claimedAt=Date.now(); api('/claim',{phone:c.phone}).catch(()=>{}); }
     return; }
   if(t.dataset.dev){ const c=contacts.find(x=>x.phone===t.dataset.dev); if(!c) return; copy(devFor(c)); api('/dev',{phone:c.phone}).then(r=>{ Object.assign(c, r.contact||{}); render(); toast(`${c.name}: отмечено, что вы написали`); }).catch(e=>toast(e.message||'Не сохранилось')); return; }
-  if(t.dataset.follow){ const c=contacts.find(x=>x.phone===t.dataset.follow); if(!c) return; copy(followFor(c)); setTimeout(()=>setStatus(c.phone,'followup',{toggle:false}),300); return; }
+  if(t.dataset.follow){ const c=contacts.find(x=>x.phone===t.dataset.follow); if(!c) return; copy(followFor(c)); setStatus(c.phone,'followup',{toggle:false}); return; }
+  if(t.dataset.allst){ openAll.add(t.dataset.allst); render(); return; }
   if(t.dataset.copy){ const c=contacts.find(x=>x.phone===t.dataset.copy); if(c) toast(await copy(t.dataset.kind==='follow'?followFor(c):msgFor(c)) ? 'Текст скопирован' : 'Не удалось скопировать'); return; }
   if(t.dataset.del){ const c=contacts.find(x=>x.phone===t.dataset.del); if(!c) return; if(t.dataset.sure!=='1'){ t.dataset.sure='1'; t.textContent='Точно?'; setTimeout(()=>{t.dataset.sure='';t.textContent='✕';},2500); return; } try{ await api('/remove',{phone:c.phone}); contacts=contacts.filter(x=>x.phone!==c.phone); render(); }catch(e){ toast(e.message); } return; }
   if(t.dataset.lang){ const c=contacts.find(x=>x.phone===t.dataset.id); if(!c||c.lang===t.dataset.lang) return; c.lang=t.dataset.lang; render(); api('/lang',{phone:c.phone,lang:c.lang}).catch(()=>toast('Язык не сохранился')); return; }
@@ -746,26 +914,51 @@ $('#saveScripts').addEventListener('click',async()=>{
   try{ await api('/settings',{scripts, examples:{furniture:$('#exF').value.trim(), massage:$('#exM').value.trim(), default:$('#exD').value.trim()}}); toast(`Сохранено ответов: ${scripts.length}`); await load(); }catch(e){ toast(e.message); }
 });
 $('#loginForm').addEventListener('submit',async e=>{
-  e.preventDefault(); $('#lerr').textContent=''; $('#lbtn').disabled=true;
-  try{ await api('/login',{login:$('#llogin').value.trim(), name:$('#lname').value.trim(), pass:$('#lpass').value}); $('#lpass').value=''; await showApp(); }
-  catch(e){ $('#lerr').textContent=e.message||'Не удалось войти'; }
-  finally{ $('#lbtn').disabled=false; }
+  e.preventDefault(); $('#lerr').textContent=''; $('#lbtn').disabled=true; $('#lbtn').textContent='Вхожу…';
+  const login=$('#llogin').value.trim(), name=$('#lname').value.trim();
+  try{ await api('/login',{login, name, pass:$('#lpass').value}, {timeout:25000}); try{ localStorage.setItem('rs_login', JSON.stringify({login,name})); }catch(_){} $('#lpass').value=''; ver=''; await showApp(); }
+  catch(err){ $('#lerr').textContent=err.message||'Не удалось войти'; if(!err.net && err.status!==401 && err.status!==400) logErr('login: '+(err.message||''), '', 'login'); }
+  finally{ $('#lbtn').disabled=false; $('#lbtn').textContent='Войти'; }
 });
+$('#lshow').addEventListener('click',()=>{ const i=$('#lpass'), show=i.type==='password'; i.type=show?'text':'password'; $('#lshow').textContent=show?'Скрыть':'Показать'; });
+try{ const r=JSON.parse(localStorage.getItem('rs_login')||'null'); if(r){ $('#llogin').value=r.login||''; $('#lname').value=r.name||''; } }catch(e){}
+$('#netRetry').addEventListener('click',()=>{ load(); });
+$('#loadRetry').addEventListener('click',()=>{ boot(); });
+$('#errReload').addEventListener('click',loadErrors);
+$('#errClear').addEventListener('click',async()=>{ try{ await api('/log-clear',{}); loadErrors(); toast('Журнал очищен'); }catch(e){ toast(e.message); } });
+// Опрашиваем сервер, только пока сайт на экране: в фоне не тратим батарею и интернет.
 document.addEventListener('visibilitychange',()=>{ if(me){ beat(); if(!document.hidden) load(); } });
+addEventListener('online',()=>{ if(me) load(); });
 
 /* ---------- экраны ---------- */
-function showLogin(){ clearInterval(pollTimer); me=null; $('#v-app').hidden=true; $('#v-login').hidden=false; }
-async function showApp(){
-  const d = await api('/me'); me=d.me;
-  $('#v-login').hidden=true; $('#v-app').hidden=false;
+function showLogin(){ clearInterval(pollTimer); me=null; $('#v-load').hidden=true; $('#v-app').hidden=true; $('#v-login').hidden=false; $('#nextBar').hidden=true; setTimeout(()=>{ const f=$('#llogin').value?$('#lpass'):$('#llogin'); try{ f.focus(); }catch(e){} },50); }
+function showShell(){
+  $('#v-load').hidden=true; $('#v-login').hidden=true; $('#v-app').hidden=false;
   const owner=me.role==='owner';
   document.querySelectorAll('.tab.owner').forEach(b=>b.hidden=!owner);
   document.querySelectorAll('.tab.devtab').forEach(b=>b.hidden=!canDev());
-  $('#sub').textContent = owner ? 'Режим владельца' : me.dev ? `Привет, ${me.name}. Ты разработчик: клиенты с интересом во вкладке «Разработка».` : `Привет, ${me.name}. Жми «Открыть чат», отправляй, дальше всё само.`;
-  await load(); beat();
-  clearInterval(pollTimer); pollTimer=setInterval(()=>{ load(); beat(); }, 20000);
+  $('#sub').textContent = owner ? 'Режим владельца' : me.dev ? `Привет, ${me.name}. Клиенты с интересом во вкладке «Разработка».` : `Привет, ${me.name}. Жми «Открыть чат», отправляй, потом отметь, что ответили.`;
 }
-(async()=>{ try{ await showApp(); }catch{ showLogin(); } })();
+function startPoll(){ clearInterval(pollTimer); pollTimer=setInterval(()=>{ if(!document.hidden){ load(); beat(); } }, 20000); }
+async function showApp(){
+  const d = await api('/state');
+  applyState(d); saveCache(d); setNet(true);
+  showShell(); render(); beat(); startPoll(); flushOutbox();
+}
+async function boot(){
+  $('#loadRetry').hidden=true; $('#loadSpin').hidden=false; $('#loadText').textContent='Загружаю список…';
+  // Сначала показываем сохранённый в телефоне список, чтобы сразу можно было работать.
+  const cached=readCache();
+  if(cached && cached.me){ applyState(cached); showShell(); render(); }
+  try{ await showApp(); }
+  catch(e){
+    if(e.auth) return;
+    if(cached && cached.me){ setNet(false); startPoll(); return; }
+    $('#loadSpin').hidden=true; $('#loadText').textContent=e.message||'Не получилось загрузить'; $('#loadRetry').hidden=false;
+    setTimeout(()=>{ if(!me) boot(); }, 8000);
+  }
+}
+boot();
 </script>
 </body>
 </html>

@@ -483,6 +483,13 @@ export default async (req) => {
     const session = { role, name: role === "owner" ? ownerName(name) : name, exp: Date.now() + SESSION_DAYS * 86400000 };
     return json({ ok: true, me: { role, name: session.name } }, 200, { "set-cookie": makeCookie(session) });
   }
+  // Журнал ошибок с устройств: телефон работника присылает, что сломалось. Без входа, чтобы ловить и ошибки до логина.
+  if (path === "/log" && method === "POST") {
+    const e = { t: Date.now(), kind: str(body.kind, 20), msg: str(body.msg, 500), stack: str(body.stack, 1500), ua: str(body.ua || req.headers.get("user-agent"), 300), url: str(body.url, 200), who: str(body.who, 40), role: str(body.role, 10) };
+    if (!e.msg) return json({ ok: false }, 400);
+    try { const cur = (await store().get("log", { type: "json" })) || []; cur.push(e); await store().setJSON("log", cur.slice(-150)); } catch {}
+    return json({ ok: true });
+  }
   // Приём новых клиентов со страницы 2ГИС (сборщик в браузере владельца). Доступ по ключу на час.
   if (path === "/import-rows") {
     const cors = { "access-control-allow-origin": "https://2gis.kz", "access-control-allow-methods": "POST", "access-control-allow-headers": "content-type" };
@@ -506,7 +513,7 @@ export default async (req) => {
     if (path === "/me" && method === "GET") { const { data } = await readState(); return json({ me: { role: me.role, name: who, dev: !isOwner && isDevName(data, who) } }); }
 
     if (path === "/state" && method === "GET") {
-      let [{ data }, presence] = await Promise.all([readState(), readPresence()]);
+      let [{ data, etag }, presence] = await Promise.all([readState(), readPresence()]);
       // Напомнили, а ответа нет полтора срока дожима: закрываем как «Не ответил», чтобы не висело.
       const limit = Date.now() - (data.settings.followupHours || 48) * 3600000 * 1.5;
       if (Object.values(data.contacts).some((c) => c.status === "followup" && (c.followAt || c.at || 0) < limit)) {
@@ -517,10 +524,15 @@ export default async (req) => {
           }
           return changed ? s : false;
         });
+        etag = null;
       }
       const isDev = !isOwner && isDevName(data, who);
+      // Версия данных: если у телефона уже есть эта версия, отдаём только «кто онлайн», без 300 КБ списка.
+      const v = etag ? `${String(etag).replace(/"/g, "")}:${isOwner ? "o" : isDev ? "d:" + who : "w"}` : "";
+      const meOut = { role: me.role, name: who, dev: isDev };
+      if (v && url.searchParams.get("v") === v) return json({ same: true, v, me: meOut, presence, now: Date.now() });
       const list = isOwner ? sorted(data) : sorted(data).map((c) => (c.deal && !(isDev && (!c.devBy || c.devBy === who)) ? { ...c, deal: { stage: c.deal.stage } } : c));
-      return json({ me: { role: me.role, name: who, dev: isDev }, contacts: list, settings: data.settings, presence, events: isOwner ? data.events : [], seedError: isOwner ? data.seedError || null : null, now: Date.now() });
+      return json({ v, me: meOut, contacts: list, settings: data.settings, presence, events: isOwner ? data.events : [], seedError: isOwner ? data.seedError || null : null, now: Date.now() });
     }
 
     if (path === "/heartbeat" && method === "POST") {
@@ -623,6 +635,12 @@ export default async (req) => {
       await mutate((s) => { added = addRows(s, rows); return added ? s : false; });
       return json({ ok: true, parsed: rows.length, added });
     }
+
+    if (path === "/log" && method === "GET") {
+      const list = (await store().get("log", { type: "json" })) || [];
+      return json({ list: list.slice(-60).reverse() });
+    }
+    if (path === "/log-clear" && method === "POST") { await store().setJSON("log", []); return json({ ok: true }); }
 
     if (path === "/import-token" && method === "GET") {
       const p = Buffer.from(JSON.stringify({ k: "imp", exp: Date.now() + 3600000 })).toString("base64url");
