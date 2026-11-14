@@ -1,0 +1,20 @@
+{
+  "name": "calm-landscape",
+  "aspectRatio": "16:9",
+  "width": 1920,
+  "height": 1080,
+  "fps": 24,
+  "pacing": "slow",
+  "voiceId": "EXAVITQu4vr4xnSDxMaL",
+  "shotPromptPreamble": "Cinematic landscape footage, slow deliberate camera moves, soft natural light, shallow depth of field. Shot: ",
+  "captions": {
+    "font": "Helvetica Neue",
+    "fontSize": 48,
+    "position": "bottom",
+    "primaryColor": "#FFFFFF",
+    "outlineColor": "#00000090",
+    "outlinePx": 2,
+    "uppercase": false,
+    "wordsPerCaption": 6
+  }
+}
