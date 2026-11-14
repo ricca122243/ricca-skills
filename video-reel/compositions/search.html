@@ -23,14 +23,26 @@
     #s-need span { display: block; }
     #s-need b { display: block; color: #5b7cff; text-shadow: 0 0 90px rgba(91, 124, 255, 0.8); }
     #s-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+    .s-bl { position: absolute; border-radius: 50%; filter: blur(80px); }
+    #s-bl1 { left: -200px; top: 900px; width: 700px; height: 700px; background: #b9c8ff; opacity: 0.7; }
+    #s-bl2 { left: 600px; top: 100px; width: 640px; height: 640px; background: #ffd2dc; opacity: 0.6; }
+    #s-sug { position: absolute; left: 130px; top: 652px; width: 820px; border-radius: 36px; background: #fff; box-shadow: 0 24px 60px rgba(15, 20, 30, 0.16); padding: 14px 0; opacity: 0; transform-origin: 50% 0; }
+    .s-sl { height: 86px; display: flex; align-items: center; padding: 0 44px; font-size: 40px; font-weight: 500; color: #3a424e; white-space: nowrap; }
+    .s-sl b { font-weight: 700; color: #0e1116; }
+    .s-tap { position: absolute; width: 120px; height: 120px; border-radius: 50%; background: rgba(47, 107, 255, 0.22); box-shadow: inset 0 0 0 6px rgba(47, 107, 255, 0.75); opacity: 0; }
+    #s-tap1 { left: 800px; top: 512px; }
+    #s-tap2 { left: 660px; top: 716px; }
+    #s-pulse { position: absolute; left: 130px; top: 1272px; width: 820px; height: 172px; border-radius: 30px; box-shadow: 0 0 0 8px #e5273d; opacity: 0; }
     #s-dark, #s-need, #s-h2, #s-h3, .s-card { opacity: 0; }
   </style>
   <div id="root" data-composition-id="search" data-width="1080" data-height="1920">
     <div id="s-page">
+      <div class="s-bl" id="s-bl1"></div><div class="s-bl" id="s-bl2"></div>
       <div class="s-h" id="s-h1">Клиент ищет</div>
       <div class="s-h" id="s-h2">Находит тех,<br />у кого есть сайт</div>
       <div class="s-h" id="s-h3">А вас здесь <em>нет</em></div>
       <div id="s-bar"><div id="s-ico"></div><div id="s-q"></div><div id="s-caret"></div></div>
+      <div id="s-sug"><div class="s-sl"><b>диван на заказ</b>&nbsp;алматы</div><div class="s-sl"><b>диван на заказ</b>&nbsp;цены</div><div class="s-sl"><b>диван на заказ</b>&nbsp;рядом</div></div>
       <div class="s-card" id="s-c1" style="top: 690px">
         <div class="s-dom"><div class="s-fav" style="background: #f2a33a"></div>konkurent-1.kz</div>
         <div class="s-tt">Диваны на заказ — каталог и цены</div>
@@ -55,6 +67,8 @@
         <div class="s-sn">Только Instagram и 2ГИС</div>
         <div class="s-badge">Нет сайта</div>
       </div>
+      <div id="s-pulse"></div>
+      <div class="s-tap" id="s-tap1"></div><div class="s-tap" id="s-tap2"></div>
     </div>
     <div id="s-dark"></div>
     <div id="s-need"><span id="s-n1">Нужен</span><b id="s-n2">сайт.</b></div>
@@ -73,6 +87,17 @@
       tl.fromTo("#s-caret", { opacity: 1 }, { opacity: 0, duration: 0.01, repeat: 21, repeatDelay: 0.27, yoyo: true, ease: "steps(1)" }, 0);
       // typing
       tl.to(typed, { n: Q.length, duration: BT * 2.5, ease: "none", onUpdate: () => { qEl.textContent = Q.slice(0, Math.round(typed.n)); } }, 0.12);
+      // background drift, suggestions while typing, taps
+      tl.fromTo("#s-bl1", { x: 0, y: 0 }, { x: 260, y: -300, duration: BT * 10, ease: "sine.inOut" }, 0);
+      tl.fromTo("#s-bl2", { x: 0, y: 0 }, { x: -240, y: 320, duration: BT * 10, ease: "sine.inOut" }, 0);
+      tl.fromTo("#s-bar", { boxShadow: "0 2px 6px rgba(15,20,30,0.08), 0 24px 60px rgba(15,20,30,0.14), 0 0 0 0px rgba(47,107,255,0.0)" }, { boxShadow: "0 2px 6px rgba(15,20,30,0.08), 0 24px 60px rgba(15,20,30,0.14), 0 0 0 8px rgba(47,107,255,0.55)", duration: 0.3, ease: "power2.out" }, 0.05);
+      tl.fromTo("#s-sug", { opacity: 0, scaleY: 0.6, y: -20 }, { opacity: 1, scaleY: 1, y: 0, duration: 0.3, ease: "back.out(1.6)" }, 0.55);
+      tl.fromTo("#s-sug .s-sl", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.25, stagger: 0.08, ease: "power3.out" }, 0.6);
+      tl.to("#s-sug", { opacity: 0, scaleY: 0.7, duration: 0.14, ease: "power2.in" }, BT * 3 - 0.2);
+      tl.fromTo("#s-tap1", { opacity: 0.9, scale: 0.4 }, { opacity: 0, scale: 1.7, duration: 0.45, ease: "power2.out", immediateRender: false }, BT * 3 - 0.12);
+      tl.fromTo("#s-tap2", { opacity: 0.9, scale: 0.4 }, { opacity: 0, scale: 1.7, duration: 0.45, ease: "power2.out", immediateRender: false }, BT * 6);
+      tl.to("#s-c1", { scale: 0.96, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.inOut" }, BT * 6);
+      tl.fromTo("#s-pulse", { opacity: 0.9, scale: 1 }, { opacity: 0, scale: 1.12, duration: 0.55, repeat: 2, ease: "power2.out", immediateRender: false }, BT * 8);
       // enter: bar press, results cascade on half-beats
       tl.fromTo("#s-bar", { scale: 1 }, { scale: 0.955, duration: 0.09, ease: "power2.in" }, BT * 3 - 0.09);
       tl.to("#s-bar", { scale: 1, duration: 0.35, ease: "back.out(3)" }, BT * 3);

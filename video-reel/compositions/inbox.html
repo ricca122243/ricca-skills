@@ -1,0 +1,54 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: #05060b; font-family: Inter, sans-serif; color: #fff; }
+    #i-glow { position: absolute; left: -360px; top: 100px; width: 1800px; height: 1800px; border-radius: 50%; background: radial-gradient(circle, #1fae55 0%, rgba(31, 174, 85, 0) 60%); opacity: 0.22; }
+    .i-row { position: absolute; left: 130px; width: 820px; text-align: center; font-weight: 900; letter-spacing: -0.04em; line-height: 1.02; white-space: nowrap; }
+    #i-t1 { top: 300px; font-size: 104px; }
+    #i-t2 { top: 410px; font-size: 104px; color: #25d366; }
+    .i-mask { position: absolute; left: 0; width: 1080px; overflow: hidden; height: 130px; }
+    .i-n { position: absolute; left: 130px; width: 820px; height: 138px; border-radius: 40px; background: rgba(22, 28, 44, 0.97); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), inset 0 0 0 2px rgba(255, 255, 255, 0.1); display: flex; align-items: center; padding: 0 30px; gap: 26px; opacity: 0; }
+    .i-ic { width: 84px; height: 84px; border-radius: 26px; background: #25d366; flex: none; display: flex; align-items: center; justify-content: center; }
+    .i-ic::after { content: ""; width: 34px; height: 34px; border-radius: 50% 50% 50% 8px; border: 7px solid #fff; }
+    .i-n small { display: block; font-size: 28px; color: #8c98a8; margin-bottom: 6px; font-weight: 500; }
+    .i-n span { font-size: 37px; font-weight: 600; white-space: nowrap; letter-spacing: -0.01em; }
+    #i-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+    .i-b { position: absolute; border-radius: 50% 50% 50% 12%; background: rgba(37, 211, 102, 0.35); }
+  </style>
+  <div id="root" data-composition-id="inbox" data-width="1080" data-height="1920">
+    <div id="i-glow"></div>
+    <div id="i-bubs"></div>
+    <div class="i-row" id="i-t1">Клиенты</div>
+    <div class="i-row" id="i-t2">пишут сами</div>
+    <div class="i-n" id="i-n0" style="top: 580px"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Здравствуйте! Хочу заказать</span></div></div>
+    <div class="i-n" id="i-n1" style="top: 734px"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Можно записаться на завтра?</span></div></div>
+    <div class="i-n" id="i-n2" style="top: 888px"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Нужен диван как на сайте</span></div></div>
+    <div class="i-n" id="i-n3" style="top: 1042px"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Беру. Как оплатить?</span></div></div>
+    <div class="i-n" id="i-n4" style="top: 1196px"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Забронируйте стол на двоих</span></div></div>
+    <div id="i-flash"></div>
+  </div>
+  <script>
+    (() => {
+      const BT = 60 / 98, H = BT / 2;
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#i-flash", { opacity: 0.85 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, 0);
+      tl.fromTo("#i-glow", { scale: 0.8 }, { scale: 1.15, duration: BT * 4, ease: "none" }, 0);
+      tl.fromTo("#i-t1", { opacity: 0, scale: 2.2 }, { opacity: 1, scale: 1, duration: 0.36, ease: "expo.out" }, 0);
+      tl.fromTo("#i-t2", { opacity: 0, scale: 2.2 }, { opacity: 1, scale: 1, duration: 0.36, ease: "expo.out" }, H);
+      const rnd = (i) => { const x = Math.sin(i * 91.7 + 13.1) * 43758.5453; return x - Math.floor(x); };
+      const bubs = document.querySelector("#i-bubs");
+      for (let i = 0; i < 18; i++) {
+        const d = document.createElement("div"); d.className = "i-b";
+        const sz = 30 + rnd(i) * 70; d.style.width = d.style.height = sz + "px";
+        d.style.left = (rnd(i + 20) * 1000) + "px"; d.style.top = (1500 + rnd(i + 40) * 700) + "px"; bubs.appendChild(d);
+        tl.fromTo(d, { y: 0, opacity: 0.2 + rnd(i + 5) * 0.6, rotation: 0 }, { y: -(1200 + rnd(i + 9) * 1400), rotation: rnd(i) * 80 - 40, duration: BT * 4, ease: "power1.out" }, 0);
+      }
+      for (let i = 0; i < 5; i++) {
+        tl.fromTo("#i-n" + i + " .i-ic", { scale: 1.5, rotation: -25 }, { scale: 1, rotation: 0, duration: 0.4, ease: "back.out(3)" }, BT + i * H + 0.1);
+        tl.fromTo("#i-n" + i, { opacity: 0, y: -260, scale: 1.25, rotation: i % 2 ? 5 : -5 }, { opacity: 1, y: 0, scale: 1, rotation: 0, duration: 0.4, ease: "back.out(1.7)" }, BT + i * H);
+      }
+      tl.to(["#i-t1", "#i-t2", ".i-n"], { opacity: 0, y: -80, duration: 0.2, ease: "power2.in", stagger: 0.015 }, BT * 4 - 0.26);
+      tl.set({}, {}, BT * 4);
+      window.__timelines["inbox"] = tl;
+    })();
+  </script>
+</template>

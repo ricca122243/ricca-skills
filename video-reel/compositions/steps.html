@@ -1,0 +1,38 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: #05060b; font-family: Inter, sans-serif; color: #fff; }
+    #t-glow { position: absolute; left: -360px; top: 300px; width: 1800px; height: 1800px; border-radius: 50%; background: radial-gradient(circle, #3f5cff 0%, rgba(63, 92, 255, 0) 60%); opacity: 0.24; }
+    #t-h { position: absolute; left: 130px; width: 820px; top: 300px; text-align: center; font-weight: 900; font-size: 92px; letter-spacing: -0.04em; line-height: 1.04; opacity: 0; }
+    .t-card { position: absolute; left: 130px; width: 820px; height: 232px; border-radius: 44px; background: linear-gradient(150deg, rgba(26, 33, 62, 0.96), rgba(12, 16, 32, 0.96)); box-shadow: inset 0 0 0 2px rgba(130, 150, 255, 0.35), 0 30px 70px rgba(0, 0, 0, 0.5); padding: 40px 44px; display: flex; gap: 36px; align-items: center; opacity: 0; }
+    .t-num { font-size: 104px; font-weight: 900; letter-spacing: -0.05em; color: #6f8aff; line-height: 1; flex: none; width: 150px; }
+    .t-tt { font-size: 50px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
+    .t-ss { font-size: 34px; font-weight: 500; color: #b9c3d9; margin-top: 10px; }
+    #t-line { position: absolute; left: 92px; top: 560px; width: 8px; height: 690px; background: linear-gradient(180deg, #6f8aff, #25d366); border-radius: 3px; transform-origin: 50% 0; opacity: 0.55; }
+  </style>
+  <div id="root" data-composition-id="steps" data-width="1080" data-height="1920">
+    <div id="t-glow"></div>
+    <div id="t-h">Как это работает</div>
+    <div id="t-line"></div>
+    <div class="t-card" id="t-c0" style="top: 520px"><div class="t-num">01</div><div><div class="t-tt">Присылаете фото и цены</div><div class="t-ss">прямо в WhatsApp</div></div></div>
+    <div class="t-card" id="t-c1" style="top: 784px"><div class="t-num">02</div><div><div class="t-tt">Собираем сайт</div><div class="t-ss">за 3–5 дней, под ваш бренд</div></div></div>
+    <div class="t-card" id="t-c2" style="top: 1048px"><div class="t-num">03</div><div><div class="t-tt">Клиенты находят вас</div><div class="t-ss">и пишут сами</div></div></div>
+  </div>
+  <script>
+    (() => {
+      const BT = 60 / 98;
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#t-glow", { y: -200 }, { y: 200, duration: BT * 8, ease: "none" }, 0);
+      tl.fromTo("#t-h", { opacity: 0, y: 70 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, 0.05);
+      tl.fromTo("#t-line", { scaleY: 0 }, { scaleY: 1, duration: BT * 5.4, ease: "none" }, BT);
+      for (let i = 0; i < 3; i++) {
+        const t = BT * (1 + i * 2);
+        tl.fromTo("#t-c" + i, { opacity: 0, x: i % 2 ? 700 : -700, rotationY: i % 2 ? -50 : 50, transformPerspective: 1600 }, { opacity: 1, x: 0, rotationY: 0, duration: 0.6, ease: "expo.out" }, t);
+        tl.fromTo("#t-c" + i + " .t-num", { scale: 2 }, { scale: 1, duration: 0.5, ease: "back.out(2)" }, t + 0.08);
+      }
+      // slow push-in while the track is quiet, then leave before the price hit
+      tl.to(["#t-h", ".t-card"], { opacity: 0, y: -120, duration: 0.22, ease: "power3.in", stagger: 0.03 }, BT * 8 - 0.32);
+      tl.set({}, {}, BT * 8);
+      window.__timelines["steps"] = tl;
+    })();
+  </script>
+</template>
