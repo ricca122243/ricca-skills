@@ -23,6 +23,8 @@
     #s-need span { display: block; }
     #s-need b { display: block; color: #5b7cff; text-shadow: 0 0 90px rgba(91, 124, 255, 0.8); }
     #s-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+    #s-cam { position: absolute; inset: 0; }
+    .s-h { z-index: 3; }
     .s-bl { position: absolute; border-radius: 50%; filter: blur(80px); }
     #s-bl1 { left: -200px; top: 900px; width: 700px; height: 700px; background: #b9c8ff; opacity: 0.7; }
     #s-bl2 { left: 600px; top: 100px; width: 640px; height: 640px; background: #ffd2dc; opacity: 0.6; }
@@ -41,6 +43,7 @@
       <div class="s-h" id="s-h1">Клиент ищет</div>
       <div class="s-h" id="s-h2">Находит тех,<br />у кого есть сайт</div>
       <div class="s-h" id="s-h3">А вас здесь <em>нет</em></div>
+      <div id="s-cam">
       <div id="s-bar"><div id="s-ico"></div><div id="s-q"></div><div id="s-caret"></div></div>
       <div id="s-sug"><div class="s-sl"><b>диван на заказ</b>&nbsp;алматы</div><div class="s-sl"><b>диван на заказ</b>&nbsp;цены</div><div class="s-sl"><b>диван на заказ</b>&nbsp;рядом</div></div>
       <div class="s-card" id="s-c1" style="top: 690px">
@@ -69,6 +72,7 @@
       </div>
       <div id="s-pulse"></div>
       <div class="s-tap" id="s-tap1"></div><div class="s-tap" id="s-tap2"></div>
+      </div>
     </div>
     <div id="s-dark"></div>
     <div id="s-need"><span id="s-n1">Нужен</span><b id="s-n2">сайт.</b></div>
@@ -82,11 +86,20 @@
       const qEl = document.querySelector("#s-q");
       const typed = { n: 0 };
       // gentle push-in on the page for the whole pre-drop
-      tl.fromTo("#s-page", { scale: 1.0 }, { scale: 1.04, duration: BT * 10 - 0.45, ease: "none" }, 0);
-      // caret blink
+            // caret blink
       tl.fromTo("#s-caret", { opacity: 1 }, { opacity: 0, duration: 0.01, repeat: 21, repeatDelay: 0.27, yoyo: true, ease: "steps(1)" }, 0);
       // typing
       tl.to(typed, { n: Q.length, duration: BT * 2.5, ease: "none", onUpdate: () => { qEl.textContent = Q.slice(0, Math.round(typed.n)); } }, 0.12);
+      // CAMERA: push in on the search bar and track the caret while typing, snap back to the results, then lean into the missing card
+      tl.set("#s-cam", { transformOrigin: "540px 572px" }, 0);
+      tl.fromTo("#s-cam", { scale: 1, x: 0, y: 0 }, { scale: 2.05, x: 300, y: 150, duration: 0.55, ease: "power3.inOut" }, 0.02);
+      tl.to("#s-cam", { x: -170, duration: BT * 2.5 - 0.5, ease: "none" }, 0.57);
+      tl.to("#s-cam", { scale: 1, x: 0, y: 0, duration: 0.6, ease: "expo.out" }, BT * 3 - 0.06);
+      tl.to("#s-cam", { scale: 1.06, y: -30, duration: BT * 2 - 0.1, ease: "sine.inOut" }, BT * 5);
+      tl.to("#s-cam", { scale: 1.07, y: -20, duration: 0.5, ease: "power3.inOut" }, BT * 7 - 0.05);
+      tl.to("#s-cam", { scale: 1.1, y: -30, duration: BT * 2, ease: "none" }, BT * 7 + 0.45);
+      tl.fromTo("#s-h1", { scale: 1, y: 0 }, { scale: 0.86, y: -40, duration: 0.5, ease: "power3.inOut" }, 0.02);
+      tl.to("#s-h1", { scale: 1, y: 0, duration: 0.55, ease: "expo.out" }, BT * 3 - 0.06);
       // background drift, suggestions while typing, taps
       tl.fromTo("#s-bl1", { x: 0, y: 0 }, { x: 260, y: -300, duration: BT * 10, ease: "sine.inOut" }, 0);
       tl.fromTo("#s-bl2", { x: 0, y: 0 }, { x: -240, y: 320, duration: BT * 10, ease: "sine.inOut" }, 0);

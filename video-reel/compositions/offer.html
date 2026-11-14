@@ -54,7 +54,8 @@
       tl.fromTo("#o-flash", { opacity: 0.85 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, 0);
       tl.fromTo("#o-rays", { rotation: 0 }, { rotation: 110, duration: 7.76, ease: "none" }, 0);
       tl.fromTo("#o-glow", { opacity: 0.3 }, { opacity: 0.45, duration: 7.5, ease: "none" }, 0);
-      // price
+      // price: start tight on the number, pull back to reveal the list
+      tl.fromTo("#o-pricewrap", { scale: 1.2, transformOrigin: "540px 520px" }, { scale: 1, duration: 0.7, ease: "power3.inOut" }, BT * 1 - 0.1);
       tl.fromTo("#o-from", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.3, ease: "expo.out" }, 0);
       tl.fromTo("#o-price", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "expo.out" }, 0.04);
       tl.to(num, { v: 45000, duration: BT - 0.08, ease: "power3.out", onUpdate: () => { pEl.textContent = fmt(Math.round(num.v / 500) * 500); } }, 0.04);
@@ -87,6 +88,8 @@
       // final hit on the downbeat, then CTA pulse on beats
       tl.fromTo("#o-flash", { opacity: 0.8 }, { opacity: 0, duration: 0.45, ease: "power2.out", immediateRender: false }, L + BT * 4);
       tl.fromTo("#o-logo", { scale: 1.06 }, { scale: 1, duration: 0.6, ease: "power3.out" }, L + BT * 4);
+      tl.to("#o-logo", { scale: 1.07, transformOrigin: "540px 800px", duration: 2.8, ease: "sine.inOut" }, L + BT * 4 + 0.6);
+      tl.fromTo("#o-logo", { scale: 1.35, transformOrigin: "540px 800px" }, { scale: 1, duration: 0.8, ease: "expo.out", immediateRender: false }, L);
       for (let b = 4; b < 8; b++) tl.fromTo("#o-cta", { scale: 1.06 }, { scale: 1, duration: 0.4, ease: "power2.out", immediateRender: false }, L + BT * b + 0.001);
       tl.set({}, {}, 7.76);
       window.__timelines["offer"] = tl;

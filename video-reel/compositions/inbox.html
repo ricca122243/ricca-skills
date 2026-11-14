@@ -12,9 +12,11 @@
     .i-n small { display: block; font-size: 28px; color: #8c98a8; margin-bottom: 6px; font-weight: 500; }
     .i-n span { font-size: 37px; font-weight: 600; white-space: nowrap; letter-spacing: -0.01em; }
     #i-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+    #i-cam { position: absolute; inset: 0; }
     .i-b { position: absolute; border-radius: 50% 50% 50% 12%; background: rgba(37, 211, 102, 0.35); }
   </style>
   <div id="root" data-composition-id="inbox" data-width="1080" data-height="1920">
+    <div id="i-cam">
     <div id="i-glow"></div>
     <div id="i-bubs"></div>
     <div class="i-row" id="i-t1">Клиенты</div>
@@ -24,6 +26,7 @@
     <div class="i-n" id="i-n2" style="top: 888px"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Нужен диван как на сайте</span></div></div>
     <div class="i-n" id="i-n3" style="top: 1042px"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Беру. Как оплатить?</span></div></div>
     <div class="i-n" id="i-n4" style="top: 1196px"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Забронируйте стол на двоих</span></div></div>
+    </div>
     <div id="i-flash"></div>
   </div>
   <script>
@@ -31,6 +34,9 @@
       const BT = 60 / 98, H = BT / 2;
       const tl = gsap.timeline({ paused: true });
       tl.fromTo("#i-flash", { opacity: 0.85 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, 0);
+      tl.set("#i-cam", { transformOrigin: "540px 800px" }, 0);
+      tl.fromTo("#i-cam", { scale: 1.5 }, { scale: 1, duration: 0.7, ease: "expo.out" }, 0);
+      tl.to("#i-cam", { scale: 1.1, duration: BT * 4 - 0.75, ease: "sine.in" }, 0.7);
       tl.fromTo("#i-glow", { scale: 0.8 }, { scale: 1.15, duration: BT * 4, ease: "none" }, 0);
       tl.fromTo("#i-t1", { opacity: 0, scale: 2.2 }, { opacity: 1, scale: 1, duration: 0.36, ease: "expo.out" }, 0);
       tl.fromTo("#i-t2", { opacity: 0, scale: 2.2 }, { opacity: 1, scale: 1, duration: 0.36, ease: "expo.out" }, H);

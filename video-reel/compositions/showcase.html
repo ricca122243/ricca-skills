@@ -22,6 +22,7 @@
     #p-glare { position: absolute; left: 0; top: -100px; width: 280px; height: 1500px; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0)); z-index: 2; }
     .p-chip { position: absolute; left: 260px; width: 560px; top: 1470px; height: 92px; border-radius: 46px; background: rgba(12, 16, 32, 0.92); box-shadow: inset 0 0 0 2px rgba(140, 160, 255, 0.5), 0 20px 50px rgba(0, 0, 0, 0.5); font-size: 40px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
     #p-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+    #p-cam { position: absolute; inset: 0; }
     .p-ring { position: absolute; left: 240px; top: 975px; width: 600px; height: 600px; border-radius: 50%; border: 5px solid rgba(150, 170, 255, 0.8); opacity: 0; }
     .p-dot { position: absolute; border-radius: 50%; background: #9fb2ff; }
     .p-tag { position: absolute; height: 86px; padding: 0 34px; border-radius: 43px; background: #fff; color: #0e1116; font-size: 37px; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; gap: 16px; white-space: nowrap; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55); opacity: 0; }
@@ -32,6 +33,7 @@
     .p-lab, .p-chip { opacity: 0; }
   </style>
   <div id="root" data-composition-id="showcase" data-width="1080" data-height="1920">
+    <div id="p-cam">
     <div id="p-glow"></div>
     <div id="p-glow2"></div>
     <div id="p-ghost">САЙТ САЙТ САЙТ САЙТ САЙТ САЙТ</div>
@@ -81,6 +83,7 @@
     <div class="p-chip" id="p-c1">Диван Kamra</div>
     <div class="p-chip" id="p-c2">Диван Semra</div>
     <div class="p-chip" id="p-c3">Диван Ronva</div>
+    </div>
     <div id="p-flash"></div>
   </div>
   <script>
@@ -132,6 +135,17 @@
         tl.fromTo("#p-glare", { x: -420 }, { x: 760, duration: 0.8, ease: "power2.inOut", immediateRender: false }, t0 + 0.35);
         for (let b = 1; b < 4; b++) tl.fromTo("#p-punch", { scale: 1.035 }, { scale: 1, duration: 0.32, ease: "power2.out", immediateRender: false }, t0 + b * BT);
         if (k > 0) tl.fromTo("#p-flash", { opacity: 0.3 }, { opacity: 0, duration: 0.3, ease: "power2.out", immediateRender: false }, t0);
+      }
+      // CAMERA: land on every site, punch into the screen on beat 3, ease back out, lean in before the cut
+      tl.set("#p-cam", { transformOrigin: "540px 1100px" }, 0);
+      for (let k = 0; k < N; k++) {
+        const t0 = k * SEG, last = k === N - 1;
+        tl.fromTo("#p-cam", { scale: k ? 0.84 : 0.7 }, { scale: 1, duration: 0.6, ease: "expo.out", immediateRender: k === 0 }, t0);
+        tl.to("#p-cam", { scale: 1.04, duration: BT * 2 - 0.65, ease: "none" }, t0 + 0.6);
+        tl.to("#p-cam", { scale: last ? 1.08 : 1.15, duration: 0.42, ease: "power3.inOut" }, t0 + BT * 2 - 0.05);
+        tl.to("#p-cam", { scale: last ? 1.1 : 1.18, duration: BT - 0.37, ease: "none" }, t0 + BT * 2 + 0.37);
+        tl.to("#p-cam", { scale: 1.05, duration: 0.42, ease: "power3.inOut" }, t0 + BT * 3 - 0.05);
+        tl.to("#p-cam", { scale: 1.16, duration: 0.2, ease: "power2.in" }, t0 + SEG - 0.2);
       }
       // drifting particles (seeded, deterministic)
       const rnd = (i) => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
