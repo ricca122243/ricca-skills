@@ -1,0 +1,62 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: #05060b; font-family: Inter, sans-serif; color: #fff; }
+    #i-cam { position: absolute; inset: 0; }
+    #i-glow { position: absolute; left: -360px; top: 100px; width: 1800px; height: 1800px; border-radius: 50%; background: radial-gradient(circle, #1fae55 0%, rgba(31, 174, 85, 0) 60%); opacity: 0.2; }
+    .i-mask { position: absolute; left: 130px; width: 820px; height: 122px; overflow: hidden; text-align: center; }
+    .i-row { font-weight: 900; font-size: 104px; letter-spacing: -0.04em; line-height: 1.12; white-space: nowrap; }
+    #i-t2 { color: #25d366; }
+    #i-app { position: absolute; left: 455px; top: 590px; width: 170px; height: 170px; border-radius: 44px; background: linear-gradient(160deg, #3ee37e, #17b550); box-shadow: 0 30px 80px rgba(37, 211, 102, 0.45); display: flex; align-items: center; justify-content: center; opacity: 0; }
+    #i-app::after { content: ""; width: 70px; height: 70px; border-radius: 50% 50% 50% 14px; border: 13px solid #fff; }
+    #i-badge { position: absolute; left: 578px; top: 566px; min-width: 78px; height: 78px; border-radius: 39px; background: #ff3b30; box-shadow: 0 0 0 6px #05060b; display: flex; align-items: center; justify-content: center; font-size: 46px; font-weight: 800; opacity: 0; }
+    .i-n { position: absolute; left: 130px; top: 940px; width: 820px; height: 150px; border-radius: 44px; background: #1a2134; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), inset 0 0 0 2px rgba(255, 255, 255, 0.12); display: flex; align-items: center; padding: 0 32px; gap: 26px; opacity: 0; }
+    .i-ic { width: 88px; height: 88px; border-radius: 26px; background: #25d366; flex: none; display: flex; align-items: center; justify-content: center; }
+    .i-ic::after { content: ""; width: 36px; height: 36px; border-radius: 50% 50% 50% 8px; border: 7px solid #fff; }
+    .i-n small { display: block; font-size: 28px; color: #8c98a8; margin-bottom: 6px; font-weight: 500; }
+    .i-n span { font-size: 38px; font-weight: 600; white-space: nowrap; letter-spacing: -0.01em; }
+  </style>
+  <div id="root" data-composition-id="inbox" data-width="1080" data-height="1920">
+    <div id="i-cam">
+      <div id="i-glow"></div>
+      <div class="i-mask" style="top: 300px"><div class="i-row" id="i-t1">Клиенты</div></div>
+      <div class="i-mask" style="top: 410px"><div class="i-row" id="i-t2">пишут сами</div></div>
+      <div id="i-app"></div>
+      <div id="i-badge">1</div>
+      <div class="i-n" id="i-n0"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Здравствуйте! Хочу заказать</span></div></div>
+      <div class="i-n" id="i-n1"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Можно записаться на завтра?</span></div></div>
+      <div class="i-n" id="i-n2"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Нужен диван как на сайте</span></div></div>
+      <div class="i-n" id="i-n3"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Беру. Как оплатить?</span></div></div>
+      <div class="i-n" id="i-n4"><div class="i-ic"></div><div><small>WhatsApp · сейчас</small><span>Забронируйте стол на двоих</span></div></div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const BT = 60 / 98, H = BT / 2;
+      const tl = gsap.timeline({ paused: true });
+      const badge = document.querySelector("#i-badge");
+      tl.set("#i-cam", { transformOrigin: "540px 860px" }, 0);
+      tl.fromTo("#i-cam", { scale: 1.12, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: "power3.out" }, 0);
+      tl.to("#i-cam", { scale: 1.06, duration: BT * 4 - 0.6, ease: "sine.inOut" }, 0.6);
+      tl.fromTo("#i-glow", { scale: 0.8 }, { scale: 1.15, duration: BT * 4, ease: "none" }, 0);
+      tl.fromTo("#i-t1", { yPercent: 110 }, { yPercent: 0, duration: 0.6, ease: "power4.out" }, 0.05);
+      tl.fromTo("#i-t2", { yPercent: 110 }, { yPercent: 0, duration: 0.6, ease: "power4.out" }, 0.2);
+      tl.fromTo("#i-app", { opacity: 0, scale: 0.5, y: 60 }, { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: "back.out(1.6)" }, 0.3);
+      // a stack that deepens: each new message slides in at the front and pushes the older ones back
+      const cnt = { n: 0 };
+      for (let i = 0; i < 5; i++) {
+        const t = BT + i * H;
+        tl.fromTo("#i-n" + i, { opacity: 0, y: 300, scale: 1.06 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }, t);
+        for (let j = 0; j < i; j++) {
+          const d = i - j;
+          tl.to("#i-n" + j, { y: -d * 40, scale: 1 - d * 0.055, opacity: Math.max(0.15, 1 - d * 0.24), duration: 0.55, ease: "power3.out" }, t);
+        }
+        tl.to(cnt, { n: i + 1, duration: 0.01, onUpdate: () => { badge.textContent = String(Math.round(cnt.n) || 1); } }, t + 0.05);
+        tl.fromTo("#i-badge", { opacity: 1, scale: 1.5 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2.5)", immediateRender: false }, t + 0.05);
+        tl.fromTo("#i-app", { rotation: i % 2 ? 7 : -7 }, { rotation: 0, duration: 0.5, ease: "elastic.out(1, 0.5)", immediateRender: false }, t + 0.05);
+      }
+      tl.to("#i-cam", { opacity: 0, y: -60, duration: 0.3, ease: "power2.in" }, BT * 4 - 0.32);
+      tl.set({}, {}, BT * 4);
+      window.__timelines["inbox"] = tl;
+    })();
+  </script>
+</template>

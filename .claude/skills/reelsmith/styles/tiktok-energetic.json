@@ -1,0 +1,20 @@
+{
+  "name": "tiktok-energetic",
+  "aspectRatio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "pacing": "fast",
+  "voiceId": "21m00Tcm4TlvDq8ikWAM",
+  "shotPromptPreamble": "Vertical short-form video, punchy energetic pacing, natural handheld camera feel, bright saturated color grade, quick focus pulls. Shot: ",
+  "captions": {
+    "font": "Arial Black",
+    "fontSize": 72,
+    "position": "bottom",
+    "primaryColor": "#FFFFFF",
+    "outlineColor": "#000000",
+    "outlinePx": 4,
+    "uppercase": true,
+    "wordsPerCaption": 3
+  }
+}

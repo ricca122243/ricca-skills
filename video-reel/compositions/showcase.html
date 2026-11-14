@@ -1,0 +1,179 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: #05060b; font-family: Inter, sans-serif; color: #fff; }
+    #p-glow { position: absolute; left: -360px; top: 200px; width: 1800px; height: 1800px; border-radius: 50%; background: radial-gradient(circle, #3f5cff 0%, rgba(63, 92, 255, 0) 62%); }
+    #p-glow2 { position: absolute; left: -200px; top: 900px; width: 1480px; height: 1480px; border-radius: 50%; background: radial-gradient(circle, #8d5cff 0%, rgba(141, 92, 255, 0) 60%); }
+    #p-ghost { position: absolute; left: 0; top: 930px; font-weight: 900; font-size: 420px; line-height: 1; letter-spacing: -0.05em; white-space: nowrap; color: transparent; -webkit-text-stroke: 3px rgba(140, 160, 255, 0.22); }
+    #p-pill { position: absolute; left: 190px; top: 300px; width: 700px; height: 96px; border-radius: 48px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); display: flex; align-items: center; padding: 0 34px; gap: 20px; }
+    #p-ico { width: 32px; height: 32px; border: 5px solid #5f6672; border-radius: 50%; position: relative; flex: none; }
+    #p-ico::after { content: ""; position: absolute; width: 5px; height: 16px; background: #5f6672; border-radius: 3px; left: 24px; top: 20px; transform: rotate(-45deg); }
+    #p-q { font-size: 38px; font-weight: 500; color: #14181f; white-space: nowrap; }
+    #p-caret { width: 4px; height: 46px; background: #2f6bff; border-radius: 2px; margin-left: -12px; }
+    .p-lab { position: absolute; left: 130px; width: 820px; top: 424px; text-align: center; }
+    .p-mask { overflow: hidden; padding: 6px 0; }
+    .p-t { font-weight: 900; font-size: 104px; line-height: 1; letter-spacing: -0.04em; white-space: nowrap; }
+    .p-s { font-size: 36px; font-weight: 500; color: #c3ccdf; margin-top: 8px; white-space: nowrap; }
+    #p-stage { position: absolute; inset: 0; }
+    #p-floor { position: absolute; left: 170px; top: 1800px; width: 740px; height: 150px; border-radius: 50%; background: radial-gradient(ellipse, rgba(91, 124, 255, 0.8), rgba(91, 124, 255, 0) 70%); filter: blur(30px); }
+    #p-phone { position: absolute; left: 230px; top: 640px; width: 620px; height: 1270px; border-radius: 96px; background: linear-gradient(145deg, #2f3650, #090b12 30%, #090b12 70%, #20263a); box-shadow: 0 0 0 3px #3a4258, 0 70px 140px rgba(0, 0, 0, 0.75), 0 0 130px rgba(91, 124, 255, 0.5); }
+    #p-screen { position: absolute; left: 30px; top: 40px; width: 560px; height: 1190px; border-radius: 66px; overflow: hidden; background: #0b0d14; }
+    #p-screen video { position: absolute; left: 0; top: 0; width: 560px; height: 1190px; object-fit: cover; }
+    #p-notch { position: absolute; left: 230px; top: 60px; width: 160px; height: 42px; border-radius: 21px; background: #07080d; z-index: 3; }
+    #p-glare { position: absolute; left: 0; top: -100px; width: 280px; height: 1500px; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0)); z-index: 2; }
+    .p-chip { position: absolute; left: 260px; width: 560px; top: 1470px; height: 92px; border-radius: 46px; background: rgba(12, 16, 32, 0.92); box-shadow: inset 0 0 0 2px rgba(140, 160, 255, 0.5), 0 20px 50px rgba(0, 0, 0, 0.5); font-size: 40px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    #p-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+    #p-cam { position: absolute; inset: 0; }
+    .p-ring { position: absolute; left: 240px; top: 975px; width: 600px; height: 600px; border-radius: 50%; border: 5px solid rgba(150, 170, 255, 0.8); opacity: 0; }
+    .p-dot { position: absolute; border-radius: 50%; background: #9fb2ff; }
+    .p-tag { position: absolute; height: 86px; padding: 0 34px; border-radius: 43px; background: #fff; color: #0e1116; font-size: 37px; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; gap: 16px; white-space: nowrap; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55); opacity: 0; }
+    .p-tag::before { content: ""; width: 20px; height: 20px; border-radius: 50%; background: #2f6bff; flex: none; }
+    .p-ta { left: 70px; top: 1040px; }
+    .p-tb { right: 70px; top: 1340px; }
+    .p-tb::before { background: #25d366; }
+    .p-lab, .p-chip { opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="showcase" data-width="1080" data-height="1920">
+    <div id="p-cam">
+    <div id="p-glow"></div>
+    <div id="p-glow2"></div>
+    <div id="p-ghost">САЙТ САЙТ САЙТ САЙТ САЙТ САЙТ</div>
+    <div id="p-dots"></div>
+    <div class="p-ring" id="p-r0"></div><div class="p-ring" id="p-r1"></div><div class="p-ring" id="p-r2"></div>
+    <div id="p-stage">
+      <div id="p-floor"></div>
+      <div id="p-punch">
+        <div id="p-float">
+          <div id="p-phone">
+            <div id="p-notch"></div>
+            <div id="p-screen">
+              <video id="p-v0" class="clip" muted playsinline src="assets/ricca.mp4" data-start="0.000" data-duration="2.449" data-track-index="1"></video>
+              <video id="p-v1" class="clip" muted playsinline src="assets/eluna.mp4" data-start="2.449" data-duration="2.449" data-track-index="2"></video>
+              <video id="p-v2" class="clip" muted playsinline src="assets/velmora.mp4" data-start="4.898" data-duration="2.449" data-track-index="3"></video>
+              <video id="p-v3" class="clip" muted playsinline src="assets/altyn.mp4" data-start="7.347" data-duration="2.449" data-track-index="4"></video>
+              <video id="p-v4" class="clip" muted playsinline src="assets/aman.mp4" data-start="9.796" data-duration="2.449" data-track-index="5"></video>
+              <video id="p-v5" class="clip" muted playsinline src="assets/sofas.mp4" data-start="12.245" data-duration="4.898" data-track-index="6"></video>
+              <div id="p-glare"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="p-pill"><div id="p-ico"></div><div id="p-q"></div><div id="p-caret"></div></div>
+    <div class="p-lab" id="p-l0"><div class="p-mask"><div class="p-t" id="p-t0">RICCA DESIGNS</div></div><div class="p-s" id="p-s0">мебель на заказ · каталог и WhatsApp</div></div>
+    <div class="p-lab" id="p-l1"><div class="p-mask"><div class="p-t" id="p-t1">ELUNA</div></div><div class="p-s" id="p-s1">матрасы · выбор модели и размера</div></div>
+    <div class="p-lab" id="p-l2"><div class="p-mask"><div class="p-t" id="p-t2">VELMORA</div></div><div class="p-s" id="p-s2">часы · премиальный лендинг</div></div>
+    <div class="p-lab" id="p-l3"><div class="p-mask"><div class="p-t" id="p-t3">ALTYN</div></div><div class="p-s" id="p-s3">ресторан · меню и бронь стола</div></div>
+    <div class="p-lab" id="p-l4"><div class="p-mask"><div class="p-t" id="p-t4">AMAN SERVICE</div></div><div class="p-s" id="p-s4">электротранспорт · запись на ремонт</div></div>
+    <div class="p-lab" id="p-l5"><div class="p-mask"><div class="p-t" id="p-t5">3D НА САЙТЕ</div></div><div class="p-s" id="p-s5">клиент крутит товар сам</div></div>
+    <div class="p-tag p-ta" id="p-g0a">Каталог</div>
+    <div class="p-tag p-tb" id="p-g0b">Заявка в WhatsApp</div>
+    <div class="p-tag p-ta" id="p-g1a">Выбор размера</div>
+    <div class="p-tag p-tb" id="p-g1b">Заказ онлайн</div>
+    <div class="p-tag p-ta" id="p-g2a">Анимация по скроллу</div>
+    <div class="p-tag p-tb" id="p-g2b">Премиум-дизайн</div>
+    <div class="p-tag p-ta" id="p-g3a">Меню</div>
+    <div class="p-tag p-tb" id="p-g3b">Бронь стола</div>
+    <div class="p-tag p-ta" id="p-g4a">Запись на ремонт</div>
+    <div class="p-tag p-tb" id="p-g4b">Карта 2ГИС</div>
+    <div class="p-chip" id="p-c0">Диван Rulva</div>
+    <div class="p-chip" id="p-c1">Диван Kamra</div>
+    <div class="p-chip" id="p-c2">Диван Semra</div>
+    <div class="p-chip" id="p-c3">Диван Ronva</div>
+    </div>
+    <div id="p-flash"></div>
+  </div>
+  <script>
+    (() => {
+      const BT = 60 / 98, SEG = BT * 4, N = 6, TOTAL = SEG * 7, LEN = (k) => (k === N - 1 ? SEG * 2 : SEG);
+      const tl = gsap.timeline({ paused: true });
+      const QS = ["диван на заказ", "матрасы алматы", "премиальные часы", "ресторан в алматы", "ремонт самоката", "собрать диван в 3D"];
+      const GH = ["МЕБЕЛЬ ", "МАТРАСЫ ", "ЧАСЫ ", "РЕСТОРАН ", "СЕРВИС ", "3D 3D "];
+      const qEl = document.querySelector("#p-q"), gEl = document.querySelector("#p-ghost");
+      for (let k = 0; k < N; k++) { const el = document.querySelector("#p-t" + k); const r = el.scrollWidth; if (r > 820) el.style.fontSize = (104 * 820 / r) + "px"; }
+
+      tl.set("#p-phone", { transformPerspective: 2400, transformOrigin: "50% 50%" }, 0);
+      tl.fromTo("#p-flash", { opacity: 0.4 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, 0);
+      tl.fromTo("#p-glow", { opacity: 0.25, scale: 0.9 }, { opacity: 0.4, scale: 1.1, duration: TOTAL, ease: "none" }, 0);
+      tl.fromTo("#p-glow2", { opacity: 0.1, x: -200 }, { opacity: 0.28, x: 200, duration: TOTAL, ease: "none" }, 0);
+      tl.fromTo("#p-ghost", { x: 0 }, { x: -4200, duration: TOTAL, ease: "none" }, 0);
+      tl.fromTo("#p-caret", { opacity: 1 }, { opacity: 0, duration: 0.01, repeat: 59, repeatDelay: 0.27, yoyo: true, ease: "steps(1)" }, 0);
+      tl.fromTo("#p-pill", { y: -360 }, { y: 0, duration: 0.5, ease: "back.out(1.5)" }, 0);
+      tl.fromTo("#p-float", { y: 10 }, { y: -12, duration: BT * 2, repeat: 13, yoyo: true, ease: "sine.inOut" }, 0);
+
+      // first entrance
+      tl.fromTo("#p-phone", { y: 1500, rotationY: -220, rotationZ: -24, rotationX: 0, scale: 0.3, x: 0, opacity: 1 }, { y: 0, rotationY: -16, rotationZ: 2, rotationX: 6, scale: 1, duration: 0.75, ease: "expo.out" }, 0);
+      tl.to("#p-phone", { rotationY: -8, duration: SEG - 0.95, ease: "sine.inOut" }, 0.75);
+      for (let k = 1; k < N; k++) {
+        const t0 = k * SEG, last = k === N - 1, style = last ? 0 : k % 3, dir = k % 2 ? 1 : -1;
+        if (style === 1) { // whip sideways
+          tl.to("#p-phone", { x: -1300 * dir, rotationY: -70 * dir, duration: 0.32, ease: "power2.in" }, t0 - 0.32);
+          tl.fromTo("#p-phone", { x: 1300 * dir, rotationY: 70 * dir, rotationZ: -3 * dir, y: 0, scale: 1, opacity: 1 }, { x: 0, rotationY: 15 * dir, rotationZ: -2 * dir, rotationX: 4, duration: 0.95, ease: "power3.out", immediateRender: false }, t0);
+        } else if (style === 2) { // fall in from the camera
+          tl.to("#p-phone", { scale: 0.15, y: 400, opacity: 0, duration: 0.32, ease: "power2.in" }, t0 - 0.32);
+          tl.fromTo("#p-phone", { scale: 2.6, y: -200, x: 0, opacity: 0, rotationY: 0, rotationX: 24, rotationZ: 0 }, { scale: 1.05, y: 0, opacity: 1, rotationY: -11 * dir, rotationX: 7, duration: 0.95, ease: "power3.out", immediateRender: false }, t0);
+        } else { // flip around its axis
+          tl.to("#p-phone", { rotationY: 90, duration: 0.32, ease: "power2.in" }, t0 - 0.32);
+          tl.fromTo("#p-phone", { rotationY: -90, x: 0, opacity: 1 }, { rotationY: -7 * dir, rotationX: 5, rotationZ: 0, scale: last ? 1.3 : 1, y: last ? 250 : 0, duration: 0.95, ease: "power3.out", immediateRender: false }, t0);
+        }
+        tl.to("#p-phone", { rotationY: 8 * dir, duration: LEN(k) - 1.3, ease: "sine.inOut" }, t0 + 0.95);
+      }
+      tl.to("#p-phone", { scale: 4.2, opacity: 0, duration: 0.24, ease: "power3.in" }, TOTAL - 0.25);
+
+      for (let k = 0; k < N; k++) {
+        const t0 = k * SEG;
+        const st = { n: 0 };
+        tl.to(st, { n: QS[k].length, duration: 0.5, ease: "none", onUpdate: () => { qEl.textContent = QS[k].slice(0, Math.round(st.n)); gEl.textContent = GH[k].repeat(10); } }, t0 + 0.02);
+        tl.fromTo("#p-pill", { scale: 1.06 }, { scale: 1, duration: 0.3, ease: "power2.out", immediateRender: false }, t0 + 0.52);
+        tl.set("#p-l" + k, { opacity: 1 }, t0 + 0.12);
+        tl.fromTo("#p-t" + k, { yPercent: 115, rotation: 4 }, { yPercent: 0, rotation: 0, duration: 0.5, ease: "expo.out" }, t0 + 0.12);
+        tl.fromTo("#p-s" + k, { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, t0 + 0.38);
+        tl.to("#p-l" + k, { opacity: 0, y: -40, duration: 0.16, ease: "power2.in" }, t0 + LEN(k) - 0.18);
+        tl.fromTo("#p-glare", { x: -420 }, { x: 760, duration: 0.8, ease: "power2.inOut", immediateRender: false }, t0 + 0.35);
+        for (let b = 1; b < LEN(k) / BT - 0.5; b++) tl.fromTo("#p-punch", { scale: 1.018 }, { scale: 1, duration: 0.32, ease: "power2.out", immediateRender: false }, t0 + b * BT);
+        if (k > 0) tl.fromTo("#p-flash", { opacity: 0.1 }, { opacity: 0, duration: 0.3, ease: "power2.out", immediateRender: false }, t0);
+      }
+      // CAMERA: land on every site, punch into the screen on beat 3, ease back out, lean in before the cut
+      tl.set("#p-cam", { transformOrigin: "540px 1100px" }, 0);
+      for (let k = 0; k < 7; k++) {
+        const t0 = k * SEG, last = k >= 5;
+        tl.fromTo("#p-cam", { scale: k === 6 ? 0.97 : k ? 0.92 : 0.8 }, { scale: 1, duration: 0.9, ease: "power3.out", immediateRender: k === 0 }, t0);
+        tl.to("#p-cam", { scale: 1.03, duration: BT * 2 - 0.97, ease: "none" }, t0 + 0.9);
+        tl.to("#p-cam", { scale: last ? 1.08 : 1.15, duration: 0.6, ease: "sine.inOut" }, t0 + BT * 2 - 0.1);
+        tl.to("#p-cam", { scale: last ? 1.1 : 1.18, duration: BT - 0.6, ease: "none" }, t0 + BT * 2 + 0.5);
+        tl.to("#p-cam", { scale: 1.05, duration: 0.6, ease: "sine.inOut" }, t0 + BT * 3 - 0.1);
+        tl.to("#p-cam", { scale: 1.12, duration: 0.3, ease: "power2.in" }, t0 + SEG - 0.3);
+      }
+      // drifting particles (seeded, deterministic)
+      const rnd = (i) => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+      const dots = document.querySelector("#p-dots");
+      for (let i = 0; i < 34; i++) {
+        const d = document.createElement("div"); d.className = "p-dot";
+        const sz = 4 + rnd(i) * 10; d.style.width = d.style.height = sz + "px";
+        d.style.left = (rnd(i + 50) * 1080) + "px"; d.style.top = (400 + rnd(i + 90) * 1900) + "px";
+        dots.appendChild(d);
+        tl.fromTo(d, { y: 0, opacity: 0.15 + rnd(i + 7) * 0.5 }, { y: -(500 + rnd(i + 3) * 1500), duration: TOTAL, ease: "none" }, 0);
+      }
+      // shockwave rings on every beat, feature callouts on beats 2 and 3 of each site
+      for (let k = 0; k < 7; k++) {
+        const t0 = k * SEG;
+        for (let b = 0; b < 4; b++) {
+          tl.fromTo("#p-r" + ((k * 4 + b) % 3), { scale: 0.55, opacity: b === 0 ? 0.9 : 0.5 }, { scale: b === 0 ? 2.6 : 1.9, opacity: 0, duration: 0.6, ease: "power2.out", immediateRender: false }, t0 + b * BT);
+        }
+        if (k < 5) {
+          tl.fromTo("#p-g" + k + "a", { opacity: 0, x: -520, rotation: -10 }, { opacity: 1, x: 0, rotation: -3, duration: 0.45, ease: "back.out(1.8)" }, t0 + BT);
+          tl.fromTo("#p-g" + k + "b", { opacity: 0, x: 520, rotation: 10 }, { opacity: 1, x: 0, rotation: 3, duration: 0.45, ease: "back.out(1.8)" }, t0 + BT * 2);
+          tl.to("#p-g" + k + "a", { y: -12, duration: BT, yoyo: true, repeat: 1, ease: "sine.inOut" }, t0 + BT + 0.45);
+          tl.to(["#p-g" + k + "a", "#p-g" + k + "b"], { opacity: 0, scale: 0.7, duration: 0.14, ease: "power2.in" }, t0 + SEG - 0.2);
+        }
+      }
+      for (let i = 0; i < 4; i++) {
+        const t = SEG * (N - 1) + i * BT * 2;
+        tl.fromTo("#p-c" + i, { opacity: 0, y: 50, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: "back.out(2.4)" }, t + 0.04);
+        tl.to("#p-c" + i, { opacity: 0, y: -30, duration: 0.12, ease: "power2.in" }, t + BT * 2 - 0.12);
+      }
+      tl.to("#p-pill", { y: -360, duration: 0.2, ease: "power2.in" }, TOTAL - 0.22);
+      tl.set({}, {}, TOTAL);
+      window.__timelines["showcase"] = tl;
+    })();
+  </script>
+</template>

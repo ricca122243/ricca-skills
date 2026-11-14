@@ -1,0 +1,30 @@
+{
+  "name": "reelsmith",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "description": "Claude Code skill: local short-form video generation CLI (Seedance 2.0 / Gemini Omni Flash / ElevenLabs / ffmpeg). No web UI, no accounts, no telemetry.",
+  "keywords": ["claude-code", "claude-skill", "video-generation", "ffmpeg", "cli"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karamusluk/reelsmith-claude-skill.git"
+  },
+  "bin": {
+    "reelsmith": "./src/cli.ts"
+  },
+  "scripts": {
+    "reelsmith": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "@types/node": "^22.7.0"
+  },
+  "engines": {
+    "node": ">=18.17"
+  }
+}
