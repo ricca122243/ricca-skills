@@ -1,45 +1,46 @@
 <template>
   <style>
     #root { position: absolute; inset: 0; overflow: hidden; background: #05060b; font-family: Inter, sans-serif; color: #fff; }
-    #t-glow { position: absolute; left: -360px; top: 300px; width: 1800px; height: 1800px; border-radius: 50%; background: radial-gradient(circle, #3f5cff 0%, rgba(63, 92, 255, 0) 60%); opacity: 0.24; }
-    #t-cam { position: absolute; inset: 0; }
-    #t-h { position: absolute; left: 130px; width: 820px; top: 300px; text-align: center; font-weight: 900; font-size: 92px; letter-spacing: -0.04em; line-height: 1.04; opacity: 0; }
-    .t-card { position: absolute; left: 130px; width: 820px; height: 232px; border-radius: 44px; background: linear-gradient(150deg, rgba(26, 33, 62, 0.96), rgba(12, 16, 32, 0.96)); box-shadow: inset 0 0 0 2px rgba(130, 150, 255, 0.35), 0 30px 70px rgba(0, 0, 0, 0.5); padding: 40px 44px; display: flex; gap: 36px; align-items: center; opacity: 0; }
-    .t-num { font-size: 104px; font-weight: 900; letter-spacing: -0.05em; color: #6f8aff; line-height: 1; flex: none; width: 150px; }
-    .t-tt { font-size: 50px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.08; }
-    .t-ss { font-size: 34px; font-weight: 500; color: #b9c3d9; margin-top: 10px; }
-    #t-line { position: absolute; left: 92px; top: 560px; width: 8px; height: 690px; background: linear-gradient(180deg, #6f8aff, #25d366); border-radius: 3px; transform-origin: 50% 0; opacity: 0.55; }
+    #t-glow { position: absolute; left: -360px; top: 200px; width: 1800px; height: 1800px; border-radius: 50%; background: radial-gradient(circle, #3f5cff 0%, rgba(63, 92, 255, 0) 60%); opacity: 0.26; }
+    #t-head { position: absolute; left: 130px; width: 820px; top: 310px; text-align: center; font-size: 40px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #9fb0d8; opacity: 0; }
+    #t-strip { position: absolute; left: 0; top: 0; width: 3240px; height: 1920px; }
+    .t-pan { position: absolute; top: 0; width: 1080px; height: 1920px; }
+    .t-num { position: absolute; left: 0; width: 1080px; top: 400px; text-align: center; font-size: 440px; font-weight: 900; letter-spacing: -0.06em; line-height: 1; color: transparent; -webkit-text-stroke: 5px #6f8aff; }
+    .t-tt { position: absolute; left: 130px; width: 820px; top: 900px; text-align: center; font-size: 86px; font-weight: 900; letter-spacing: -0.04em; line-height: 1.05; }
+    .t-ss { position: absolute; left: 130px; width: 820px; top: 1110px; text-align: center; font-size: 44px; font-weight: 500; color: #c3ccdf; }
+    #t-bar { position: absolute; left: 330px; top: 1250px; width: 420px; display: flex; gap: 16px; opacity: 0; }
+    #t-bar div { flex: 1; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.18); overflow: hidden; }
+    #t-bar b { display: block; width: 100%; height: 100%; background: #6f8aff; transform-origin: 0 50%; }
   </style>
   <div id="root" data-composition-id="steps" data-width="1080" data-height="1920">
-    <div id="t-cam">
     <div id="t-glow"></div>
-    <div id="t-h">Как это работает</div>
-    <div id="t-line"></div>
-    <div class="t-card" id="t-c0" style="top: 520px"><div class="t-num">01</div><div><div class="t-tt">Присылаете фото и цены</div><div class="t-ss">прямо в WhatsApp</div></div></div>
-    <div class="t-card" id="t-c1" style="top: 784px"><div class="t-num">02</div><div><div class="t-tt">Собираем сайт</div><div class="t-ss">за 3–5 дней, под ваш бренд</div></div></div>
-    <div class="t-card" id="t-c2" style="top: 1048px"><div class="t-num">03</div><div><div class="t-tt">Клиенты находят вас</div><div class="t-ss">и пишут сами</div></div></div>
+    <div id="t-strip">
+      <div class="t-pan" style="left: 0"><div class="t-num" id="t-n0">01</div><div class="t-tt" id="t-a0">Присылаете<br />фото и цены</div><div class="t-ss" id="t-b0">прямо в WhatsApp</div></div>
+      <div class="t-pan" style="left: 1080px"><div class="t-num" id="t-n1">02</div><div class="t-tt" id="t-a1">Собираем<br />сайт</div><div class="t-ss" id="t-b1">за 3–5 дней, под ваш бренд</div></div>
+      <div class="t-pan" style="left: 2160px"><div class="t-num" id="t-n2">03</div><div class="t-tt" id="t-a2">Клиенты<br />находят вас</div><div class="t-ss" id="t-b2">и пишут сами</div></div>
     </div>
+    <div id="t-head">Как это работает</div>
+    <div id="t-bar"><div><b id="t-p0"></b></div><div><b id="t-p1"></b></div><div><b id="t-p2"></b></div></div>
   </div>
   <script>
     (() => {
       const BT = 60 / 98;
       const tl = gsap.timeline({ paused: true });
-      tl.set("#t-cam", { transformOrigin: "540px 640px" }, 0);
-      tl.fromTo("#t-cam", { scale: 1.3, y: 80 }, { scale: 1, y: 0, duration: 0.8, ease: "expo.out" }, 0);
-      tl.to("#t-cam", { scale: 1.08, y: -20, duration: 0.55, ease: "power3.inOut" }, BT * 1 - 0.05);
-      tl.to("#t-cam", { scale: 1.08, y: -120, duration: 0.6, ease: "power3.inOut" }, BT * 3 - 0.05);
-      tl.to("#t-cam", { scale: 1.08, y: -230, duration: 0.6, ease: "power3.inOut" }, BT * 5 - 0.05);
-      tl.to("#t-cam", { scale: 1, y: 0, duration: 0.7, ease: "power3.inOut" }, BT * 6.4);
-      tl.fromTo("#t-glow", { y: -200 }, { y: 200, duration: BT * 8, ease: "none" }, 0);
-      tl.fromTo("#t-h", { opacity: 0, y: 70 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, 0.05);
-      tl.fromTo("#t-line", { scaleY: 0 }, { scaleY: 1, duration: BT * 5.4, ease: "none" }, BT);
+      const S = [0, BT * 3, BT * 6, BT * 8]; // one panel per phrase of the quiet part
+      tl.fromTo("#t-glow", { x: -300 }, { x: 300, duration: BT * 8, ease: "sine.inOut" }, 0);
+      tl.fromTo("#t-head", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.05);
+      tl.fromTo("#t-bar", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, 0.1);
       for (let i = 0; i < 3; i++) {
-        const t = BT * (1 + i * 2);
-        tl.fromTo("#t-c" + i, { opacity: 0, x: i % 2 ? 700 : -700, rotationY: i % 2 ? -50 : 50, transformPerspective: 1600 }, { opacity: 1, x: 0, rotationY: 0, duration: 0.6, ease: "expo.out" }, t);
-        tl.fromTo("#t-c" + i + " .t-num", { scale: 2 }, { scale: 1, duration: 0.5, ease: "back.out(2)" }, t + 0.08);
+        const t = S[i], len = S[i + 1] - S[i];
+        if (i) tl.to("#t-strip", { x: -1080 * i, duration: 0.8, ease: "power3.inOut" }, t - 0.4);
+        // the big numeral drifts against the slide (parallax), the copy settles after it
+        tl.fromTo("#t-n" + i, { x: i ? 260 : 0, scale: i ? 1 : 1.25, opacity: i ? 1 : 0 }, { x: 0, scale: 1, opacity: 1, duration: i ? 0.9 : 0.7, ease: "power3.out" }, i ? t - 0.4 : 0.05);
+        tl.to("#t-n" + i, { x: -70, duration: len, ease: "none" }, t + 0.5);
+        tl.fromTo("#t-a" + i, { opacity: 0, y: 70 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, t + 0.12);
+        tl.fromTo("#t-b" + i, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, t + 0.26);
+        tl.fromTo("#t-p" + i, { scaleX: 0 }, { scaleX: 1, duration: len - 0.1, ease: "none" }, t);
       }
-      // slow push-in while the track is quiet, then leave before the price hit
-      tl.to(["#t-h", ".t-card"], { opacity: 0, y: -120, duration: 0.22, ease: "power3.in", stagger: 0.03 }, BT * 8 - 0.32);
+      tl.to(["#t-strip", "#t-head", "#t-bar"], { opacity: 0, duration: 0.3, ease: "power2.in" }, BT * 8 - 0.32);
       tl.set({}, {}, BT * 8);
       window.__timelines["steps"] = tl;
     })();
