@@ -11,6 +11,7 @@ const EVENTS_CAP = 4000;
 export const DEFAULT_SETTINGS = {
   dailyPlan: 60,
   devs: [],
+  webhookUrl: "",
   autoSent: true,
   followupHours: 48,
   templates: {
@@ -304,6 +305,51 @@ function makeCookie(session) {
   const payload = Buffer.from(JSON.stringify(session)).toString("base64url");
   return `rs=${payload}.${sign(payload)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}`;
 }
+/* ---------- интеграция с другой CRM: ключ API и вебхук ---------- */
+// Ключ лежит в Netlify (INTEGRATION_KEY). CRM шлёт его в заголовке Authorization: Bearer <ключ> (или X-Api-Key, или ?key=).
+function apiKeySession(req, url) {
+  const key = env("INTEGRATION_KEY");
+  if (!key || key.length < 16) return null;
+  const h = req.headers.get("authorization") || "";
+  const given = (/^Bearer\s+(.+)$/i.exec(h) || [])[1] || req.headers.get("x-api-key") || url.searchParams.get("key") || "";
+  return given && same(given.trim(), key) ? { role: "owner", name: "CRM", api: true, exp: Date.now() + 60000 } : null;
+}
+const STATUS_RU = { new: "Новый", sent: "Написал", followup: "Напомнил", noreply: "Не ответил", interested: "Интерес", refused: "Отказал", skip: "Нет WhatsApp" };
+const STAGE_RU = { talk: "На связи", brief: "Материалы получены", draft: "Черновик отправлен", paid: "Оплата получена", done: "Сайт сдан", lost: "Не купил" };
+const iso = (t) => (t ? new Date(t).toISOString() : null);
+function crmContact(c, tiers) {
+  const d = c.deal || null;
+  return {
+    phone: "+" + c.phone, name: c.name, niche: c.niche || "", address: c.address || "", instagram: c.instagram ? "https://instagram.com/" + String(c.instagram).replace(/^@/, "") : "",
+    rating: c.rating || "", reviews: c.reviews || 0, category: c.category || "", hours: c.hours || "",
+    tier: tiers || c.tier ? tierOf(c, tiers) : null, tier_ru: tiers || c.tier ? TIER_LABEL[tierOf(c, tiers)] : null, lang: c.lang || "ru",
+    status: c.status || "new", status_ru: STATUS_RU[c.status || "new"], status_by: c.by || "", status_at: iso(c.at),
+    first_contact_by: c.sentBy || "", first_contact_at: iso(c.sentAt), followup_at: iso(c.followAt), note: c.note || "",
+    developer: c.devBy || "", developer_wrote_at: iso(c.devAt),
+    deal: d ? { stage: d.stage, stage_ru: STAGE_RU[d.stage] || "", package: d.pkg ? d.pkg + (d.act ? " + активация" : "") : "", price: d.price || 0, paid: d.paid || 0, left: d.stage !== "lost" && d.price ? Math.max(0, d.price - (d.paid || 0)) : 0, site_link: d.link || "" } : null,
+    whatsapp: "https://wa.me/" + c.phone, gis: c.firmId ? "https://2gis.kz/almaty/firm/" + c.firmId : "",
+    updated_at: iso(Math.max(c.at || 0, c.devAt || 0, (d && d.upd) || 0) || null),
+  };
+}
+// Сообщаем CRM о каждом изменении: статус, сообщение разработчика, этап сделки, заметка.
+async function fireHook(settings, event, c, who, extra = {}) {
+  const target = String((settings && settings.webhookUrl) || "").trim();
+  if (!/^https?:\/\//i.test(target)) return { skipped: true };
+  const body = JSON.stringify({ source: "damillion-rassylka", event, at: new Date().toISOString(), by: who, ...extra, contact: c ? crmContact(c) : null });
+  const headers = { "content-type": "application/json" };
+  const key = env("INTEGRATION_KEY");
+  if (key) headers["x-damillion-signature"] = "sha256=" + createHmac("sha256", key).update(body).digest("hex");
+  try {
+    const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 4000);
+    const r = await fetch(target, { method: "POST", headers, body, signal: ctrl.signal });
+    clearTimeout(t);
+    if (!r.ok) await logServer("webhook", `Вебхук CRM ответил ${r.status}`, target);
+    return { status: r.status };
+  } catch (e) { await logServer("webhook", "Вебхук CRM недоступен: " + (e.message || e), target); return { error: String(e.message || e) }; }
+}
+async function logServer(kind, msg, extra) {
+  try { const cur = (await store().get("log", { type: "json" })) || []; cur.push({ t: Date.now(), kind, msg: String(msg).slice(0, 500), stack: String(extra || "").slice(0, 500), who: "сервер", ua: "" }); await store().setJSON("log", cur.slice(-150)); } catch {}
+}
 function readSession(req) {
   const m = /(?:^|;\s*)rs=([^;]+)/.exec(req.headers.get("cookie") || "");
   if (!m) return null;
@@ -452,8 +498,9 @@ const sorted = (state) => Object.values(state.contacts).sort((a, b) => (a.ord ||
 const fmtAlmaty = (t) => (t ? new Date(t + 5 * 3600000).toISOString().replace("T", " ").slice(0, 16) : "");
 
 /* ---------- обработчик ---------- */
-export default async (req) => {
+export default async (req, context) => {
   const url = new URL(req.url);
+  const later = (p) => { if (context && typeof context.waitUntil === "function") context.waitUntil(p); else return p; };
   const path = url.pathname.replace(/^\/api/, "") || "/";
   const method = req.method;
 
@@ -505,8 +552,8 @@ export default async (req) => {
   }
   if (path === "/logout" && method === "POST") return json({ ok: true }, 200, { "set-cookie": "rs=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0" });
 
-  const me = readSession(req);
-  if (!me) return json({ error: "auth" }, 401);
+  const me = readSession(req) || apiKeySession(req, url);
+  if (!me) return json({ error: "auth", message: "Нужен вход или ключ API (Authorization: Bearer <INTEGRATION_KEY>)" }, 401);
   const isOwner = me.role === "owner", who = isOwner ? ownerName(me.name) : me.name;
 
   try {
@@ -561,12 +608,14 @@ export default async (req) => {
         s.events.push({ t: now, who, phone, status });
         return s;
       });
+      if (state.contacts[phone]) await later(fireHook(state.settings, "status", state.contacts[phone], who, { status, status_ru: STATUS_RU[status] }));
       return json({ ok: true, contact: state.contacts[phone] });
     }
 
     if (path === "/note" && method === "POST") {
       const phone = normPhone(body.phone);
-      await mutate((s) => { const c = s.contacts[phone]; if (!c) return false; c.note = String(body.note || "").slice(0, 300); return s; });
+      const st2 = await mutate((s) => { const c = s.contacts[phone]; if (!c) return false; c.note = String(body.note || "").slice(0, 300); return s; });
+      if (st2.contacts[phone]) await later(fireHook(st2.settings, "note", st2.contacts[phone], who));
       return json({ ok: true });
     }
 
@@ -592,6 +641,7 @@ export default async (req) => {
       });
       if (err) return json({ error: "forbidden", message: err[1] }, err[0]);
       if (!state.contacts[phone]) return json({ error: "not found" }, 404);
+      await later(fireHook(state.settings, "developer", state.contacts[phone], who));
       return json({ ok: true, contact: state.contacts[phone] });
     }
 
@@ -624,6 +674,7 @@ export default async (req) => {
       });
       if (err) return json({ error: "forbidden", message: err[1] }, err[0]);
       if (!state.contacts[phone]) return json({ error: "not found" }, 404);
+      await later(fireHook(state.settings, "deal", state.contacts[phone], who, { stage: state.contacts[phone].deal && state.contacts[phone].deal.stage }));
       return json({ ok: true, contact: state.contacts[phone] });
     }
 
@@ -634,6 +685,35 @@ export default async (req) => {
       let added = 0;
       await mutate((s) => { added = addRows(s, rows); return added ? s : false; });
       return json({ ok: true, parsed: rows.length, added });
+    }
+
+    // Для CRM: компактный список. Фильтры: ?status=interested,sent  ?updated_since=2026-11-01T00:00:00Z  ?niche=мебель  ?limit=500
+    if (path === "/crm/contacts" && method === "GET") {
+      const { data } = await readState();
+      const tiers = rankTiers(Object.values(data.contacts));
+      const sts = (url.searchParams.get("status") || "").split(",").map((x) => x.trim()).filter(Boolean);
+      const since = Date.parse(url.searchParams.get("updated_since") || "") || 0;
+      const niche = (url.searchParams.get("niche") || "").toLowerCase();
+      const limit = Math.min(5000, parseInt(url.searchParams.get("limit")) || 5000);
+      let list = sorted(data).filter((c) => (!sts.length || sts.includes(c.status || "new")) && (!niche || (c.niche || "").toLowerCase().includes(niche)));
+      let out = list.map((c) => crmContact(c, tiers));
+      if (since) out = out.filter((c) => c.updated_at && Date.parse(c.updated_at) >= since);
+      return json({ count: out.length, contacts: out.slice(0, limit) });
+    }
+    if (path === "/crm/contact" && method === "GET") {
+      const { data } = await readState(); const c = data.contacts[normPhone(url.searchParams.get("phone"))];
+      return c ? json({ contact: crmContact(c, rankTiers(Object.values(data.contacts))) }) : json({ error: "not found" }, 404);
+    }
+    if (path === "/integration" && method === "GET") {
+      if (me.api) return json({ ok: true, api: true });
+      const { data } = await readState();
+      return json({ key: env("INTEGRATION_KEY") || "", webhookUrl: data.settings.webhookUrl || "", base: url.origin + "/api" });
+    }
+    if (path === "/hook-test" && method === "POST") {
+      const { data } = await readState();
+      const c = Object.values(data.contacts).find((x) => x.status === "interested") || Object.values(data.contacts)[0];
+      const r = await fireHook(data.settings, "test", c, who);
+      return json({ ok: !!(r.status && r.status < 400), ...r });
     }
 
     if (path === "/log" && method === "GET") {
@@ -665,6 +745,7 @@ export default async (req) => {
         const pick = (v, old) => (String(v || "").trim() || old).slice(0, 1500);
         s.settings = {
           dailyPlan: Math.max(1, parseInt(body.dailyPlan) || cur.dailyPlan),
+          webhookUrl: body.webhookUrl !== undefined ? (/^https?:\/\//i.test(String(body.webhookUrl).trim()) ? str(body.webhookUrl, 500) : "") : cur.webhookUrl || "",
           devs: Array.isArray(body.devs) ? [...new Set(body.devs.map((x) => str(x, 40)).filter(Boolean))].slice(0, 30) : cur.devs || [],
           autoSent: body.autoSent === undefined ? cur.autoSent : !!body.autoSent,
           followupHours: Math.max(1, parseInt(body.followupHours) || cur.followupHours),

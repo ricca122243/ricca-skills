@@ -349,6 +349,15 @@ details.legend .lg{display:none}
           <p class="hint" id="previewBox" hidden></p>
         </div>
         <div class="panel form">
+          <h2>Интеграция с другой CRM</h2>
+          <p class="hint">Другая CRM может читать клиентов и ставить статусы через API, а сюда получать уведомление о каждом изменении (вебхук). Подробная инструкция для разработчика CRM: в файле «Промпт для CRM».</p>
+          <label>Адрес API</label><input type="text" id="intBase" readonly>
+          <label>Ключ API (никому, кроме своей CRM, не давать)</label>
+          <div class="pwd"><input type="password" id="intKey" readonly><button type="button" id="intShow">Показать</button></div>
+          <label for="hookUrl">Вебхук CRM: куда слать изменения (https://…)</label><input type="text" id="hookUrl" placeholder="https://ваша-crm/webhook">
+          <div class="tools"><button class="btn primary" id="saveHook">Сохранить</button><button class="btn" id="testHook">Проверить вебхук</button><button class="btn" id="copyKey">Скопировать ключ</button></div>
+        </div>
+        <div class="panel form">
           <h2>Разработка: пакеты и сообщения</h2>
           <p class="hint">Пакеты: по строке на пакет, <code>Название; цена; цена с активацией</code>. В сообщениях подставляются <code>{name}</code> название фирмы, <code>{link}</code> ссылка из карточки, <code>{pkg}</code> пакет, <code>{price}</code> цена.</p>
           <label for="pkgs">Пакеты и цены</label><textarea id="pkgs" style="min-height:110px"></textarea>
@@ -781,7 +790,8 @@ async function load(){
   }catch(e){ if(!e.auth) setNet(false); }
   finally{ loading=false; }
 }
-function fillOwnerCfg(){ const t=settings.templates, h=settings.hooks; $('#tplF').value=t.furniture||''; $('#tplM').value=t.massage||''; $('#tplD').value=t.default||''; $('#tplU').value=t.followup||''; $('#hookW').value=h.withReviews||''; $('#hookN').value=h.withoutReviews||''; const tk=settings.templatesKz||{}, hk=settings.hooksKz||{}; $('#tplFk').value=tk.furniture||''; $('#tplMk').value=tk.massage||''; $('#tplDk').value=tk.default||''; $('#tplUk').value=tk.followup||''; $('#hookWk').value=hk.withReviews||''; $('#hookNk').value=hk.withoutReviews||''; const dv=settings.templatesDev||{}, dk=settings.templatesDevKz||{}; $('#dvF').value=dv.furniture||''; $('#dvM').value=dv.massage||''; $('#dvD').value=dv.default||''; $('#dvFk').value=dk.furniture||''; $('#dvMk').value=dk.massage||''; $('#dvDk').value=dk.default||''; $('#scripts').value=(settings.scripts||[]).map(sc=>`${sc.niche==='furniture'?'мебель: ':sc.niche==='massage'?'массаж: ':''}${sc.title}\n${sc.ru.replace(/\n/g,' / ')}\n${(sc.kz||'').replace(/\n/g,' / ')}`).join('\n\n'); const ex=settings.examples||{}; $('#exF').value=ex.furniture||''; $('#exM').value=ex.massage||''; $('#exD').value=ex.default||''; fillDealCfg(); $('#plan').value=settings.dailyPlan||60; $('#followupHours').value=settings.followupHours||48; $('#autoSent').checked=settings.autoSent!==false; }
+async function loadIntegration(){ try{ const r=await api('/integration'); $('#intBase').value=r.base||''; $('#intKey').value=r.key||'(ключ не задан в Netlify: INTEGRATION_KEY)'; }catch(e){} }
+function fillOwnerCfg(){ $('#hookUrl').value=settings.webhookUrl||''; const t=settings.templates, h=settings.hooks; $('#tplF').value=t.furniture||''; $('#tplM').value=t.massage||''; $('#tplD').value=t.default||''; $('#tplU').value=t.followup||''; $('#hookW').value=h.withReviews||''; $('#hookN').value=h.withoutReviews||''; const tk=settings.templatesKz||{}, hk=settings.hooksKz||{}; $('#tplFk').value=tk.furniture||''; $('#tplMk').value=tk.massage||''; $('#tplDk').value=tk.default||''; $('#tplUk').value=tk.followup||''; $('#hookWk').value=hk.withReviews||''; $('#hookNk').value=hk.withoutReviews||''; const dv=settings.templatesDev||{}, dk=settings.templatesDevKz||{}; $('#dvF').value=dv.furniture||''; $('#dvM').value=dv.massage||''; $('#dvD').value=dv.default||''; $('#dvFk').value=dk.furniture||''; $('#dvMk').value=dk.massage||''; $('#dvDk').value=dk.default||''; $('#scripts').value=(settings.scripts||[]).map(sc=>`${sc.niche==='furniture'?'мебель: ':sc.niche==='massage'?'массаж: ':''}${sc.title}\n${sc.ru.replace(/\n/g,' / ')}\n${(sc.kz||'').replace(/\n/g,' / ')}`).join('\n\n'); const ex=settings.examples||{}; $('#exF').value=ex.furniture||''; $('#exM').value=ex.massage||''; $('#exD').value=ex.default||''; fillDealCfg(); $('#plan').value=settings.dailyPlan||60; $('#followupHours').value=settings.followupHours||48; $('#autoSent').checked=settings.autoSent!==false; }
 function fillDealCfg(){
   const t=settings.templatesDeal||{}, k=settings.templatesDealKz||{};
   $('#pkgs').value=(settings.packages||[]).map(p=>`${p.name}; ${p.price}; ${p.act}`).join('\n');
@@ -843,7 +853,7 @@ document.addEventListener('click', async e=>{
   const t=e.target.closest('button,a'); if(!t) return;
   if(t.dataset.tab){
     if(t.dataset.tab==='out'){ await api('/logout',{}).catch(()=>{}); try{ localStorage.removeItem(CACHE_KEY); }catch(e){} ver=''; showLogin(); return; }
-    showTab(t.dataset.tab); if(t.dataset.tab==='team') loadErrors(); return;
+    showTab(t.dataset.tab); if(t.dataset.tab==='team') loadErrors(); if(t.dataset.tab==='set') loadIntegration(); return;
   }
   if(t.dataset.goto){ if(t.dataset.goto==='deals') dfilter='wait'; showTab(t.dataset.goto); window.scrollTo({top:0}); return; }
   if(t.dataset.df){ dfilter=t.dataset.df; render(); return; }
@@ -925,6 +935,10 @@ try{ const r=JSON.parse(localStorage.getItem('rs_login')||'null'); if(r){ $('#ll
 $('#netRetry').addEventListener('click',()=>{ load(); });
 $('#loadRetry').addEventListener('click',()=>{ boot(); });
 $('#errReload').addEventListener('click',loadErrors);
+$('#intShow').addEventListener('click',()=>{ const i=$('#intKey'), show=i.type==='password'; i.type=show?'text':'password'; $('#intShow').textContent=show?'Скрыть':'Показать'; });
+$('#copyKey').addEventListener('click',()=>{ copy($('#intKey').value); toast('Ключ скопирован'); });
+$('#saveHook').addEventListener('click',async()=>{ const u=$('#hookUrl').value.trim(); if(u && !/^https?:\/\//i.test(u)){ toast('Адрес должен начинаться с https://'); return; } try{ await api('/settings',{webhookUrl:u}); toast(u?'Вебхук сохранён':'Вебхук выключен'); await load(); }catch(e){ toast(e.message); } });
+$('#testHook').addEventListener('click',async()=>{ try{ const r=await api('/hook-test',{}); toast(r.skipped?'Сначала сохрани адрес вебхука': r.ok?`CRM ответила ${r.status}, всё работает`:`CRM не приняла: ${r.status||r.error}`); }catch(e){ toast(e.message); } });
 $('#errClear').addEventListener('click',async()=>{ try{ await api('/log-clear',{}); loadErrors(); toast('Журнал очищен'); }catch(e){ toast(e.message); } });
 // Опрашиваем сервер, только пока сайт на экране: в фоне не тратим батарею и интернет.
 document.addEventListener('visibilitychange',()=>{ if(me){ beat(); if(!document.hidden) load(); } });
