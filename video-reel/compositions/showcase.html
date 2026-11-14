@@ -1,0 +1,126 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: #05060b; font-family: Inter, sans-serif; color: #fff; }
+    #p-glow { position: absolute; left: -360px; top: 200px; width: 1800px; height: 1800px; border-radius: 50%; background: radial-gradient(circle, #3f5cff 0%, rgba(63, 92, 255, 0) 62%); }
+    #p-glow2 { position: absolute; left: -200px; top: 900px; width: 1480px; height: 1480px; border-radius: 50%; background: radial-gradient(circle, #8d5cff 0%, rgba(141, 92, 255, 0) 60%); }
+    #p-ghost { position: absolute; left: 0; top: 930px; font-weight: 900; font-size: 420px; line-height: 1; letter-spacing: -0.05em; white-space: nowrap; color: transparent; -webkit-text-stroke: 3px rgba(140, 160, 255, 0.22); }
+    #p-pill { position: absolute; left: 190px; top: 300px; width: 700px; height: 96px; border-radius: 48px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); display: flex; align-items: center; padding: 0 34px; gap: 20px; }
+    #p-ico { width: 32px; height: 32px; border: 5px solid #5f6672; border-radius: 50%; position: relative; flex: none; }
+    #p-ico::after { content: ""; position: absolute; width: 5px; height: 16px; background: #5f6672; border-radius: 3px; left: 24px; top: 20px; transform: rotate(-45deg); }
+    #p-q { font-size: 38px; font-weight: 500; color: #14181f; white-space: nowrap; }
+    #p-caret { width: 4px; height: 46px; background: #2f6bff; border-radius: 2px; margin-left: -12px; }
+    .p-lab { position: absolute; left: 130px; width: 820px; top: 424px; text-align: center; }
+    .p-mask { overflow: hidden; padding: 6px 0; }
+    .p-t { font-weight: 900; font-size: 104px; line-height: 1; letter-spacing: -0.04em; white-space: nowrap; }
+    .p-s { font-size: 36px; font-weight: 500; color: #c3ccdf; margin-top: 8px; white-space: nowrap; }
+    #p-stage { position: absolute; inset: 0; }
+    #p-floor { position: absolute; left: 170px; top: 1800px; width: 740px; height: 150px; border-radius: 50%; background: radial-gradient(ellipse, rgba(91, 124, 255, 0.8), rgba(91, 124, 255, 0) 70%); filter: blur(30px); }
+    #p-phone { position: absolute; left: 230px; top: 640px; width: 620px; height: 1270px; border-radius: 96px; background: linear-gradient(145deg, #2f3650, #090b12 30%, #090b12 70%, #20263a); box-shadow: 0 0 0 3px #3a4258, 0 70px 140px rgba(0, 0, 0, 0.75), 0 0 130px rgba(91, 124, 255, 0.5); }
+    #p-screen { position: absolute; left: 30px; top: 40px; width: 560px; height: 1190px; border-radius: 66px; overflow: hidden; background: #0b0d14; }
+    #p-screen video { position: absolute; left: 0; top: 0; width: 560px; height: 1190px; object-fit: cover; }
+    #p-notch { position: absolute; left: 230px; top: 60px; width: 160px; height: 42px; border-radius: 21px; background: #07080d; z-index: 3; }
+    #p-glare { position: absolute; left: 0; top: -100px; width: 280px; height: 1500px; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0)); z-index: 2; }
+    .p-chip { position: absolute; left: 260px; width: 560px; top: 1470px; height: 92px; border-radius: 46px; background: rgba(12, 16, 32, 0.92); box-shadow: inset 0 0 0 2px rgba(140, 160, 255, 0.5), 0 20px 50px rgba(0, 0, 0, 0.5); font-size: 40px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    #p-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+    .p-lab, .p-chip { opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="showcase" data-width="1080" data-height="1920">
+    <div id="p-glow"></div>
+    <div id="p-glow2"></div>
+    <div id="p-ghost">САЙТ САЙТ САЙТ САЙТ САЙТ САЙТ</div>
+    <div id="p-stage">
+      <div id="p-floor"></div>
+      <div id="p-punch">
+        <div id="p-float">
+          <div id="p-phone">
+            <div id="p-notch"></div>
+            <div id="p-screen">
+              <video id="p-v0" class="clip" muted playsinline src="assets/ricca.mp4" data-start="0" data-duration="2.449" data-track-index="1"></video>
+              <video id="p-v1" class="clip" muted playsinline src="assets/eluna.mp4" data-start="2.449" data-duration="2.449" data-track-index="2"></video>
+              <video id="p-v2" class="clip" muted playsinline src="assets/velmora.mp4" data-start="4.898" data-duration="2.449" data-track-index="3"></video>
+              <video id="p-v3" class="clip" muted playsinline src="assets/sofas.mp4" data-start="7.347" data-duration="2.449" data-track-index="4"></video>
+              <div id="p-glare"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="p-pill"><div id="p-ico"></div><div id="p-q"></div><div id="p-caret"></div></div>
+    <div class="p-lab" id="p-l0"><div class="p-mask"><div class="p-t" id="p-t0">RICCA DESIGNS</div></div><div class="p-s" id="p-s0">мебель на заказ · каталог и WhatsApp</div></div>
+    <div class="p-lab" id="p-l1"><div class="p-mask"><div class="p-t" id="p-t1">ELUNA</div></div><div class="p-s" id="p-s1">матрасы · выбор модели и размера</div></div>
+    <div class="p-lab" id="p-l2"><div class="p-mask"><div class="p-t" id="p-t2">VELMORA</div></div><div class="p-s" id="p-s2">часы · премиальный лендинг</div></div>
+    <div class="p-lab" id="p-l3"><div class="p-mask"><div class="p-t" id="p-t3">3D НА САЙТЕ</div></div><div class="p-s" id="p-s3">клиент крутит товар сам</div></div>
+    <div class="p-chip" id="p-c0">Диван Rulva</div>
+    <div class="p-chip" id="p-c1">Диван Kamra</div>
+    <div class="p-chip" id="p-c2">Диван Semra</div>
+    <div class="p-chip" id="p-c3">Диван Ronva</div>
+    <div id="p-flash"></div>
+  </div>
+  <script>
+    (() => {
+      const BT = 60 / 98, SEG = BT * 4;
+      const tl = gsap.timeline({ paused: true });
+      const QS = ["диван на заказ", "матрасы алматы", "премиальные часы", "собрать диван в 3D"];
+      const GH = ["МЕБЕЛЬ ", "МАТРАСЫ ", "ЧАСЫ ", "3D 3D "];
+      const qEl = document.querySelector("#p-q"), gEl = document.querySelector("#p-ghost");
+      const fit = (sel, w) => { const el = document.querySelector(sel); const r = el.scrollWidth; if (r > w) el.style.fontSize = (104 * w / r) + "px"; };
+      ["#p-t0", "#p-t1", "#p-t2", "#p-t3"].forEach((s) => fit(s, 820));
+
+      tl.set("#p-phone", { transformPerspective: 2400, transformOrigin: "50% 50%" }, 0);
+      tl.fromTo("#p-flash", { opacity: 0.9 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, 0);
+      tl.fromTo("#p-glow", { opacity: 0.25, scale: 0.9 }, { opacity: 0.4, scale: 1.1, duration: SEG * 4, ease: "none" }, 0);
+      tl.fromTo("#p-glow2", { opacity: 0.1, x: -200 }, { opacity: 0.28, x: 200, duration: SEG * 4, ease: "none" }, 0);
+      tl.fromTo("#p-ghost", { x: 0 }, { x: -2600, duration: SEG * 4, ease: "none" }, 0);
+      tl.fromTo("#p-caret", { opacity: 1 }, { opacity: 0, duration: 0.01, repeat: 31, repeatDelay: 0.27, yoyo: true, ease: "steps(1)" }, 0);
+      tl.fromTo("#p-pill", { y: -360 }, { y: 0, duration: 0.5, ease: "back.out(1.5)" }, 0);
+      // idle float for the whole scene
+      tl.fromTo("#p-float", { y: 10 }, { y: -12, duration: BT * 2, repeat: 7, yoyo: true, ease: "sine.inOut" }, 0);
+
+      // phone entrances / poses per segment
+      tl.fromTo("#p-phone", { y: 1500, rotationY: -220, rotationZ: -24, rotationX: 0, scale: 0.3, x: 0, opacity: 1 }, { y: 0, rotationY: -16, rotationZ: 2, rotationX: 6, scale: 1, duration: 0.75, ease: "expo.out" }, 0);
+      tl.to("#p-phone", { rotationY: -8, duration: SEG - 0.95, ease: "sine.inOut" }, 0.75);
+      // -> ELUNA: whip out left, in from right
+      tl.to("#p-phone", { x: -1300, rotationY: -70, duration: 0.2, ease: "power3.in" }, SEG - 0.2);
+      tl.fromTo("#p-phone", { x: 1300, rotationY: 70, rotationZ: -3 }, { x: 0, rotationY: 15, rotationZ: -2, rotationX: 4, duration: 0.6, ease: "expo.out", immediateRender: false }, SEG);
+      tl.to("#p-phone", { rotationY: 7, duration: SEG - 0.8, ease: "sine.inOut" }, SEG + 0.6);
+      // -> VELMORA: drop away, fall in from the camera
+      tl.to("#p-phone", { scale: 0.15, y: 400, opacity: 0, duration: 0.2, ease: "power3.in" }, SEG * 2 - 0.2);
+      tl.fromTo("#p-phone", { scale: 2.6, y: -200, opacity: 0, rotationY: 0, rotationX: 24, rotationZ: 0 }, { scale: 1.05, y: 0, opacity: 1, rotationY: -11, rotationX: 7, duration: 0.6, ease: "expo.out", immediateRender: false }, SEG * 2);
+      tl.to("#p-phone", { rotationY: 9, duration: SEG - 0.8, ease: "sine.inOut" }, SEG * 2 + 0.6);
+      // -> 3D: flip around its axis into a close-up on the model
+      tl.to("#p-phone", { rotationY: 90, duration: 0.2, ease: "power2.in" }, SEG * 3 - 0.2);
+      tl.fromTo("#p-phone", { rotationY: -90, scale: 1.05, y: 0 }, { rotationY: -7, rotationX: 5, scale: 1.3, y: 250, duration: 0.6, ease: "expo.out", immediateRender: false }, SEG * 3);
+      tl.to("#p-phone", { rotationY: 7, duration: SEG - 0.9, ease: "sine.inOut" }, SEG * 3 + 0.6);
+      // exit into the price scene
+      tl.to("#p-phone", { scale: 4.2, opacity: 0, duration: 0.24, ease: "power3.in" }, SEG * 4 - 0.25);
+
+      for (let k = 0; k < 4; k++) {
+        const t0 = k * SEG;
+        // query typed into the pill
+        const st = { n: 0 };
+        tl.set(st, { n: 0, onComplete: () => {} }, t0);
+        tl.to(st, { n: QS[k].length, duration: 0.5, ease: "none", onUpdate: () => { qEl.textContent = QS[k].slice(0, Math.round(st.n)); gEl.textContent = GH[k].repeat(8); } }, t0 + 0.02);
+        tl.fromTo("#p-pill", { scale: 1.06 }, { scale: 1, duration: 0.3, ease: "power2.out", immediateRender: false }, t0 + 0.52);
+        // label
+        tl.set("#p-l" + k, { opacity: 1 }, t0 + 0.12);
+        tl.fromTo("#p-t" + k, { yPercent: 115, rotation: 4 }, { yPercent: 0, rotation: 0, duration: 0.5, ease: "expo.out" }, t0 + 0.12);
+        tl.fromTo("#p-s" + k, { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, t0 + 0.38);
+        tl.to("#p-l" + k, { opacity: 0, y: -40, duration: 0.16, ease: "power2.in" }, t0 + SEG - 0.18);
+        // glare sweep + beat punches
+        tl.fromTo("#p-glare", { x: -420 }, { x: 760, duration: 0.8, ease: "power2.inOut" }, t0 + 0.35);
+        for (let b = 1; b < 4; b++) tl.fromTo("#p-punch", { scale: 1.035 }, { scale: 1, duration: 0.32, ease: "power2.out" }, t0 + b * BT);
+        tl.fromTo("#p-floor", { opacity: 0.5, scaleX: 0.8 }, { opacity: 1, scaleX: 1, duration: 0.4, ease: "power2.out" }, t0 + 0.1);
+        if (k > 0) tl.fromTo("#p-flash", { opacity: 0.3 }, { opacity: 0, duration: 0.3, ease: "power2.out", immediateRender: false }, t0);
+      }
+      // model name chips, one per beat, during the 3D segment
+      for (let i = 0; i < 4; i++) {
+        const t = SEG * 3 + i * BT;
+        tl.fromTo("#p-c" + i, { opacity: 0, y: 50, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: "back.out(2.4)" }, t + 0.04);
+        tl.to("#p-c" + i, { opacity: 0, y: -30, duration: 0.12, ease: "power2.in" }, t + BT - 0.12);
+      }
+      tl.to("#p-pill", { y: -360, duration: 0.2, ease: "power2.in" }, SEG * 4 - 0.22);
+      tl.set({}, {}, SEG * 4);
+      window.__timelines["showcase"] = tl;
+    })();
+  </script>
+</template>

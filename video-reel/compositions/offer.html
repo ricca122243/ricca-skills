@@ -1,0 +1,80 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: #05060b; font-family: Inter, sans-serif; color: #fff; }
+    #o-glow { position: absolute; left: -360px; top: 0; width: 1800px; height: 1800px; border-radius: 50%; background: radial-gradient(circle, #3f5cff 0%, rgba(63, 92, 255, 0) 60%); }
+    #o-rays { position: absolute; left: -660px; top: -340px; width: 2400px; height: 2400px; border-radius: 50%; background: repeating-conic-gradient(from 0deg, rgba(77, 107, 255, 0) 0deg 7deg, rgba(120, 145, 255, 0.2) 9deg 11deg, rgba(77, 107, 255, 0) 13deg 20deg); -webkit-mask-image: radial-gradient(circle, #000 0%, rgba(0, 0, 0, 0) 62%); }
+    .o-row { position: absolute; left: 0; width: 1080px; text-align: center; }
+    #o-from { top: 330px; font-size: 62px; font-weight: 700; letter-spacing: -0.02em; color: #c9d2e6; }
+    #o-price { top: 410px; font-size: 196px; font-weight: 900; letter-spacing: -0.055em; line-height: 1.1; white-space: nowrap; text-shadow: 0 0 90px rgba(91, 124, 255, 0.9); }
+    .o-chip { position: absolute; left: 130px; width: 820px; height: 122px; border-radius: 36px; background: rgba(14, 19, 38, 0.94); box-shadow: inset 0 0 0 2px rgba(130, 150, 255, 0.42), 0 20px 50px rgba(0, 0, 0, 0.4); display: flex; align-items: center; padding: 0 38px; font-size: 44px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; }
+    .o-chip::before { content: ""; width: 22px; height: 40px; border: solid #7f97ff; border-width: 0 9px 9px 0; transform: rotate(45deg) translate(-6px, -6px); flex: none; margin: 0 44px 0 10px; }
+    #o-ring { position: absolute; left: 400px; top: 310px; width: 280px; height: 280px; border-radius: 50%; background: conic-gradient(from 0deg, #4d6bff, #9b7bff, #25d3ff, #4d6bff); filter: blur(22px); }
+    #o-mark { position: absolute; left: 430px; top: 340px; width: 220px; height: 220px; border-radius: 50%; box-shadow: inset 0 0 0 7px #8fa2ff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 124px; background: radial-gradient(circle at 30% 30%, #27358f, #080c2a); }
+    #o-name { top: 600px; font-size: 118px; font-weight: 900; letter-spacing: -0.04em; line-height: 1.1; }
+    #o-ag { top: 742px; font-size: 44px; font-weight: 400; letter-spacing: 0.6em; padding-left: 0.6em; color: #dfe5f5; }
+    #o-tag { top: 850px; font-size: 44px; font-weight: 500; color: #c9d2e6; }
+    #o-cta { position: absolute; left: 130px; top: 980px; width: 820px; height: 164px; border-radius: 82px; background: #25d366; color: #04210f; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 50px; letter-spacing: -0.01em; box-shadow: 0 0 110px rgba(37, 211, 102, 0.6), inset 0 -8px 0 rgba(0, 0, 0, 0.12); }
+    #o-tel { top: 1196px; font-size: 58px; font-weight: 700; letter-spacing: 0.01em; }
+    #o-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+    #o-logoimg, #o-lglow, #o-tag, #o-cta, #o-tel, .o-chip { opacity: 0; }
+    #o-logoimg { position: absolute; left: 130px; top: 410px; width: 820px; height: 361px; }
+    #o-lglow { position: absolute; left: 40px; top: 250px; width: 1000px; height: 680px; border-radius: 50%; background: radial-gradient(ellipse, rgba(91, 124, 255, 0.55), rgba(91, 124, 255, 0) 68%); }
+  </style>
+  <div id="root" data-composition-id="offer" data-width="1080" data-height="1920">
+    <div id="o-glow"></div>
+    <div id="o-rays"></div>
+    <div id="o-pricewrap">
+      <div class="o-row" id="o-from">Сайт под ключ от</div>
+      <div class="o-row" id="o-price">0 ₸</div>
+      <div class="o-chip" id="o-k0" style="top: 720px">Готов за 3–5 дней</div>
+      <div class="o-chip" id="o-k1" style="top: 868px">Адаптив под телефон</div>
+      <div class="o-chip" id="o-k2" style="top: 1016px">Кнопка WhatsApp</div>
+      <div class="o-chip" id="o-k3" style="top: 1164px">Гарантия на каждый сайт</div>
+    </div>
+    <div id="o-logo">
+      <div id="o-lglow"></div>
+      <img id="o-logoimg" src="assets/logo.png" alt="Damillion Agency" />
+      <div class="o-row" id="o-tag">Сайты для бизнеса · от 45 000 ₸</div>
+      <div id="o-cta">Написать в WhatsApp</div>
+      <div class="o-row" id="o-tel">+7 775 043 18 33</div>
+    </div>
+    <div id="o-flash"></div>
+  </div>
+  <script>
+    (() => {
+      const BT = 60 / 98, H = BT / 2;
+      const tl = gsap.timeline({ paused: true });
+      const pEl = document.querySelector("#o-price");
+      const fmt = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ₸";
+      const num = { v: 0 };
+      tl.fromTo("#o-flash", { opacity: 0.85 }, { opacity: 0, duration: 0.4, ease: "power2.out" }, 0);
+      tl.fromTo("#o-rays", { rotation: 0 }, { rotation: 110, duration: 7.5, ease: "none" }, 0);
+      tl.fromTo("#o-glow", { opacity: 0.3 }, { opacity: 0.45, duration: 7.5, ease: "none" }, 0);
+      // price
+      tl.fromTo("#o-from", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.3, ease: "expo.out" }, 0);
+      tl.fromTo("#o-price", { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "expo.out" }, 0.04);
+      tl.to(num, { v: 45000, duration: BT - 0.08, ease: "power3.out", onUpdate: () => { pEl.textContent = fmt(Math.round(num.v / 500) * 500); } }, 0.04);
+      tl.fromTo("#o-price", { scale: 1.16 }, { scale: 1, duration: 0.4, ease: "power3.out", immediateRender: false }, BT);
+      tl.fromTo("#o-flash", { opacity: 0.35 }, { opacity: 0, duration: 0.3, ease: "power2.out", immediateRender: false }, BT);
+      ["#o-k0", "#o-k1", "#o-k2", "#o-k3"].forEach((c, i) => {
+        tl.fromTo(c, { opacity: 0, x: i % 2 ? 900 : -900, skewX: i % 2 ? -16 : 16 }, { opacity: 1, x: 0, skewX: 0, duration: 0.36, ease: "back.out(1.3)" }, BT * 1 + i * H);
+      });
+      // out -> logo on the next bar
+      tl.to("#o-pricewrap", { y: -1700, duration: 0.24, ease: "power3.in" }, BT * 4 - 0.25);
+      tl.fromTo("#o-flash", { opacity: 0.4 }, { opacity: 0, duration: 0.3, ease: "power2.out", immediateRender: false }, BT * 4);
+      const L = BT * 4;
+      tl.fromTo("#o-logoimg", { opacity: 0, scale: 1.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: "expo.out" }, L);
+      tl.fromTo("#o-lglow", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.9, ease: "power3.out" }, L);
+      tl.to("#o-lglow", { opacity: 0.6, scale: 1.12, duration: BT * 2, repeat: 3, yoyo: true, ease: "sine.inOut" }, L + 0.9);
+      tl.fromTo("#o-tag", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.4, ease: "expo.out" }, L + BT * 1.5);
+      tl.fromTo("#o-cta", { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" }, L + BT * 2);
+      tl.fromTo("#o-tel", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.4, ease: "expo.out" }, L + BT * 3);
+      // final hit on the downbeat, then CTA pulse on beats
+      tl.fromTo("#o-flash", { opacity: 0.8 }, { opacity: 0, duration: 0.45, ease: "power2.out", immediateRender: false }, L + BT * 4);
+      tl.fromTo("#o-logo", { scale: 1.06 }, { scale: 1, duration: 0.6, ease: "power3.out" }, L + BT * 4);
+      for (let b = 4; b < 8; b++) tl.fromTo("#o-cta", { scale: 1.06 }, { scale: 1, duration: 0.4, ease: "power2.out", immediateRender: false }, L + BT * b + 0.001);
+      tl.set({}, {}, 7.5);
+      window.__timelines["offer"] = tl;
+    })();
+  </script>
+</template>

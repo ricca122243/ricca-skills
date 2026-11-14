@@ -1,0 +1,110 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: #05060b; font-family: Inter, sans-serif; }
+    #s-page { position: absolute; inset: 0; background: linear-gradient(180deg, #f6f7f9 0%, #eceef2 100%); }
+    .s-h { position: absolute; left: 130px; width: 820px; top: 300px; text-align: center; font-weight: 900; font-size: 84px; line-height: 1.04; letter-spacing: -0.035em; color: #0e1116; }
+    .s-h em { font-style: normal; color: #e5273d; }
+    #s-bar { position: absolute; left: 130px; top: 510px; width: 820px; height: 124px; border-radius: 62px; background: #fff; box-shadow: 0 2px 6px rgba(15, 20, 30, 0.08), 0 24px 60px rgba(15, 20, 30, 0.14); display: flex; align-items: center; padding: 0 44px; gap: 26px; }
+    #s-ico { width: 40px; height: 40px; border: 6px solid #5f6672; border-radius: 50%; position: relative; flex: none; }
+    #s-ico::after { content: ""; position: absolute; width: 6px; height: 20px; background: #5f6672; border-radius: 3px; left: 31px; top: 26px; transform: rotate(-45deg); }
+    #s-q { font-size: 46px; font-weight: 500; color: #14181f; white-space: nowrap; letter-spacing: -0.01em; }
+    #s-caret { width: 4px; height: 56px; background: #2f6bff; border-radius: 2px; margin-left: -16px; }
+    .s-card { position: absolute; left: 130px; width: 820px; height: 172px; border-radius: 30px; background: #fff; box-shadow: 0 2px 4px rgba(15, 20, 30, 0.06), 0 14px 36px rgba(15, 20, 30, 0.09); padding: 26px 34px; }
+    .s-dom { display: flex; align-items: center; gap: 16px; font-size: 29px; color: #5b6472; font-weight: 500; }
+    .s-fav { width: 38px; height: 38px; border-radius: 50%; flex: none; }
+    .s-tt { font-size: 40px; font-weight: 700; color: #1a55d6; letter-spacing: -0.02em; margin-top: 10px; white-space: nowrap; }
+      .s-sn { font-size: 29px; color: #6a7280; margin-top: 8px; white-space: nowrap; }
+    .s-badge { position: absolute; right: 30px; top: 26px; font-size: 28px; font-weight: 700; padding: 7px 20px; border-radius: 22px; background: #e3f7ea; color: #14803c; }
+    #s-c4 { background: #fff5f5; box-shadow: inset 0 0 0 4px #f3b4bb; }
+    #s-c4 .s-tt { color: #8a909b; }
+    #s-c4 .s-badge { background: #e5273d; color: #fff; }
+    #s-dark { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, #16204a 0%, #05060b 62%); }
+    #s-need { position: absolute; left: 0; width: 1080px; top: 720px; text-align: center; font-weight: 900; font-size: 170px; line-height: 1; letter-spacing: -0.045em; color: #fff; }
+    #s-need span { display: block; }
+    #s-need b { display: block; color: #5b7cff; text-shadow: 0 0 90px rgba(91, 124, 255, 0.8); }
+    #s-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+    #s-dark, #s-need, #s-h2, #s-h3, .s-card { opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="search" data-width="1080" data-height="1920">
+    <div id="s-page">
+      <div class="s-h" id="s-h1">Клиент ищет</div>
+      <div class="s-h" id="s-h2">Находит тех,<br />у кого есть сайт</div>
+      <div class="s-h" id="s-h3">А вас здесь <em>нет</em></div>
+      <div id="s-bar"><div id="s-ico"></div><div id="s-q"></div><div id="s-caret"></div></div>
+      <div class="s-card" id="s-c1" style="top: 690px">
+        <div class="s-dom"><div class="s-fav" style="background: #f2a33a"></div>konkurent-1.kz</div>
+        <div class="s-tt">Диваны на заказ — каталог и цены</div>
+        <div class="s-sn">Фото работ, размеры, заявка за минуту</div>
+        <div class="s-badge" id="s-b1">Сайт ✓</div>
+      </div>
+      <div class="s-card" id="s-c2" style="top: 884px">
+        <div class="s-dom"><div class="s-fav" style="background: #3aa6f2"></div>konkurent-2.kz</div>
+        <div class="s-tt">Мебель в Алматы — соберите в 3D</div>
+        <div class="s-sn">Ткани, модели, доставка по городу</div>
+        <div class="s-badge" id="s-b2">Сайт ✓</div>
+      </div>
+      <div class="s-card" id="s-c3" style="top: 1078px">
+        <div class="s-dom"><div class="s-fav" style="background: #7a5cf0"></div>konkurent-3.kz</div>
+        <div class="s-tt">Мягкая мебель — заявка онлайн</div>
+        <div class="s-sn">Шоурум, отзывы, кнопка WhatsApp</div>
+        <div class="s-badge" id="s-b3">Сайт ✓</div>
+      </div>
+      <div class="s-card" id="s-c4" style="top: 1272px">
+        <div class="s-dom"><div class="s-fav" style="background: #c9ced6"></div>ваш бизнес</div>
+        <div class="s-tt">Сайта нет — клиент вас не видит</div>
+        <div class="s-sn">Только Instagram и 2ГИС</div>
+        <div class="s-badge">Нет сайта</div>
+      </div>
+    </div>
+    <div id="s-dark"></div>
+    <div id="s-need"><span id="s-n1">Нужен</span><b id="s-n2">сайт.</b></div>
+    <div id="s-flash"></div>
+  </div>
+  <script>
+    (() => {
+      const BT = 60 / 98;
+      const tl = gsap.timeline({ paused: true });
+      const Q = "диван на заказ алматы";
+      const qEl = document.querySelector("#s-q");
+      const typed = { n: 0 };
+      // gentle push-in on the page for the whole pre-drop
+      tl.fromTo("#s-page", { scale: 1.0 }, { scale: 1.04, duration: BT * 10 - 0.45, ease: "none" }, 0);
+      // caret blink
+      tl.fromTo("#s-caret", { opacity: 1 }, { opacity: 0, duration: 0.01, repeat: 21, repeatDelay: 0.27, yoyo: true, ease: "steps(1)" }, 0);
+      // typing
+      tl.to(typed, { n: Q.length, duration: BT * 2.5, ease: "none", onUpdate: () => { qEl.textContent = Q.slice(0, Math.round(typed.n)); } }, 0.12);
+      // enter: bar press, results cascade on half-beats
+      tl.fromTo("#s-bar", { scale: 1 }, { scale: 0.955, duration: 0.09, ease: "power2.in" }, BT * 3 - 0.09);
+      tl.to("#s-bar", { scale: 1, duration: 0.35, ease: "back.out(3)" }, BT * 3);
+      ["#s-c1", "#s-c2", "#s-c3"].forEach((c, i) => {
+        tl.fromTo(c, { y: 90, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.42, ease: "back.out(1.6)" }, BT * (3 + i * 0.5));
+      });
+      // headline 2 + badges
+      tl.to("#s-h1", { y: -50, opacity: 0, duration: 0.2, ease: "power2.in" }, BT * 5 - 0.2);
+      tl.fromTo("#s-h2", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "expo.out" }, BT * 5);
+      ["#s-b1", "#s-b2", "#s-b3"].forEach((b, i) => {
+        tl.fromTo(b, { scale: 0 }, { scale: 1, duration: 0.34, ease: "back.out(3)" }, BT * 5 + 0.1 + i * 0.1);
+      });
+      // your card: missing
+      tl.fromTo("#s-c4", { y: 90, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.6)" }, BT * 7);
+      tl.to("#s-c4", { x: 16, duration: 0.05, repeat: 7, yoyo: true, ease: "sine.inOut" }, BT * 7 + 0.4);
+      tl.to("#s-h2", { y: -50, opacity: 0, duration: 0.2, ease: "power2.in" }, BT * 7.5 - 0.2);
+      tl.fromTo("#s-h3", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "expo.out" }, BT * 7.5);
+      tl.to(["#s-c1", "#s-c2", "#s-c3"], { opacity: 0.4, duration: 0.3 }, BT * 8);
+      tl.to("#s-c4", { scale: 1.05, duration: 0.3, ease: "back.out(3)" }, BT * 8);
+      // collapse to dark, "Нужен сайт."
+      tl.to("#s-page", { scale: 0.7, opacity: 0, rotationX: 28, transformPerspective: 1600, y: -180, duration: 0.42, ease: "power3.in" }, BT * 10 - 0.42);
+      tl.to("#s-dark", { opacity: 1, duration: 0.3 }, BT * 10 - 0.3);
+      tl.fromTo("#s-flash", { opacity: 0.55 }, { opacity: 0, duration: 0.35, ease: "power2.out", immediateRender: false }, BT * 10);
+      tl.set("#s-need", { opacity: 1 }, BT * 10);
+      tl.fromTo("#s-n1", { scale: 2.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.36, ease: "expo.out" }, BT * 10);
+      tl.fromTo("#s-n2", { scale: 2.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "expo.out" }, BT * 10.5);
+      // zoom through into the drop (the track is silent on this beat)
+      tl.to("#s-n1", { opacity: 0, y: -80, duration: 0.3, ease: "power2.in" }, BT * 11.2);
+      tl.to("#s-n2", { scale: 30, duration: BT * 0.8, ease: "power4.in" }, BT * 11.2);
+      tl.to("#s-n2", { opacity: 0, duration: 0.12 }, BT * 12 - 0.13);
+      tl.set({}, {}, BT * 12);
+      window.__timelines["search"] = tl;
+    })();
+  </script>
+</template>
