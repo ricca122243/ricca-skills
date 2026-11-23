@@ -1,0 +1,112 @@
+{
+  "voice": "en-US-AndrewNeural",
+  "rate": "+6%",
+  "scenes": [
+    {
+      "id": "rich",
+      "text": "You get one billion dollars... and you can never die.",
+      "hl": [
+        "billion",
+        "never",
+        "die"
+      ]
+    },
+    {
+      "id": "catch",
+      "text": "But there's a catch. A snail is coming for you.",
+      "hl": [
+        "catch",
+        "snail"
+      ]
+    },
+    {
+      "id": "threat",
+      "text": "It's slow, but it never stops. And if it touches you... you die.",
+      "hl": [
+        "never",
+        "touches",
+        "die"
+      ]
+    },
+    {
+      "id": "walk",
+      "text": "Easy. It's a snail. You just walk away.",
+      "hl": [
+        "easy",
+        "walk"
+      ]
+    },
+    {
+      "id": "globe",
+      "text": "You fly to the other side of the planet.",
+      "hl": [
+        "planet"
+      ],
+      "hold": 0.3
+    },
+    {
+      "id": "ocean",
+      "text": "Meanwhile, the snail crawls across the ocean floor.",
+      "hl": [
+        "ocean"
+      ]
+    },
+    {
+      "id": "beach",
+      "text": "Years go by. You forget all about it.",
+      "hl": [
+        "years",
+        "forget"
+      ]
+    },
+    {
+      "id": "night",
+      "text": "Then one night... you hear a tiny knock.",
+      "hl": [
+        "knock"
+      ],
+      "hold": 1.3
+    },
+    {
+      "id": "launch",
+      "text": "So you build a rocket and fly to Mars.",
+      "hl": [
+        "rocket",
+        "mars"
+      ],
+      "hold": 0.5
+    },
+    {
+      "id": "mars",
+      "text": "Five hundred years of peace.",
+      "hl": [
+        "five",
+        "hundred",
+        "peace"
+      ]
+    },
+    {
+      "id": "landing",
+      "text": "Then a little rocket lands right next to you.",
+      "hl": [
+        "little",
+        "rocket"
+      ],
+      "hold": 1.0
+    },
+    {
+      "id": "twist",
+      "text": "Turns out... the snail got a billion dollars too.",
+      "hl": [
+        "billion",
+        "too"
+      ],
+      "hold": 0.4
+    },
+    {
+      "id": "end",
+      "text": "What would you do? Tell me in the comments.",
+      "hl": []
+    }
+  ]
+}
