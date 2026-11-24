@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Истикама — игра дисциплины: привычки, иман, деньги, книга месяца, награды",
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.13.0",
     "@netlify/blobs": "^11.1.7",
     "web-push": "^3.6.7"
   }

@@ -21,7 +21,7 @@ export default async (req) => {
     if (!b.sub?.endpoint || !/^https:\/\//.test(b.sub.endpoint)) return Response.json({ error: 'bad sub' }, { status: 400 });
     const reminders = (Array.isArray(b.reminders) ? b.reminders : []).slice(0, 40)
       .filter(r => /^\d{2}:\d{2}$/.test(r.time))
-      .map(r => ({ id: String(r.id).slice(0, 40), time: r.time, title: String(r.title || '').slice(0, 80), body: String(r.body || '').slice(0, 200), onlyIfNoReport: !!r.onlyIfNoReport, days: Array.isArray(r.days) ? r.days.slice(0, 7) : null }));
+      .map(r => ({ id: String(r.id).slice(0, 40), time: r.time, title: String(r.title || '').slice(0, 80), body: String(r.body || '').slice(0, 200), onlyIfNoReport: !!r.onlyIfNoReport, open: ['food', 'report', 'money'].includes(r.open) ? r.open : null, days: Array.isArray(r.days) ? r.days.slice(0, 7) : null }));
     let tz = 'Asia/Almaty';
     try { if (b.tz) { new Intl.DateTimeFormat('en', { timeZone: b.tz }); tz = b.tz; } } catch {}
     const doc = { sub: b.sub, tz, reminders, keyHash: validKey(b.key) ? await hashKey(b.key) : null, saved: Date.now() };

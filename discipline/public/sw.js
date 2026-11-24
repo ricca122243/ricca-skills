@@ -1,5 +1,5 @@
 // Истикама service worker: офлайн-оболочка + push-уведомления
-const CACHE = 'istiqama-v1';
+const CACHE = 'istiqama-v2';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
@@ -12,8 +12,6 @@ self.addEventListener('fetch', e => {
     // сеть в первую очередь (свежая версия), кэш — если нет интернета
     e.respondWith(fetch(e.request).then(r => { if (r.ok) { const cp = r.clone(); caches.open(CACHE).then(c => c.put(e.request, cp)); } return r; })
       .catch(() => caches.match(e.request).then(r => r || caches.match('/index.html'))));
-  } else if (url.host.includes('fonts.g')) {
-    e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(res => { const cp = res.clone(); caches.open(CACHE).then(c => c.put(e.request, cp)); return res; })));
   }
 });
 
@@ -29,7 +27,8 @@ self.addEventListener('notificationclick', e => {
   e.notification.close();
   const url = e.notification.data?.url || '/';
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-    for (const c of list) { if ('focus' in c) { if (url.includes('open=report')) c.postMessage({ open: 'report' }); return c.focus(); } }
+    const open = new URL(url, self.location.origin).searchParams.get('open');
+    for (const c of list) { if ('focus' in c) { if (open) c.postMessage({ open }); return c.focus(); } }
     return self.clients.openWindow(url);
   }));
 });

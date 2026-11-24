@@ -32,7 +32,7 @@ export default async () => {
         if (dataCache === undefined) dataCache = await store.get('data/' + doc.keyHash, { type: 'json' });
         if (dataCache?.days?.[now.date]?.r?.closed) { sent[r.id] = now.date; changed = true; continue; }
       }
-      const res = await send(doc.sub, { title: r.title, body: r.body, url: r.onlyIfNoReport ? '/?open=report' : '/' });
+      const res = await send(doc.sub, { title: r.title, body: r.body, url: r.open ? '/?open=' + r.open : r.onlyIfNoReport ? '/?open=report' : '/' });
       if (res.gone) { await store.delete(key); await store.delete(sentKey); changed = false; break; }
       sent[r.id] = now.date; changed = true;
     }

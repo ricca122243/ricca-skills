@@ -1,12 +1,12 @@
 // Слияние данных двух устройств: по каждой записи побеждает более свежая (поле u).
-export const SINGLE = ['profile', 'goals', 'settings'];
-export const LISTS = ['habits', 'money', 'rewards', 'purchases', 'reminders', 'books'];
+export const SINGLE = ['profile', 'goals', 'settings', 'body', 'insight'];
+export const LISTS = ['habits', 'money', 'rewards', 'purchases', 'reminders', 'books', 'meals'];
 
 export function mergeState(a, b) {
   if (!a) return b;
   if (!b) return a;
   const out = { v: 1 };
-  for (const k of SINGLE) out[k] = ((a[k]?.u || 0) >= (b[k]?.u || 0)) ? a[k] : b[k];
+  for (const k of SINGLE) { const v = ((a[k]?.u || 0) >= (b[k]?.u || 0)) ? a[k] : b[k]; if (v !== undefined) out[k] = v; }
   for (const k of LISTS) {
     const m = new Map();
     for (const it of [...(a[k] || []), ...(b[k] || [])]) {

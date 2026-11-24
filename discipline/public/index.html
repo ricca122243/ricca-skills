@@ -2,211 +2,139 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Истикама</title>
-<meta name="description" content="Игра дисциплины: привычки, иман, деньги, книга месяца, награды">
-<meta name="theme-color" content="#0a0e18">
+<meta name="description" content="Дисциплина каждый день: дела, еда, вода, деньги, книга, отчёт и награды">
+<meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Истикама">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0a0e18; --bg2:#0f1524; --card:#141b2d; --card2:#1a2338; --line:#232d45; --line2:#2d3956;
-  --text:#eef1f8; --muted:#8a93a9; --dim:#5c6680;
-  --gold:#f5b942; --gold2:#ffd77a;
-  --iman:#34d399; --body:#fb923c; --mind:#a78bfa; --work:#60a5fa;
-  --s0:#1c2438; --s1:#ef4444; --s2:#f97316; --s3:#eab308; --s4:#84cc16; --s5:#22c55e;
-  --good:#22c55e; --bad:#ef4444;
-  --r:20px; --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+  --bg:#ffffff; --soft:#f4f4f6; --soft2:#ececf0; --line:#e4e4e9; --text:#111114; --muted:#6b6b76; --dim:#a3a3ad;
+  --green:#16a34a; --green-bg:#e9f7ee; --red:#dc2626; --red-bg:#fdecec; --amber:#b45309; --amber-bg:#fdf3e2; --blue:#2563eb;
+  --s0:#ececf0; --s1:#ef4444; --s2:#f97316; --s3:#facc15; --s4:#84cc16; --s5:#22c55e;
+  --iman:#059669; --body:#ea580c; --mind:#7c3aed; --work:#2563eb;
+  --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.4}
-body{min-height:100vh;overscroll-behavior-y:none;
-  background:radial-gradient(900px 500px at 85% -10%,rgba(245,185,66,.10),transparent 60%),radial-gradient(700px 500px at -10% 10%,rgba(52,211,153,.08),transparent 60%),var(--bg)}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased}
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none;padding:0}
-input,textarea,select{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;width:100%;outline:none}
-input:focus,textarea:focus,select:focus{border-color:var(--gold)}
-textarea{resize:vertical;min-height:70px}
-.h-font{font-family:Unbounded,Manrope,sans-serif;letter-spacing:-.01em}
-#app{max-width:560px;margin:0 auto;padding:calc(var(--safe-t) + 14px) 16px calc(var(--safe-b) + 96px)}
-.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.avatar{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;font-weight:800;font-size:18px;
-  background:linear-gradient(135deg,#1f6f55,#0f3b2e);border:1px solid rgba(52,211,153,.35);color:#c9ffe9;flex:none;position:relative}
-.avatar .lv{position:absolute;bottom:-7px;right:-7px;background:var(--gold);color:#241800;font-size:11px;font-weight:800;border-radius:9px;padding:1px 6px;border:2px solid var(--bg)}
-.top .who{flex:1;min-width:0}
-.top .hi{font-weight:800;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.top .rank{color:var(--muted);font-size:12px;line-height:1.3}
-.chip{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-weight:700;font-size:14px;white-space:nowrap}
-.chip.gold{color:var(--gold2);border-color:rgba(245,185,66,.35);background:rgba(245,185,66,.08)}
-.chip.fire{color:#ffb38a;border-color:rgba(251,146,60,.35);background:rgba(251,146,60,.08)}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--dim);display:inline-block}
-.sync-dot.ok{background:var(--good)} .sync-dot.busy{background:var(--gold)} .sync-dot.err{background:var(--bad)}
-
-.card{background:linear-gradient(180deg,var(--card),#121829);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
-.card.flat{background:var(--card)}
-.sec-title{display:flex;align-items:center;justify-content:space-between;margin:22px 4px 10px;font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.sec-title .dot{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:8px}
-.sec-title .pct{font-size:12px;letter-spacing:0;text-transform:none;font-weight:700}
-.muted{color:var(--muted)} .dim{color:var(--dim)} .small{font-size:13px} .tiny{font-size:11.5px}
-.row{display:flex;align-items:center;gap:10px} .between{justify-content:space-between} .wrap{flex-wrap:wrap}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-
-/* hero */
-.hero{display:flex;gap:16px;align-items:center;position:relative;overflow:hidden}
-.hero:after{content:"";position:absolute;inset:auto -60px -80px auto;width:200px;height:200px;border-radius:50%;background:radial-gradient(closest-side,rgba(245,185,66,.14),transparent)}
-.ring{position:relative;width:118px;height:118px;flex:none}
-.ring svg{transform:rotate(-90deg)}
-.ring .val{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
-.ring .val b{font-family:Unbounded,sans-serif;font-size:26px;display:block;line-height:1}
-.ring .val span{font-size:11px;color:var(--muted)}
-.hero .stats{flex:1;display:grid;gap:8px}
-.stat{display:flex;justify-content:space-between;align-items:center;font-size:14px}
-.stat b{font-weight:800}
-.xpbar{height:8px;border-radius:9px;background:var(--bg2);overflow:hidden;border:1px solid var(--line)}
-.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#ffe29a);border-radius:9px;transition:width .5s}
-
-.quote{font-size:14px;line-height:1.5;border-left:3px solid var(--iman);padding:2px 0 2px 12px;color:#d6dbe7}
-.quote .src{display:block;color:var(--muted);font-size:12px;margin-top:4px}
-
-.daynav{display:flex;align-items:center;justify-content:space-between;margin:6px 0 2px}
-.daynav button{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:18px}
-.daynav button:disabled{opacity:.3}
-.daynav .d{font-weight:800;text-align:center}
-.daynav .d small{display:block;font-weight:600;color:var(--muted);font-size:12px}
-
-/* habits */
-.habit{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;background:var(--card);border:1px solid var(--line);margin-bottom:8px;position:relative;overflow:hidden;transition:border-color .2s,background .2s}
-.habit .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:none;background:var(--bg2)}
-.habit .nm{flex:1;min-width:0}
-.habit .nm b{display:block;font-weight:700;font-size:14.5px}
-.habit .nm span{font-size:12px;color:var(--muted)}
-.habit.done{border-color:color-mix(in srgb,var(--c) 55%,transparent);background:linear-gradient(90deg,color-mix(in srgb,var(--c) 13%,var(--card)),var(--card))}
-.habit.multi{flex-wrap:wrap}
-.habit .fill{position:absolute;left:0;bottom:0;height:3px;background:var(--c);transition:width .3s}
-.tick{width:34px;height:34px;border-radius:11px;border:2px solid var(--line2);display:grid;place-items:center;flex:none;transition:.15s;font-size:16px;color:transparent}
-.habit.done .tick{background:var(--c);border-color:var(--c);color:#0b1220}
-.cnt{display:flex;align-items:center;gap:6px}
-.cnt button{width:34px;height:34px;border-radius:11px;background:var(--bg2);border:1px solid var(--line2);font-size:18px;font-weight:700}
-.cnt .v{min-width:48px;text-align:center;font-weight:800;font-size:14px}
-.cnt .v small{display:block;font-size:10.5px;color:var(--muted);font-weight:600}
+input,textarea,select{background:var(--soft);border:1px solid transparent;border-radius:12px;padding:12px 14px;width:100%;outline:none;font-size:16px}
+input:focus,textarea:focus,select:focus{border-color:var(--text);background:#fff}
+textarea{resize:vertical;min-height:84px}
+#app{max-width:600px;margin:0 auto;padding:calc(var(--safe-t) + 14px) 16px calc(var(--safe-b) + 90px)}
+h1{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:4px 0 2px}
+h2{font-size:20px;font-weight:750;margin:0 0 14px;letter-spacing:-.01em}
+h3{font-size:13px;font-weight:650;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:26px 4px 8px;display:flex;justify-content:space-between;align-items:center}
+.sub{color:var(--muted);font-size:14px}
+.muted{color:var(--muted)} .dim{color:var(--dim)} .small{font-size:14px} .tiny{font-size:12.5px} .b{font-weight:700}
+.row{display:flex;align-items:center;gap:10px} .between{justify-content:space-between} .grow{flex:1;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px} .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.box{background:var(--soft);border-radius:16px;padding:16px;margin-bottom:10px;display:block}
+.list{background:var(--soft);border-radius:16px;overflow:hidden;margin-bottom:10px}
+.item{display:flex;align-items:center;gap:12px;padding:13px 14px;width:100%;text-align:left;position:relative}
+.item + .item{border-top:1px solid var(--line)}
+.item .ic{font-size:20px;width:28px;text-align:center;flex:none}
+.item .t{font-weight:600}
+.item .s{font-size:13px;color:var(--muted)}
+.chk{width:28px;height:28px;border-radius:50%;border:2px solid #c9c9d1;flex:none;display:grid;place-items:center;color:transparent;font-size:15px;font-weight:800;transition:.15s;background:#fff}
+.chk.on{background:var(--green);border-color:var(--green);color:#fff}
+.chk.half{border-color:var(--green);background:conic-gradient(var(--green) var(--p),#fff 0)}
+.cnt{display:flex;align-items:center;gap:4px;flex:none}
+.cnt button{width:34px;height:34px;border-radius:10px;background:#fff;border:1px solid var(--line);font-size:19px;font-weight:600}
 .pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.pill{padding:7px 10px;border-radius:10px;background:var(--bg2);border:1px solid var(--line2);font-size:12.5px;font-weight:700;color:var(--muted)}
-.pill.on{background:var(--c);border-color:var(--c);color:#0b1220}
-.xp{font-size:11px;font-weight:800;color:var(--gold);background:rgba(245,185,66,.1);border-radius:7px;padding:2px 6px;margin-left:6px;vertical-align:1px}
-
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:15px;padding:13px 18px;font-weight:800;background:var(--card2);border:1px solid var(--line2);transition:transform .1s}
-.btn:active{transform:scale(.97)}
-.btn.primary{background:linear-gradient(135deg,#f7c75a,#e99d1f);color:#271a00;border:0;box-shadow:0 8px 24px -8px rgba(245,185,66,.6)}
-.btn.green{background:linear-gradient(135deg,#34d399,#0ea371);color:#032015;border:0}
-.btn.ghost{background:transparent}
-.btn.danger{color:#ffb4b4;border-color:rgba(239,68,68,.4)}
+.pill{padding:7px 11px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:13.5px;font-weight:600;color:var(--muted)}
+.pill.on{background:var(--green);border-color:var(--green);color:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;padding:13px 18px;font-weight:650;background:var(--soft);font-size:16px}
+.btn:active{opacity:.75}
+.btn.dark{background:var(--text);color:#fff}
+.btn.green{background:var(--green);color:#fff}
+.btn.line{background:#fff;border:1px solid var(--line)}
+.btn.red{color:var(--red)}
 .btn.block{width:100%}
-.btn.sm{padding:8px 12px;border-radius:11px;font-size:13px}
-
-.report-cta{margin-top:18px;padding:18px;border-radius:var(--r);border:1px dashed rgba(245,185,66,.5);background:rgba(245,185,66,.06);text-align:center}
-.report-done{border:1px solid rgba(34,197,94,.45);background:rgba(34,197,94,.07);border-style:solid}
-
-/* nav */
-nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:8px 10px calc(var(--safe-b) + 8px);background:rgba(10,14,24,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line)}
-nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
-nav.tabs button{display:grid;justify-items:center;gap:3px;padding:6px 0;color:var(--dim);font-size:11px;font-weight:700}
-nav.tabs button .i{font-size:21px;filter:grayscale(1) opacity(.65);transition:.2s}
+.btn.sm{padding:8px 13px;font-size:14px;border-radius:10px}
+.bar{height:8px;border-radius:9px;background:var(--soft2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:9px;background:var(--text);transition:width .4s}
+.tag{display:inline-block;font-size:12px;font-weight:650;padding:2px 8px;border-radius:999px;background:var(--soft2);color:var(--muted);white-space:nowrap}
+.tag.good{background:var(--green-bg);color:var(--green)} .tag.bad{background:var(--red-bg);color:var(--red)} .tag.warn{background:var(--amber-bg);color:var(--amber)}
+.big{font-size:34px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+.up{color:var(--green);font-weight:700} .down{color:var(--red);font-weight:700}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.stats-line{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;color:var(--muted);margin:6px 0 16px}
+.stats-line b{color:var(--text)}
+.sync{width:7px;height:7px;border-radius:50%;background:var(--dim);display:inline-block;margin-left:5px;vertical-align:1px}
+.sync.ok{background:var(--green)} .sync.busy{background:#f59e0b} .sync.err{background:var(--red)}
+.daynav{display:flex;gap:6px}
+.daynav button{width:38px;height:38px;border-radius:50%;background:var(--soft);font-size:18px;font-weight:600}
+.daynav button:disabled{opacity:.3}
+.q{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;border:1.5px solid var(--text);margin-bottom:8px;background:#fff;width:100%;text-align:left}
+.q .qi{font-size:24px}
+.q .qt{font-weight:700}
+.q .arrow{margin-left:auto;font-size:20px;color:var(--muted)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:saturate(1.8) blur(14px);-webkit-backdrop-filter:saturate(1.8) blur(14px);border-top:1px solid var(--line);padding:6px 6px calc(var(--safe-b) + 6px)}
+nav.tabs .in{max-width:600px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav.tabs button{display:grid;justify-items:center;gap:2px;padding:5px 0;color:var(--dim);font-size:11px;font-weight:600}
+nav.tabs button svg{width:25px;height:25px}
 nav.tabs button.on{color:var(--text)}
-nav.tabs button.on .i{filter:none;transform:translateY(-2px)}
-
-/* month */
-.mnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.mnav button{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:18px}
-.mnav .t{font-family:Unbounded,sans-serif;font-size:17px;text-transform:capitalize}
-.big-num{font-family:Unbounded,sans-serif;font-size:30px;line-height:1.1}
-.delta{display:inline-flex;align-items:center;gap:4px;font-weight:800;border-radius:9px;padding:3px 8px;font-size:13px}
-.delta.up{color:#86efac;background:rgba(34,197,94,.12)} .delta.down{color:#fca5a5;background:rgba(239,68,68,.12)} .delta.eq{color:var(--muted);background:var(--bg2)}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.cal .wd{font-size:11px;color:var(--dim);text-align:center;font-weight:700;padding-bottom:2px}
-.cal .c{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-size:12.5px;font-weight:800;background:var(--s0);color:#c7cede;position:relative}
-.cal .c.fut{opacity:.35}
-.cal .c.today{outline:2px solid var(--text);outline-offset:1px}
-.cal .c .rep{position:absolute;top:3px;right:4px;width:5px;height:5px;border-radius:50%;background:#fff;opacity:.9}
-.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:11.5px;color:var(--muted)}
-.legend i{width:11px;height:11px;border-radius:4px;display:inline-block;vertical-align:-1px;margin-right:4px}
-.bar{height:10px;border-radius:9px;background:var(--bg2);overflow:hidden}
-.bar i{display:block;height:100%;border-radius:9px}
-.hrow{display:grid;grid-template-columns:28px 1fr 54px;gap:10px;align-items:center;margin:11px 0}
-.hrow .nm{font-size:13.5px;font-weight:700;margin-bottom:5px;display:flex;justify-content:space-between}
-
-/* money */
-.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
-.seg button{padding:10px 6px;border-radius:10px;font-weight:800;font-size:13px;color:var(--muted)}
-.seg button.on{background:var(--card2);color:var(--text);box-shadow:0 1px 0 var(--line2) inset}
-.cats{display:flex;flex-wrap:wrap;gap:6px}
-.cats button{padding:8px 11px;border-radius:11px;background:var(--bg2);border:1px solid var(--line);font-size:13px;font-weight:700}
-.cats button.on{border-color:var(--gold);background:rgba(245,185,66,.12);color:var(--gold2)}
-.tx{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
-.tx:last-child{border-bottom:0}
-.tx .e{width:38px;height:38px;border-radius:12px;background:var(--bg2);display:grid;place-items:center;font-size:18px;flex:none}
-.tx .a{font-weight:800;white-space:nowrap}
-.in-c{color:#86efac} .out-c{color:#fca5a5} .save-c{color:var(--gold2)}
-
-/* rewards */
-.shop{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.rw{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px}
-.rw .em{font-size:30px}
-.rw b{font-size:14px}
-.rw .cost{color:var(--gold2);font-weight:800;font-size:13px}
-.rw.locked{opacity:.75}
-.ach{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.ach .a{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 8px;text-align:center}
-.ach .a .em{font-size:28px;filter:grayscale(1) opacity(.35)}
-.ach .a.on{border-color:rgba(245,185,66,.5);background:linear-gradient(180deg,rgba(245,185,66,.12),var(--card))}
-.ach .a.on .em{filter:none}
-.ach .a b{display:block;font-size:12px;margin-top:4px}
-.ach .a span{font-size:10.5px;color:var(--muted)}
-.cond{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
-.cond:last-child{border-bottom:0}
-.cond .ok{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;font-size:13px;flex:none;background:var(--bg2);border:1px solid var(--line2)}
-.cond.met .ok{background:var(--good);border-color:var(--good);color:#032015}
-.trip{background:linear-gradient(135deg,#0d3b4f,#123a2e 55%,#3a2c0a);border:1px solid rgba(245,185,66,.35);position:relative;overflow:hidden}
-.trip .em-bg{position:absolute;right:-6px;top:-14px;font-size:96px;opacity:.18}
-
-/* settings */
-.list-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
-.list-item:last-child{border-bottom:0}
-.list-item .grow{flex:1;min-width:0}
-.switch{width:46px;height:28px;border-radius:99px;background:var(--line2);position:relative;flex:none;transition:.2s}
-.switch:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
-.switch.on{background:var(--good)} .switch.on:after{left:21px}
-.field{margin-bottom:12px} .field label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:0 0 6px 2px}
-.code{font-family:ui-monospace,Menlo,monospace;font-size:15px;letter-spacing:.04em;background:var(--bg2);border:1px dashed var(--line2);padding:12px;border-radius:12px;word-break:break-all;text-align:center}
-.banner{border-radius:16px;padding:14px;background:linear-gradient(135deg,rgba(96,165,250,.16),rgba(167,139,250,.12));border:1px solid rgba(96,165,250,.35);font-size:14px;margin-bottom:14px}
-
-/* sheet */
-.sheet-bg{position:fixed;inset:0;background:rgba(3,6,12,.66);z-index:50;opacity:0;transition:opacity .2s;backdrop-filter:blur(3px)}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;max-height:92vh;overflow:auto;background:var(--bg2);border-top-left-radius:26px;border-top-right-radius:26px;border:1px solid var(--line);padding:10px 18px calc(var(--safe-b) + 22px);transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);max-width:560px;margin:0 auto}
-.sheet .grab{width:42px;height:5px;border-radius:9px;background:var(--line2);margin:0 auto 14px}
-.sheet h2{font-family:Unbounded,sans-serif;font-size:19px;margin:0 0 14px}
-.show .sheet-bg{opacity:1} .show .sheet{transform:none}
-.moods{display:flex;justify-content:space-between;gap:6px}
-.moods button{flex:1;font-size:26px;padding:10px 0;border-radius:14px;background:var(--card);border:1px solid var(--line);transition:.15s}
-.moods button.on{border-color:var(--gold);background:rgba(245,185,66,.14);transform:scale(1.06)}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--soft);border-radius:12px;padding:3px;gap:3px;margin-bottom:14px}
+.seg button{padding:9px 6px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts button{padding:10px 14px;border-radius:12px;background:var(--soft);font-weight:600;font-size:15px;border:1.5px solid transparent}
+.opts button.on{border-color:var(--text);background:#fff}
+.opts.col{display:grid;grid-template-columns:1fr 1fr}
+.opts.col button{text-align:left;padding:12px}
+.opts.col button small{display:block;font-weight:500;color:var(--muted);font-size:12.5px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal .wd{font-size:11px;color:var(--dim);text-align:center;font-weight:600}
+.cal .c{aspect-ratio:1;border-radius:9px;display:grid;place-items:center;font-size:13px;font-weight:650;background:var(--s0);color:var(--muted);position:relative}
+.cal .c.today{box-shadow:0 0 0 2px var(--text)}
+.cal .c.fut{background:transparent;color:var(--dim)}
+.cal .c .r{position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.7}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;vertical-align:-1px;margin-right:4px}
+.hrow{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center;padding:9px 0}
+.hrow + .hrow{border-top:1px solid var(--line)}
+.hrow .nm{display:flex;justify-content:space-between;font-size:14.5px;font-weight:600;margin-bottom:5px}
+.meal-items{margin:8px 0 0;padding:0;list-style:none}
+.meal-items li{display:flex;justify-content:space-between;gap:8px;font-size:14px;padding:3px 0}
+.glasses{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.glass{width:30px;height:38px;border-radius:4px 4px 8px 8px;border:2px solid #93c5fd;position:relative;overflow:hidden;background:#fff;display:inline-block}
+.glass.on:after{content:"";position:absolute;left:0;right:0;bottom:0;height:80%;background:#60a5fa}
+.kbar{display:flex;height:10px;border-radius:9px;overflow:hidden;background:var(--soft2)}
+.kbar i{display:block;height:100%}
+.insight{display:flex;gap:12px;padding:13px 14px}
+.insight + .insight{border-top:1px solid var(--line)}
+.insight .e{font-size:20px;flex:none;width:26px;text-align:center}
+#sheet-root .bg{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:50;opacity:0;transition:opacity .2s}
+#sheet-root .sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;max-height:92vh;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:8px 18px calc(var(--safe-b) + 20px);transform:translateY(100%);transition:transform .25s ease;max-width:600px;margin:0 auto;-webkit-overflow-scrolling:touch}
+#sheet-root .grab{width:38px;height:5px;border-radius:9px;background:var(--soft2);margin:0 auto 14px}
+#sheet-root.show .bg{opacity:1} #sheet-root.show .sheet{transform:none}
+.field{margin-bottom:14px} .field > label{display:block;font-size:15px;font-weight:700;margin:0 0 8px}
+.field > label small{font-weight:500;color:var(--muted)}
+.moods{display:flex;gap:6px}
+.moods button{flex:1;font-size:26px;padding:8px 0;border-radius:12px;background:var(--soft);border:1.5px solid transparent}
+.moods button.on{border-color:var(--text);background:#fff}
 .rate{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
-.rate button{padding:10px 0;border-radius:10px;background:var(--card);border:1px solid var(--line);font-weight:800;font-size:13px}
-.rate button.on{color:#0b1220;border-color:transparent}
-
-.toast{position:fixed;left:50%;top:calc(var(--safe-t) + 14px);transform:translate(-50%,-140%);background:#1f2a44;border:1px solid var(--line2);padding:11px 16px;border-radius:14px;font-weight:800;z-index:80;transition:transform .3s;box-shadow:0 12px 30px -10px #000;max-width:92vw;text-align:center}
+.rate button{padding:10px 0;border-radius:9px;background:var(--soft);font-weight:700;font-size:14px}
+.rate button.on{background:var(--text);color:#fff}
+.toast{position:fixed;left:50%;top:calc(var(--safe-t) + 12px);transform:translate(-50%,-160%);background:var(--text);color:#fff;padding:11px 16px;border-radius:12px;font-weight:600;font-size:15px;z-index:80;transition:transform .25s;max-width:92vw;text-align:center}
 .toast.show{transform:translate(-50%,0)}
-canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:90}
-.empty{text-align:center;padding:22px 10px;color:var(--muted);font-size:14px}
-svg text{font-family:Manrope,sans-serif}
-@media (min-width:900px){ #app{max-width:640px} .sheet{max-width:640px} }
+.empty{text-align:center;padding:18px 10px;color:var(--muted);font-size:14px}
+.spin{width:22px;height:22px;border:3px solid var(--soft2);border-top-color:var(--text);border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:15px;background:#fff;padding:12px;border-radius:12px;word-break:break-all;text-align:center}
+.switch{width:50px;height:30px;border-radius:99px;background:#d4d4da;position:relative;flex:none;transition:.2s}
+.switch:after{content:"";position:absolute;top:2px;left:2px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.2s}
+.switch.on{background:var(--green)} .switch.on:after{left:22px}
+.note{background:#eff6ff;color:#1e3a8a;border-radius:14px;padding:13px 14px;font-size:14px;margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -214,7 +142,6 @@ svg text{font-family:Manrope,sans-serif}
 <nav class="tabs"><div class="in" id="tabs"></div></nav>
 <div id="sheet-root"></div>
 <div class="toast" id="toast"></div>
-<canvas id="fx"></canvas>
 
 <script>
 'use strict';
@@ -231,111 +158,157 @@ const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); retu
 const ymOf = s => s.slice(0, 7);
 const addMonth = (ym, n) => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 1 + n, 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`; };
 const daysIn = ym => { const [y, m] = ym.split('-').map(Number); return new Date(y, m, 0).getDate(); };
+const hhmm = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const hourNow = () => new Date().getHours() + new Date().getMinutes() / 60;
 const MONTHS = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 const MONTHS_G = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const WD = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
 const monthName = ym => `${MONTHS[+ym.slice(5) - 1]} ${ym.slice(0, 4)}`;
 const dayTitle = s => { const d = parse(s); return `${d.getDate()} ${MONTHS_G[d.getMonth()]}`; };
-const money = n => (Math.round(n) || 0).toLocaleString('ru-RU').replace(/,/g, ' ') + ' ' + (S?.settings?.currency || '₸');
+const num = n => (Math.round(n) || 0).toLocaleString('ru-RU');
+const money = n => num(n) + ' ' + (S?.settings?.currency || '₸');
+const liters = glasses => (Math.round((+glasses || 0) * 25) / 100).toLocaleString('ru-RU');
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const sum = (a, f = x => x) => a.reduce((s, x) => s + (+f(x) || 0), 0);
 
 /* ============ constants ============ */
 const CATS = {
-  iman: { name: 'Иман', color: 'var(--iman)', hex: '#34d399', icon: '🕌' },
-  body: { name: 'Тело и питание', color: 'var(--body)', hex: '#fb923c', icon: '💪' },
-  mind: { name: 'Разум', color: 'var(--mind)', hex: '#a78bfa', icon: '🧠' },
-  work: { name: 'Работа и деньги', color: 'var(--work)', hex: '#60a5fa', icon: '💼' },
+  iman: { name: 'Иман', color: 'var(--iman)' },
+  body: { name: 'Тело и еда', color: 'var(--body)' },
+  mind: { name: 'Разум', color: 'var(--mind)' },
+  work: { name: 'Работа и деньги', color: 'var(--work)' },
 };
 const DEF_HABITS = [
   { id: 'namaz', cat: 'iman', icon: '🕌', name: '5 намазов', type: 'multi', labels: ['Фаджр','Зухр','Аср','Магриб','Иша'], xp: 50 },
   { id: 'quran', cat: 'iman', icon: '📖', name: 'Коран', type: 'count', target: 2, unit: 'стр', xp: 15 },
   { id: 'azkar', cat: 'iman', icon: '📿', name: 'Азкары', type: 'multi', labels: ['Утро','Вечер'], xp: 10 },
   { id: 'sadaqa', cat: 'iman', icon: '🤲', name: 'Садака / доброе дело', type: 'check', xp: 10 },
-  { id: 'food', cat: 'body', icon: '🥗', name: 'Питался правильно', type: 'multi', labels: ['Завтрак','Обед','Ужин'], xp: 20, hint: 'без фастфуда и сладкого' },
+  { id: 'food', cat: 'body', icon: '🥗', name: 'Правильное питание', type: 'food', xp: 25 },
   { id: 'water', cat: 'body', icon: '💧', name: 'Вода', type: 'count', target: 8, unit: 'стак.', xp: 10 },
-  { id: 'sport', cat: 'body', icon: '🏃', name: 'Спорт / прогулка', type: 'check', xp: 20, hint: '30+ минут движения' },
+  { id: 'sport', cat: 'body', icon: '🏃', name: 'Спорт / прогулка 30 мин', type: 'check', xp: 20 },
   { id: 'sleep', cat: 'body', icon: '🌙', name: 'Сон до 23:00', type: 'check', xp: 10 },
   { id: 'read', cat: 'mind', icon: '📚', name: 'Чтение книги', type: 'count', target: 20, unit: 'стр', xp: 20, book: true },
   { id: 'phone', cat: 'mind', icon: '📵', name: 'Без лишних соцсетей', type: 'check', xp: 10 },
-  { id: 'work', cat: 'work', icon: '💼', name: 'Работа на 100%', type: 'check', xp: 25, hint: 'сделал всё запланированное' },
-  { id: 'moneylog', cat: 'work', icon: '🧾', name: 'Записал доходы/расходы', type: 'auto', xp: 5, hint: 'отмечается само во вкладке «Деньги»' },
+  { id: 'work', cat: 'work', icon: '💼', name: 'Работа на 100%', type: 'check', xp: 25 },
+  { id: 'moneylog', cat: 'work', icon: '🧾', name: 'Записал траты', type: 'auto', xp: 5 },
 ];
 const DEF_REWARDS = [
   { id: 'rw-coffee', icon: '☕', name: 'Любимый кофе или десерт', cost: 300 },
   { id: 'rw-movie', icon: '🎬', name: 'Кино / вечер отдыха', cost: 800 },
-  { id: 'rw-food', icon: '🍣', name: 'Ужин в хорошем месте', cost: 1500 },
-  { id: 'rw-day', icon: '🏖️', name: 'Выходной без дел', cost: 2500 },
+  { id: 'rw-food', icon: '🍽️', name: 'Ужин в хорошем месте', cost: 1500 },
+  { id: 'rw-day', icon: '🛋️', name: 'Выходной без дел', cost: 2500 },
   { id: 'rw-buy', icon: '🛍️', name: 'Покупка для себя', cost: 4500 },
-  { id: 'rw-trip', icon: '✈️', name: 'Поездка / путешествие', cost: 15000 },
+  { id: 'rw-trip', icon: '✈️', name: 'Поездка', cost: 15000 },
 ];
 const DEF_REMINDERS = [
-  { id: 'rm-morning', time: '07:00', title: 'Доброе утро ☀️', body: 'Фаджр, азкары и план на день. Начни день с победы.', on: true },
-  { id: 'rm-noon', time: '13:00', title: 'Середина дня 💧', body: 'Вода, здоровый обед, Зухр. Отметь в Истикаме.', on: true },
-  { id: 'rm-book', time: '19:00', title: 'Время книги 📚', body: 'Сегодняшние страницы — и ты ближе к книге месяца.', on: true },
-  { id: 'rm-report', time: '21:30', title: 'Итог дня 📝', body: 'Дай отчёт: что сделал, сколько потратил, оценка дня.', on: true, onlyIfNoReport: true },
-  { id: 'rm-report2', time: '22:45', title: 'День ещё не закрыт ⏰', body: '2 минуты на отчёт — и серия сохранится.', on: true, onlyIfNoReport: true },
+  { id: 'rm-morning', time: '07:00', title: 'Доброе утро', body: 'Фаджр, азкары и план на день.', on: true },
+  { id: 'rm-breakfast', time: '10:00', title: 'Что ты ел на завтрак? 🍳', body: 'Ответь — посчитаю калории.', on: true, open: 'food' },
+  { id: 'rm-lunch', time: '15:00', title: 'Что было на обед? 🍲', body: 'Дома или в кафе? Сколько стоило?', on: true, open: 'food' },
+  { id: 'rm-water', time: '17:00', title: 'Сколько воды выпил? 💧', body: 'Отметь стаканы.', on: true },
+  { id: 'rm-book', time: '19:00', title: 'Книга 📚', body: 'Сколько страниц сегодня?', on: true },
+  { id: 'rm-dinner', time: '20:30', title: 'Что на ужин? 🍽', body: 'Запиши, пока не забыл.', on: true, open: 'food' },
+  { id: 'rm-report', time: '21:30', title: 'Итог дня 📝', body: 'Дай отчёт: как прошёл день.', on: true, onlyIfNoReport: true },
+  { id: 'rm-report2', time: '22:45', title: 'День ещё не закрыт', body: '2 минуты на отчёт — и серия сохранится.', on: true, onlyIfNoReport: true },
 ];
 const MONEY_CATS = {
+  out: [['🍽️','Еда'],['🛒','Продукты'],['🚕','Транспорт'],['🏠','Жильё'],['📱','Связь'],['👕','Одежда'],['🎮','Развлечения'],['💊','Здоровье'],['👨‍👩‍👦','Семья'],['🤲','Садака'],['📚','Учёба'],['➕','Другое']],
   in: [['💼','Зарплата'],['💸','Подработка'],['🎁','Подарок'],['➕','Другое']],
-  out: [['🍽️','Еда'],['🚕','Транспорт'],['🏠','Жильё'],['📱','Связь'],['👕','Одежда'],['🎮','Развлечения'],['💊','Здоровье'],['👨‍👩‍👦','Семья'],['🤲','Садака'],['📚','Книги/учёба'],['➕','Другое']],
   save: [['🏝️','Фонд отдыха'],['🛡️','Подушка']],
 };
+const MEALS = { breakfast: ['Завтрак', '🍳', 8], lunch: ['Обед', '🍲', 13], dinner: ['Ужин', '🍽️', 19], snack: ['Перекус', '🍎', 99] };
+const PLACES = { home: ['🏠', 'Дома', 'бесплатно'], cafe: ['🍽️', 'Кафе', 'ресторан, столовая'], delivery: ['🛵', 'Доставка', 'Glovo, Wolt…'], street: ['🌯', 'Фастфуд', 'на улице, на ходу'] };
 const QUOTES = [
   ['Воистину, Аллах не меняет положения людей, пока они не изменят самих себя.', 'Коран, 13:11'],
-  ['Самые любимые Аллахом дела — постоянные, даже если они небольшие.', 'хадис, аль-Бухари и Муслим'],
+  ['Самые любимые Аллахом дела — постоянные, даже если они небольшие.', 'аль-Бухари и Муслим'],
   ['Воистину, за тягостью — облегчение.', 'Коран, 94:6'],
   ['Ищите помощи в терпении и молитве.', 'Коран, 2:45'],
-  ['Сильный верующий лучше и любимее Аллаху, чем слабый верующий.', 'хадис, Муслим'],
-  ['Воспользуйся пятью до пяти: молодостью до старости, здоровьем до болезни, богатством до бедности, свободным временем до занятости, жизнью до смерти.', 'хадис, аль-Хаким'],
+  ['Сильный верующий лучше и любимее Аллаху, чем слабый верующий.', 'Муслим'],
   ['Аллах не возлагает на душу больше, чем она может вынести.', 'Коран, 2:286'],
-  ['Кто вступил на путь поиска знаний, тому Аллах облегчит путь в Рай.', 'хадис, Муслим'],
-  ['Сын Адама не наполнял сосуда хуже, чем свой желудок.', 'хадис, ат-Тирмизи'],
-  ['Читай во имя Господа твоего, Который сотворил.', 'Коран, 96:1'],
-  ['Поистине, Аллах любит, когда кто-то из вас, совершая дело, делает его качественно.', 'хадис, аль-Байхаки'],
-  ['Дисциплина — это мост между целями и результатом.', 'принцип Истикамы'],
-  ['Маленький шаг каждый день сильнее большого рывка раз в месяц.', 'принцип Истикамы'],
-  ['Не жди мотивации. Сделай — и мотивация придёт.', 'принцип Истикамы'],
+  ['Сын Адама не наполнял сосуда хуже, чем свой желудок.', 'ат-Тирмизи'],
+  ['Кто вступил на путь поиска знаний, тому Аллах облегчит путь в Рай.', 'Муслим'],
+  ['Ешьте и пейте, но не излишествуйте.', 'Коран, 7:31'],
 ];
 const RANKS = [[1,'Новичок'],[3,'Ученик'],[5,'Боец'],[8,'Воин'],[12,'Мастер'],[17,'Чемпион'],[25,'Легенда']];
 const scoreColor = p => p == null ? 'var(--s0)' : p < 30 ? 'var(--s1)' : p < 50 ? 'var(--s2)' : p < 70 ? 'var(--s3)' : p < 90 ? 'var(--s4)' : 'var(--s5)';
-const scoreHex = p => p == null ? '#1c2438' : p < 30 ? '#ef4444' : p < 50 ? '#f97316' : p < 70 ? '#eab308' : p < 90 ? '#84cc16' : '#22c55e';
+const scoreHex = p => p == null ? '#ececf0' : p < 30 ? '#ef4444' : p < 50 ? '#f97316' : p < 70 ? '#facc15' : p < 90 ? '#84cc16' : '#22c55e';
+const scoreText = p => p >= 50 && p < 70 ? '#a16207' : scoreHex(p);
 const GOOD_DAY = 70;
 
+/* ============ база блюд для расчёта без интернета ============ */
+// [ключи, название, ккал на обычную порцию, Б, Ж, У, 1 полезно / 0 нормально / -1 вредно]
+const FOOD_DB = [
+  [['плов','палау'],'Плов',650,22,30,70,0],[['бешбармак'],'Бешбармак',700,40,35,55,0],[['лагман'],'Лагман',600,25,22,75,0],
+  [['манты'],'Манты (5 шт)',550,25,28,50,0],[['самса'],'Самса',380,12,22,35,-1],[['баурсак','бауырсак'],'Баурсаки',420,8,22,48,-1],
+  [['шашлык'],'Шашлык',450,35,32,2,0],[['шаурм','донер','шаверм'],'Шаурма',650,28,32,60,-1],[['бургер','чизбургер'],'Бургер',550,25,28,45,-1],
+  [['фри'],'Картошка фри',360,4,18,45,-1],[['пицц'],'Пицца (2 куска)',560,22,22,65,-1],[['хот-дог','хотдог'],'Хот-дог',350,12,20,30,-1],
+  [['kfc','крылыш','наггетс'],'Курица во фритюре',500,30,30,25,-1],[['пельмен'],'Пельмени',500,22,22,50,0],[['вареник'],'Вареники',420,12,10,70,0],
+  [['борщ'],'Борщ',250,10,10,28,1],[['суп','сорпа','шорпа'],'Суп',220,12,8,22,1],[['куырдак','куурдак'],'Куырдак',600,30,48,10,-1],
+  [['казы','шужук'],'Казы',350,15,32,0,-1],[['курин','курица','грудк'],'Курица',280,40,10,0,1],[['рыб'],'Рыба',260,35,12,0,1],
+  [['котлет'],'Котлета',300,18,20,10,0],[['говядин','мясо','баранин'],'Мясо',320,35,18,0,0],[['гречк'],'Гречка',220,8,3,40,1],[['рис'],'Рис',250,5,1,55,0],
+  [['макарон','паста','спагетт'],'Макароны',350,12,4,68,0],[['пюре'],'Пюре',220,4,9,30,0],[['картош','картофел'],'Картошка',250,5,8,38,0],
+  [['яичниц','яйц','омлет'],'Яйца/омлет',250,18,18,2,1],[['овсян','каш'],'Каша',260,9,6,42,1],[['творог'],'Творог',200,28,5,8,1],
+  [['йогурт'],'Йогурт',130,8,3,15,1],[['кефир','айран'],'Кефир/айран',110,7,3,10,1],[['кумыс','шубат'],'Кумыс/шубат',110,4,4,8,1],
+  [['оливье','шуба','мимоз'],'Майонезный салат',380,8,30,15,-1],[['салат','овощ','огурц','помидор'],'Овощной салат',120,3,8,9,1],
+  [['яблок'],'Яблоко',80,0,0,19,1],[['банан'],'Банан',105,1,0,27,1],[['фрукт','апельсин','мандарин','груш','виноград'],'Фрукты',90,1,0,22,1],
+  [['хлеб'],'Хлеб (2 куска)',160,5,2,30,0],[['лепёшк','лепешк','нан'],'Лепёшка',300,9,4,58,0],[['сыр'],'Сыр',110,7,9,0,0],
+  [['колбас','сосиск','сардельк'],'Колбаса/сосиски',300,12,27,2,-1],[['орех'],'Орехи',300,8,26,8,1],[['мёд','мед'],'Мёд',60,0,0,17,0],
+  [['чай с сахар','сладкий чай'],'Чай с сахаром',50,0,0,13,0],[['капучино','латте','раф'],'Кофе с молоком',170,7,8,16,0],[['чай'],'Чай',5,0,0,1,1],
+  [['кофе'],'Кофе',5,0,0,0,0],[['кола','пепси','фанта','спрайт','газиров','лимонад'],'Сладкая газировка',210,0,0,53,-1],
+  [['энергетик'],'Энергетик',220,0,0,55,-1],[['сок'],'Сок',120,1,0,28,0],[['шоколад','сникерс','батончик'],'Шоколад',250,4,14,28,-1],
+  [['торт','пирожн','десерт'],'Торт/пирожное',400,5,22,45,-1],[['печень','вафл','конфет','сладост'],'Сладости',250,3,11,35,-1],
+  [['чипс','сухарик','кириешк'],'Чипсы',300,4,19,30,-1],[['морожен'],'Мороженое',250,4,13,28,-1],[['вода'],'Вода',0,0,0,0,1],
+  [['хинкал'],'Хинкали',500,22,24,48,0],[['ролл','суши'],'Роллы',450,15,12,68,0],
+];
+function localEstimate(text, portion, place) {
+  const k = { s: .7, m: 1, l: 1.4 }[portion] || 1, pk = place === 'home' ? 1 : 1.15;
+  const parts = text.toLowerCase().split(/,|\+|;|\n| и /).map(s => s.trim()).filter(Boolean);
+  const items = parts.map(p => {
+    const f = FOOD_DB.find(f => f[0].some(key => p.includes(key)));
+    if (!f) return { name: p[0].toUpperCase() + p.slice(1), grams: 0, kcal: Math.round(250 * k), protein: 10, fat: 10, carbs: 30, verdict: 'ok', why: 'примерно' };
+    const m = k * (f[6] < 0 ? pk : 1);
+    return { name: f[1], grams: 0, kcal: Math.round(f[2] * m), protein: Math.round(f[3] * m), fat: Math.round(f[4] * m), carbs: Math.round(f[5] * m), verdict: f[6] > 0 ? 'good' : f[6] < 0 ? 'bad' : 'ok', why: f[6] > 0 ? 'полезно' : f[6] < 0 ? 'жирное или сладкое' : '' };
+  });
+  const bad = items.filter(i => i.verdict === 'bad').length, good = items.filter(i => i.verdict === 'good').length;
+  const score = items.length ? clamp(Math.round(6 + (good - bad * 1.5) / items.length * 4), 1, 10) : 0;
+  return { items, score, comment: bad ? 'Есть вредное — в следующий раз замени на домашнее или овощи.' : 'Нормальный приём пищи.', local: true };
+}
+
 /* ============ state ============ */
-const LS = 'istiqama-v1', LS_KEY = 'istiqama-key', LS_DEV = 'istiqama-device', LS_PUSH = 'istiqama-push';
+const LS = 'istiqama-v2', LS_KEY = 'istiqama-key', LS_DEV = 'istiqama-device', LS_PUSH = 'istiqama-push';
 let S = null;
-let ui = { tab: 'today', day: today(), month: ymOf(today()), moneyMonth: ymOf(today()), moneyType: 'out', moneyCat: null };
+let ui = { tab: 'today', day: today(), month: ymOf(today()), moneyMonth: ymOf(today()), statsSeg: 'month', period: 7 };
 const lsGet = k => { try { return localStorage.getItem(k); } catch { return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
-function load() { try { const s = JSON.parse(lsGet(LS)); return s && s.v === 1 ? s : null; } catch { return null; } }
+function load() { try { const s = JSON.parse(lsGet(LS)); return s && s.v === 1 ? normalize(s) : null; } catch { return null; } }
+function normalize(s) { for (const k of ['habits','money','rewards','purchases','reminders','books','meals']) s[k] = s[k] || []; s.days = s.days || {}; s.body = s.body || { u: 0, sex: 'm', goal: 'keep', activity: 1.375 }; return s; }
 function persist() { lsSet(LS, JSON.stringify(S)); }
 function save() { S.updatedAt = now(); persist(); queueSync(); }
 function randKey(n = 24) { const a = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; const r = crypto.getRandomValues(new Uint8Array(n)); return [...r].map(x => a[x % a.length]).join(''); }
 function syncKey() { let k = lsGet(LS_KEY); if (!k) { k = randKey(); lsSet(LS_KEY, k); } return k; }
 function deviceId() { let k = lsGet(LS_DEV); if (!k) { k = 'd-' + randKey(16); lsSet(LS_DEV, k); } return k; }
-
 function newState(p) {
   const t = now(), start = today();
-  return {
+  return normalize({
     v: 1, updatedAt: t,
     profile: { u: t, name: p.name || 'Друг', start },
-    goals: { u: t, monthScore: 80, fundTarget: +p.fund || 300000, tripName: p.trip || 'Отдых на море', namazPct: 90 },
+    goals: { u: t, monthScore: 80, fundTarget: +p.fund || 300000, tripName: p.trip || 'Отдых', namazPct: 90 },
     settings: { u: t, currency: p.currency || '₸' },
+    body: { u: 0, sex: 'm', goal: 'keep', activity: 1.375 },
     habits: DEF_HABITS.map((h, i) => ({ ...h, o: i, u: t, from: start })),
     rewards: DEF_REWARDS.map(r => ({ ...r, u: t })),
     reminders: DEF_REMINDERS.map(r => ({ ...r, u: t })),
-    purchases: [], money: [],
+    purchases: [], money: [], meals: [],
     books: p.book ? [{ id: uid(), u: t, title: p.book, pages: +p.pages || 250, offset: 0, start }] : [],
     days: {},
-  };
+  });
 }
 
-/* ============ merge (same logic as server) ============ */
+/* ============ merge (как на сервере) ============ */
 function mergeState(a, b) {
   if (!a) return b; if (!b) return a;
   const out = { v: 1 };
-  for (const k of ['profile','goals','settings']) out[k] = ((a[k]?.u || 0) >= (b[k]?.u || 0)) ? a[k] : b[k];
-  for (const k of ['habits','money','rewards','purchases','reminders','books']) {
+  for (const k of ['profile','goals','settings','body','insight']) { const v = ((a[k]?.u || 0) >= (b[k]?.u || 0)) ? a[k] : b[k]; if (v !== undefined) out[k] = v; }
+  for (const k of ['habits','money','rewards','purchases','reminders','books','meals']) {
     const m = new Map();
     for (const it of [...(a[k] || []), ...(b[k] || [])]) { const c = m.get(it.id); if (!c || (it.u || 0) > (c.u || 0)) m.set(it.id, it); }
     out[k] = [...m.values()];
@@ -346,22 +319,21 @@ function mergeState(a, b) {
     out.days[d] = !x ? y : !y ? x : ((x.u || 0) >= (y.u || 0) ? x : y);
   }
   out.updatedAt = Math.max(a.updatedAt || 0, b.updatedAt || 0);
-  return out;
+  return normalize(out);
 }
 
 /* ============ sync ============ */
 let syncTimer = null, syncState = 'idle';
-function setSync(s) { syncState = s; const d = $('#syncdot'); if (d) d.className = 'sync-dot ' + ({ ok: 'ok', busy: 'busy', err: 'err' }[s] || ''); }
+function setSync(s) { syncState = s; document.querySelectorAll('.sync').forEach(d => d.className = 'sync ' + ({ ok: 'ok', busy: 'busy', err: 'err' }[s] || '')); }
 function queueSync() { clearTimeout(syncTimer); syncTimer = setTimeout(syncPush, 1200); }
+const sheetOpen = () => !!$('#sheet-root .sheet');
 async function syncPush() {
   if (!S) return;
   setSync('busy');
   try {
     const r = await fetch('/api/sync', { method: 'PUT', headers: { 'content-type': 'application/json', 'x-sync-key': syncKey() }, body: JSON.stringify(S) });
     if (!r.ok) throw 0;
-    const { data } = await r.json();
-    applyRemote(data);
-    setSync('ok');
+    applyRemote((await r.json()).data); setSync('ok');
   } catch { setSync('err'); }
 }
 async function syncPull() {
@@ -371,57 +343,72 @@ async function syncPull() {
     const r = await fetch('/api/sync', { headers: { 'x-sync-key': syncKey() } });
     if (!r.ok) throw 0;
     const { data } = await r.json();
-    if (data) { const before = JSON.stringify(S); const m = mergeState(S, data); if (JSON.stringify(m) !== before) { S = m; persist(); render(); } if (JSON.stringify(data) !== JSON.stringify(S)) queueSync(); }
-    else queueSync();
+    if (data) { applyRemote(data); if (JSON.stringify(data) !== JSON.stringify(S)) queueSync(); } else queueSync();
     setSync('ok');
   } catch { setSync('err'); }
 }
 function applyRemote(data) {
   if (!data) return;
   const m = mergeState(S, data);
-  if (JSON.stringify(m) !== JSON.stringify(S)) { S = m; persist(); if (!document.querySelector('.sheet')) render(); }
+  if (JSON.stringify(m) !== JSON.stringify(S)) { S = m; persist(); if (!sheetOpen()) render(); }
 }
+
+/* ============ нормы тела ============ */
+function kcalNorm() {
+  const b = S.body; if (!b?.weight || !b?.height || !b?.age) return 2200;
+  const bmr = 10 * b.weight + 6.25 * b.height - 5 * b.age + (b.sex === 'f' ? -161 : 5);
+  return Math.round(bmr * (+b.activity || 1.375) * ({ lose: .85, keep: 1, gain: 1.1 }[b.goal] || 1) / 10) * 10;
+}
+const waterGoalMl = () => S.body?.weight ? Math.round(S.body.weight * 30 / 250) * 250 : 2000;
 
 /* ============ logic ============ */
 const habits = () => S.habits.filter(h => !h.del).sort((a, b) => (a.o ?? 0) - (b.o ?? 0));
 const habitsOn = d => S.habits.filter(h => (!h.from || h.from <= d) && (!h.del || (h.delAt && h.delAt > d))).sort((a, b) => (a.o ?? 0) - (b.o ?? 0));
 const dayObj = d => S.days[d] || { h: {} };
-function hasMoneyOn(d) { return S.money.some(m => !m.del && m.date === d); }
+const mealsOn = d => S.meals.filter(m => !m.del && m.date === d).sort((a, b) => (a.time || '') < (b.time || '') ? -1 : 1);
+const moneyOn = d => S.money.filter(m => !m.del && m.date === d);
+const mealHealth = m => clamp((m.score - 3) / 5, 0, 1);
+function foodFrac(d) {
+  const ms = mealsOn(d); if (!ms.length) return 0;
+  let s = 0;
+  for (const t of ['breakfast', 'lunch', 'dinner']) { const x = ms.filter(m => m.meal === t); if (x.length) s += sum(x, mealHealth) / x.length; }
+  s -= ms.filter(m => m.meal === 'snack' && m.score < 5).length * .3;
+  if (sum(ms, m => m.kcal) > kcalNorm() * 1.2) s -= .5;
+  return clamp(s / 3, 0, 1);
+}
 function frac(h, d) {
   const v = dayObj(d).h?.[h.id];
   if (h.type === 'check') return v ? 1 : 0;
   if (h.type === 'count') return clamp((+v || 0) / (h.target || 1), 0, 1);
   if (h.type === 'multi') return Array.isArray(v) ? v.filter(Boolean).length / h.labels.length : 0;
-  if (h.type === 'auto') return hasMoneyOn(d) ? 1 : 0;
+  if (h.type === 'auto') return moneyOn(d).length || dayObj(d).noSpend ? 1 : 0;
+  if (h.type === 'food') return foodFrac(d);
   return 0;
 }
 const startDate = () => S.profile.start || today();
 function dayScore(d, cat) {
   if (d > today() || d < startDate()) return null;
   const hs = habitsOn(d).filter(h => !cat || h.cat === cat);
-  const tot = hs.reduce((s, h) => s + (+h.xp || 0), 0);
-  if (!tot) return null;
-  return Math.round(hs.reduce((s, h) => s + (+h.xp || 0) * frac(h, d), 0) / tot * 100);
+  const tot = sum(hs, h => h.xp);
+  return tot ? Math.round(sum(hs, h => (+h.xp || 0) * frac(h, d)) / tot * 100) : null;
 }
 function dayXP(d) {
   if (d > today() || d < startDate()) return 0;
-  let xp = habitsOn(d).reduce((s, h) => s + (+h.xp || 0) * frac(h, d), 0);
+  let xp = sum(habitsOn(d), h => (+h.xp || 0) * frac(h, d));
   if (dayObj(d).r?.closed) xp += 30;
   if (dayScore(d) >= 100) xp += 50;
   return Math.round(xp);
 }
-let _xpCache = null;
+let _xp = null;
 function totalXP() {
-  if (_xpCache != null) return _xpCache;
+  if (_xp != null) return _xp;
   let xp = 0;
   for (let d = startDate(); d <= today(); d = addDays(d, 1)) xp += dayXP(d);
-  xp += booksDone().length * 300;
-  return (_xpCache = xp);
+  return (_xp = xp + booksDone().length * 300);
 }
-const spent = () => S.purchases.filter(p => !p.del).reduce((s, p) => s + (+p.cost || 0), 0);
-const coins = () => totalXP() - spent();
-const lvlNeed = L => 125 * (L - 1) * L; // XP для достижения уровня L
-function level(xp = totalXP()) { let L = 1; while (xp >= lvlNeed(L + 1)) L++; return { L, cur: xp - lvlNeed(L), need: lvlNeed(L + 1) - lvlNeed(L) }; }
+const coins = () => totalXP() - sum(S.purchases.filter(p => !p.del), p => p.cost);
+const lvlNeed = L => 125 * (L - 1) * L;
+function level(xp = totalXP()) { let L = 1; while (xp >= lvlNeed(L + 1)) L++; return { L }; }
 const rank = L => RANKS.filter(r => L >= r[0]).pop()[1];
 function streak() {
   let d = today(), n = 0;
@@ -429,468 +416,552 @@ function streak() {
   while (d >= startDate() && (dayScore(d) ?? 0) >= GOOD_DAY) { n++; d = addDays(d, -1); }
   return n;
 }
-function bestStreak(from, to) {
-  let best = 0, cur = 0;
-  for (let d = from; d <= to; d = addDays(d, 1)) { if ((dayScore(d) ?? 0) >= GOOD_DAY) { cur++; best = Math.max(best, cur); } else cur = 0; }
-  return best;
-}
+function bestStreak(from, to) { let best = 0, cur = 0; for (let d = from; d <= to; d = addDays(d, 1)) { if ((dayScore(d) ?? 0) >= GOOD_DAY) best = Math.max(best, ++cur); else cur = 0; } return best; }
 function monthRange(ym) {
   const first = ym + '-01', last = `${ym}-${pad(daysIn(ym))}`;
-  const from = first < startDate() ? startDate() : first;
-  const to = last > today() ? today() : last;
-  return { first, last, from, to, ok: from <= to };
+  const from = first < startDate() ? startDate() : first, to = last > today() ? today() : last;
+  return { from, to, ok: from <= to };
 }
-function monthStats(ym, cat) {
-  const r = monthRange(ym);
-  if (!r.ok) return null;
-  let sum = 0, n = 0, closed = 0, perfect = 0, good = 0;
-  for (let d = r.from; d <= r.to; d = addDays(d, 1)) {
-    const s = dayScore(d, cat); if (s == null) continue;
-    sum += s; n++; if (dayObj(d).r?.closed) closed++; if (s >= 100) perfect++; if (s >= GOOD_DAY) good++;
-  }
-  return n ? { avg: Math.round(sum / n), n, closed, perfect, good, best: bestStreak(r.from, r.to) } : null;
+function rangeStats(from, to, cat) {
+  let s = 0, n = 0, closed = 0, good = 0;
+  for (let d = from; d <= to; d = addDays(d, 1)) { const x = dayScore(d, cat); if (x == null) continue; s += x; n++; if (dayObj(d).r?.closed) closed++; if (x >= GOOD_DAY) good++; }
+  return n ? { avg: Math.round(s / n), n, closed, good, best: bestStreak(from, to) } : null;
 }
-function habitMonthPct(h, ym) {
-  const r = monthRange(ym); if (!r.ok) return null;
-  let sum = 0, n = 0;
-  for (let d = r.from; d <= r.to; d = addDays(d, 1)) { if (!habitsOn(d).includes(h)) continue; sum += frac(h, d); n++; }
-  return n ? Math.round(sum / n * 100) : null;
+const monthStats = (ym, cat) => { const r = monthRange(ym); return r.ok ? rangeStats(r.from, r.to, cat) : null; };
+function habitPct(h, from, to) {
+  let s = 0, n = 0;
+  for (let d = from; d <= to; d = addDays(d, 1)) { if (d < startDate() || d > today() || !habitsOn(d).includes(h)) continue; s += frac(h, d); n++; }
+  return n ? Math.round(s / n * 100) : null;
 }
+const habitMonthPct = (h, ym) => { const r = monthRange(ym); return r.ok ? habitPct(h, r.from, r.to) : null; };
 function moneyStats(ym) {
   const list = S.money.filter(m => !m.del && m.date.startsWith(ym));
-  const sum = t => list.filter(m => m.type === t).reduce((s, m) => s + (+m.amount || 0), 0);
-  return { list, inc: sum('in'), out: sum('out'), save: sum('save') };
+  const t = k => sum(list.filter(m => m.type === k), m => m.amount);
+  return { list, inc: t('in'), out: t('out'), save: t('save') };
 }
-const fundTotal = () => S.money.filter(m => !m.del && m.type === 'save').reduce((s, m) => s + (+m.amount || 0), 0);
-
-/* books */
+const fundTotal = () => sum(S.money.filter(m => !m.del && m.type === 'save'), m => m.amount);
 const readHabit = () => S.habits.find(h => h.book && !h.del);
 function bookProgress(b) {
-  const rh = readHabit();
-  let pages = +b.offset || 0;
-  if (rh) for (let d = b.start; d <= (b.finished || today()); d = addDays(d, 1)) pages += +(S.days[d]?.h?.[rh.id] || 0);
-  return Math.min(pages, b.pages);
+  const rh = readHabit(); let p = +b.offset || 0;
+  if (rh) for (let d = b.start; d <= (b.finished || today()); d = addDays(d, 1)) p += +(S.days[d]?.h?.[rh.id] || 0);
+  return Math.min(p, b.pages);
 }
 const booksAll = () => S.books.filter(b => !b.del).sort((a, b) => a.start < b.start ? 1 : -1);
 const booksDone = () => booksAll().filter(b => b.finished);
 const currentBook = () => booksAll().find(b => !b.finished);
-function checkBooks() {
-  let changed = false;
-  for (const b of booksAll()) if (!b.finished && bookProgress(b) >= b.pages) { b.finished = today(); b.u = now(); changed = true; celebrate(`📗 Книга «${b.title}» прочитана! +300 XP`); }
-  return changed;
-}
-
-/* namaz month % */
-function namazPct(ym) {
-  const h = S.habits.find(x => x.id === 'namaz' && !x.del); if (!h) return null;
-  return habitMonthPct(h, ym);
-}
+function checkBooks() { for (const b of booksAll()) if (!b.finished && bookProgress(b) >= b.pages) { b.finished = today(); b.u = now(); toast(`Книга «${b.title}» прочитана! +300 XP`); } }
 function grandGoal(ym) {
-  const g = S.goals, ms = monthStats(ym), np = namazPct(ym);
-  const booksThisMonth = booksDone().filter(b => b.finished.startsWith(ym)).length;
-  const cb = currentBook();
+  const g = S.goals, ms = monthStats(ym), nh = S.habits.find(x => x.id === 'namaz' && !x.del), np = nh ? habitMonthPct(nh, ym) : null;
+  const bm = booksDone().filter(b => b.finished.startsWith(ym)).length, cb = currentBook();
   const conds = [
-    { t: `Средний балл месяца ≥ ${g.monthScore}%`, v: ms ? ms.avg + '%' : '—', met: !!ms && ms.avg >= g.monthScore, p: ms ? clamp(ms.avg / g.monthScore, 0, 1) : 0 },
-    { t: `5 намазов ≥ ${g.namazPct}% дней`, v: np != null ? np + '%' : '—', met: np != null && np >= g.namazPct, p: np != null ? clamp(np / g.namazPct, 0, 1) : 0 },
-    { t: 'Прочитать книгу месяца', v: booksThisMonth ? '✓' : cb ? `${bookProgress(cb)}/${cb.pages}` : 'нет книги', met: booksThisMonth > 0, p: booksThisMonth ? 1 : cb ? bookProgress(cb) / cb.pages : 0 },
-    { t: `Фонд отдыха: ${money(g.fundTarget)}`, v: money(fundTotal()), met: fundTotal() >= g.fundTarget, p: g.fundTarget ? clamp(fundTotal() / g.fundTarget, 0, 1) : 1 },
+    { t: `Средний балл месяца от ${g.monthScore}%`, v: ms ? ms.avg + '%' : '—', met: !!ms && ms.avg >= g.monthScore },
+    { t: `5 намазов — от ${g.namazPct}%`, v: np != null ? np + '%' : '—', met: np != null && np >= g.namazPct },
+    { t: 'Прочитать книгу месяца', v: bm ? 'готово' : cb ? `${bookProgress(cb)}/${cb.pages}` : 'нет книги', met: bm > 0 },
+    { t: `Фонд отдыха ${money(g.fundTarget)}`, v: money(fundTotal()), met: fundTotal() >= g.fundTarget },
   ];
-  return { conds, done: conds.every(c => c.met), p: conds.reduce((s, c) => s + c.p, 0) / conds.length };
+  return { conds, done: conds.every(c => c.met), n: conds.filter(c => c.met).length };
 }
-
-/* achievements */
 function achievements() {
-  const xp = totalXP(), L = level(xp).L, st = bestStreak(startDate(), today());
-  let allNamaz = 0, best = 0;
-  const nh = S.habits.find(x => x.id === 'namaz');
-  if (nh) for (let d = startDate(); d <= today(); d = addDays(d, 1)) { if (frac(nh, d) === 1) { allNamaz++; best = Math.max(best, allNamaz); } else allNamaz = 0; }
+  const L = level().L, st = bestStreak(startDate(), today());
+  let run = 0, best = 0; const nh = S.habits.find(x => x.id === 'namaz');
+  if (nh) for (let d = startDate(); d <= today(); d = addDays(d, 1)) { if (frac(nh, d) === 1) best = Math.max(best, ++run); else run = 0; }
   const closed = Object.values(S.days).filter(x => x?.r?.closed).length;
-  const months = []; for (let ym = ymOf(startDate()); ym < ymOf(today()); ym = addMonth(ym, 1)) months.push(ym);
-  const goodMonth = months.some(ym => (monthStats(ym)?.avg ?? 0) >= 80);
-  const perfect = Object.keys(S.days).some(d => dayScore(d) >= 100);
   return [
-    { e: '🌱', t: 'Первый шаг', d: 'Первый отчёт дня', on: closed >= 1 },
-    { e: '💯', t: 'Идеальный день', d: '100% за день', on: perfect },
-    { e: '🔥', t: 'Неделя огня', d: 'Серия 7 дней', on: st >= 7 },
-    { e: '⚔️', t: 'Стальная воля', d: 'Серия 30 дней', on: st >= 30 },
-    { e: '🕌', t: 'Хранитель намаза', d: '7 дней все 5', on: best >= 7 },
-    { e: '🌙', t: 'Месяц намаза', d: '30 дней все 5', on: best >= 30 },
-    { e: '📗', t: 'Читатель', d: 'Первая книга', on: booksDone().length >= 1 },
-    { e: '📚', t: 'Книжник', d: '6 книг', on: booksDone().length >= 6 },
-    { e: '📝', t: 'Честный отчёт', d: '30 отчётов', on: closed >= 30 },
-    { e: '🏝️', t: 'Заслужил отдых', d: 'Фонд собран', on: fundTotal() >= S.goals.fundTarget && S.goals.fundTarget > 0 },
-    { e: '🏆', t: 'Сильный месяц', d: 'Месяц ≥ 80%', on: goodMonth },
-    { e: '👑', t: 'Уровень 10', d: `сейчас ${L}`, on: L >= 10 },
+    ['📝', 'Первый отчёт', closed >= 1], ['🔥', 'Серия 7 дней', st >= 7], ['⚔️', 'Серия 30 дней', st >= 30],
+    ['🕌', '7 дней все намазы', best >= 7], ['🌙', '30 дней все намазы', best >= 30], ['📗', 'Первая книга', booksDone().length >= 1],
+    ['🥗', '30 записей еды', S.meals.filter(m => !m.del).length >= 30], ['🏝️', 'Фонд отдыха собран', S.goals.fundTarget > 0 && fundTotal() >= S.goals.fundTarget], ['⭐', 'Уровень 10', L >= 10],
   ];
 }
 
-/* ============ UI: shell ============ */
-const TABS = [['today','🔥','Сегодня'],['month','📊','Месяц'],['money','💰','Деньги'],['rewards','🏆','Награды'],['more','⚙️','Ещё']];
-function renderTabs() {
-  $('#tabs').innerHTML = TABS.map(([id, i, t]) => `<button class="${ui.tab === id ? 'on' : ''}" data-tab="${id}"><span class="i">${i}</span>${t}</button>`).join('');
-}
-$('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; ui.tab = b.dataset.tab; if (ui.tab === 'today') ui.day = today(); render(); scrollTo(0, 0); });
-
-function header() {
-  const xp = totalXP(), lv = level(xp), st = streak();
-  const initial = esc((S.profile.name || '?').trim()[0]?.toUpperCase() || '?');
-  return `<div class="top">
-    <div class="avatar">${initial}<span class="lv">${lv.L}</span></div>
-    <div class="who"><div class="rank">${greeting()}</div><div class="hi">${esc(S.profile.name)}</div><div class="rank">${rank(lv.L)} · ур. ${lv.L} <span class="sync-dot" id="syncdot"></span></div></div>
-    <span class="chip fire" title="Серия дней ≥ ${GOOD_DAY}%">🔥 ${st}</span>
-    <span class="chip gold" title="Монеты">🪙 ${coins().toLocaleString('ru-RU')}</span>
-  </div>`;
-}
-function greeting() { const h = new Date().getHours(); return h < 5 ? 'Доброй ночи' : h < 12 ? 'Доброе утро' : h < 18 ? 'Добрый день' : 'Добрый вечер'; }
-
+/* ============ shell ============ */
+const ICONS = {
+  today: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.6 2.5L16 9.5"/></svg>',
+  food: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8M4.5 3v5a2.5 2.5 0 005 0V3M7 11v10M17 21V3c-2 1.5-3 4-3 7v3h3"/></svg>',
+  money: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 15h2"/></svg>',
+  stats: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg>',
+};
+const TABS = [['today','Сегодня'],['food','Еда'],['money','Деньги'],['stats','Итоги'],['more','Ещё']];
+function renderTabs() { $('#tabs').innerHTML = TABS.map(([id, t]) => `<button class="${ui.tab === id ? 'on' : ''}" data-tab="${id}">${ICONS[id]}${t}</button>`).join(''); }
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; ui.tab = b.dataset.tab; ui.day = today(); render(); scrollTo(0, 0); });
 function render() {
   if (!S) return renderOnboarding();
-  _xpCache = null;
-  renderTabs();
-  const v = { today: viewToday, month: viewMonth, money: viewMoney, rewards: viewRewards, more: viewMore }[ui.tab]();
-  $('#app').innerHTML = header() + v;
+  _xp = null; renderTabs();
+  $('#app').innerHTML = ({ today: viewToday, food: viewFood, money: viewMoney, stats: viewStats, more: viewMore })[ui.tab]();
   setSync(syncState);
 }
+const dayNav = d => `<div class="daynav"><button data-act="day-prev" ${d <= startDate() ? 'disabled' : ''} aria-label="Назад">‹</button><button data-act="day-next" ${d >= today() ? 'disabled' : ''} aria-label="Вперёд">›</button></div>`;
+const titleFor = d => d === today() ? 'Сегодня' : d === addDays(today(), -1) ? 'Вчера' : dayTitle(d);
 
-/* ============ TODAY ============ */
-function ring(p, size = 118, stroke = 11) {
-  const r = (size - stroke) / 2, c = 2 * Math.PI * r, off = c * (1 - (p || 0) / 100);
-  return `<svg width="${size}" height="${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" stroke="#1c2438" stroke-width="${stroke}" fill="none"/>
-  <circle cx="${size / 2}" cy="${size / 2}" r="${r}" stroke="${scoreHex(p ?? 0)}" stroke-width="${stroke}" fill="none" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" style="transition:stroke-dashoffset .6s"/></svg>`;
+/* ============ СЕГОДНЯ ============ */
+function questions(d) {
+  const h = d === today() ? hourNow() : 24, q = [], ms = mealsOn(d);
+  for (const [t, [name, icon, at]] of Object.entries(MEALS)) if (at < 99 && h >= at + 1 && !ms.some(m => m.meal === t)) q.push({ icon, t: `Что ты ел на ${name.toLowerCase()}?`, s: 'Дома или на улице, сколько стоило', act: 'food-add', arg: t });
+  const w = +dayObj(d).h?.water || 0, wt = S.habits.find(x => x.id === 'water' && !x.del)?.target || 8;
+  if (h >= 11 && w < wt * clamp((h - 8) / 13, .2, 1) - .5) q.push({ icon: '💧', t: 'Сколько воды выпил?', s: `Сейчас ${liters(w)} л`, act: 'water-ask' });
+  if (h >= 18 && !moneyOn(d).length && !dayObj(d).noSpend) q.push({ icon: '🧾', t: 'Были сегодня траты?', s: 'Запиши или отметь «не тратил»', act: 'spend-ask' });
+  const rh = readHabit(); if (rh && h >= 19 && !(+dayObj(d).h?.[rh.id])) q.push({ icon: '📚', t: 'Сколько страниц прочитал?', s: currentBook() ? esc(currentBook().title) : 'Книга месяца', act: 'pages-ask' });
+  if (h >= 20 && !dayObj(d).r?.closed) q.push({ icon: '📝', t: 'Как прошёл день?', s: 'Отчёт дня · +30 XP', act: 'report' });
+  return q;
 }
 function viewToday() {
-  const d = ui.day, isToday = d === today();
-  const sc = dayScore(d) ?? 0, xpd = dayXP(d), lv = level(), q = QUOTES[(Math.floor(parse(d) / 864e5)) % QUOTES.length];
-  const rep = dayObj(d).r;
-  const cb = currentBook();
-  let h = `<div class="card hero">
-    <div class="ring">${ring(sc)}<div class="val"><div><b>${sc}%</b><span>${isToday ? 'сегодня' : 'за день'}</span></div></div></div>
-    <div class="stats">
-      <div class="stat"><span class="muted">XP за день</span><b style="color:var(--gold2)">+${xpd}</b></div>
-      <div class="stat"><span class="muted">Серия</span><b>🔥 ${streak()} дн.</b></div>
-      <div><div class="stat small" style="margin-bottom:5px"><span class="muted">Уровень ${lv.L}</span><span class="dim">${lv.cur}/${lv.need}</span></div><div class="xpbar"><i style="width:${lv.cur / lv.need * 100}%"></i></div></div>
-    </div></div>
-  <div class="card flat"><div class="quote">${esc(q[0])}<span class="src">— ${esc(q[1])}</span></div></div>
-  <div class="daynav"><button data-act="day-prev" ${d <= startDate() ? 'disabled' : ''}>‹</button>
-    <div class="d">${isToday ? 'Сегодня' : dayTitle(d)}<small>${WD[parse(d).getDay()]}${isToday ? ', ' + dayTitle(d) : ''}</small></div>
-    <button data-act="day-next" ${isToday ? 'disabled' : ''}>›</button></div>`;
+  const d = ui.day, sc = dayScore(d) ?? 0, lv = level(), q = questions(d);
+  const quote = QUOTES[Math.floor(parse(d) / 864e5) % QUOTES.length];
+  let h = `<div class="top"><div><div class="sub">${WD[parse(d).getDay()]}, ${dayTitle(d)}</div><h1>${titleFor(d)}</h1></div>${dayNav(d)}</div>
+  <div class="stats-line"><span>День <b style="color:${scoreText(sc)}">${sc}%</b></span><span>Серия <b>${streak()} дн.</b></span><span>Ур. <b>${lv.L}</b> · ${rank(lv.L)}</span><span>Монеты <b>${num(coins())}</b><span class="sync"></span></span></div>
+  <div class="bar" style="margin:-6px 0 18px;height:6px"><i style="width:${sc}%;background:${scoreHex(sc)}"></i></div>`;
+  if (q.length) h += `<h3 style="margin-top:6px">Ответь на вопросы</h3>` + q.slice(0, 4).map(x => `<button class="q" data-act="${x.act}" data-arg="${x.arg || ''}"><span class="qi">${x.icon}</span><span><div class="qt">${x.t}</div><div class="sub tiny">${x.s}</div></span><span class="arrow">›</span></button>`).join('');
   for (const [cid, c] of Object.entries(CATS)) {
-    const hs = habitsOn(d).filter(x => x.cat === cid);
-    if (!hs.length) continue;
-    const cs = dayScore(d, cid);
-    h += `<div class="sec-title"><span><span class="dot" style="background:${c.color}"></span>${c.name}</span><span class="pct" style="color:${scoreColor(cs)}">${cs ?? 0}%</span></div>`;
-    h += hs.map(x => habitRow(x, d, c)).join('');
-    if (cid === 'mind' && cb) {
-      const p = bookProgress(cb), left = cb.pages - p, dl = daysIn(ymOf(today())) - parse(today()).getDate() + 1;
-      h += `<div class="card flat small" style="margin-top:2px"><div class="row between"><span>📗 <b>${esc(cb.title)}</b></span><span class="muted">${p}/${cb.pages} стр</span></div>
-      <div class="bar" style="margin:8px 0 6px"><i style="width:${p / cb.pages * 100}%;background:var(--mind)"></i></div>
-      <span class="muted tiny">${left > 0 ? `Осталось ${left} стр — это ~${Math.ceil(left / dl)} стр/день до конца месяца` : 'Прочитано!'}</span></div>`;
-    }
+    const hs = habitsOn(d).filter(x => x.cat === cid); if (!hs.length) continue;
+    h += `<h3><span><span class="dot" style="background:${c.color};margin-right:6px"></span>${c.name}</span><span>${dayScore(d, cid) ?? 0}%</span></h3><div class="list">${hs.map(x => habitRow(x, d)).join('')}</div>`;
   }
+  const rep = dayObj(d).r;
   h += rep?.closed
-    ? `<div class="report-cta report-done"><div style="font-size:30px">✅</div><b>День закрыт</b><div class="muted small" style="margin:4px 0 12px">Оценка ${rep.rate || '—'}/10 ${rep.mood || ''} · +30 XP за отчёт</div><button class="btn sm" data-act="report">Открыть отчёт</button></div>`
-    : `<div class="report-cta"><div style="font-size:30px">📝</div><b>${isToday ? 'Итог дня' : 'Отчёт за этот день'}</b><div class="muted small" style="margin:4px 0 12px">Оцени день, запиши победы и деньги. +30 XP и серия не прервётся.</div><button class="btn primary block" data-act="report">Дать отчёт</button></div>`;
-  return h;
+    ? `<div class="box" style="margin-top:20px"><div class="row between"><div><div class="b">✓ День закрыт</div><div class="sub">Оценка ${rep.rate}/10 ${rep.mood || ''}</div></div><button class="btn sm line" data-act="report">Открыть</button></div></div>`
+    : `<button class="btn dark block" style="margin-top:20px" data-act="report">Дать отчёт дня</button>`;
+  return h + `<p class="sub tiny" style="text-align:center;margin:22px 10px 0">«${esc(quote[0])}» — ${esc(quote[1])}</p>`;
 }
-function habitRow(x, d, c) {
-  const f = frac(x, d), v = dayObj(d).h?.[x.id], done = f >= 1;
-  const xpTag = `<span class="xp">+${x.xp}</span>`;
-  const sub = x.hint ? esc(x.hint) : x.type === 'count' ? `цель ${x.target} ${esc(x.unit || '')}` : x.type === 'multi' ? `${Math.round(f * x.labels.length)}/${x.labels.length}` : '';
-  const base = `class="habit ${done ? 'done' : ''}" style="--c:${c.color}"`;
-  if (x.type === 'check' || x.type === 'auto') {
-    return `<div ${base} ${x.type === 'check' ? `data-act="tog" data-id="${x.id}"` : 'data-act="go-money"'} role="button">
-      <div class="ic">${x.icon}</div><div class="nm"><b>${esc(x.name)}${xpTag}</b><span>${sub}</span></div><div class="tick">✓</div></div>`;
-  }
+function habitRow(x, d) {
+  const f = frac(x, d), v = dayObj(d).h?.[x.id];
+  const chk = `<span class="chk ${f >= 1 ? 'on' : f > 0 ? 'half' : ''}" style="--p:${Math.round(f * 100)}%">${f >= 1 ? '✓' : ''}</span>`;
+  if (x.type === 'check') return `<button class="item" data-act="tog" data-id="${x.id}"><span class="ic">${x.icon}</span><span class="grow"><div class="t">${esc(x.name)}</div></span>${chk}</button>`;
+  if (x.type === 'auto') { const ms = moneyOn(d); return `<button class="item" data-act="spend-ask"><span class="ic">${x.icon}</span><span class="grow"><div class="t">${esc(x.name)}</div><div class="s">${ms.length ? `${ms.length} зап. · −${money(sum(ms.filter(m => m.type === 'out'), m => m.amount))}` : dayObj(d).noSpend ? 'без трат' : 'нажми, чтобы записать'}</div></span>${chk}</button>`; }
+  if (x.type === 'food') { const ms = mealsOn(d); return `<button class="item" data-act="go-food"><span class="ic">${x.icon}</span><span class="grow"><div class="t">${esc(x.name)}</div><div class="s">${ms.length ? `${ms.length} приём. пищи · ${num(sum(ms, m => m.kcal))} из ${num(kcalNorm())} ккал` : 'запиши, что ел'}</div></span>${chk}</button>`; }
   if (x.type === 'count') {
-    return `<div ${base}><div class="fill" style="width:${f * 100}%"></div>
-      <div class="ic">${x.icon}</div><div class="nm"><b>${esc(x.name)}${xpTag}</b><span>${sub}</span></div>
-      <div class="cnt"><button data-act="dec" data-id="${x.id}">−</button><div class="v">${+v || 0}<small>/${x.target}</small></div><button data-act="inc" data-id="${x.id}">+</button></div></div>`;
+    const sub = x.id === 'water' ? `${liters(v)} л из ${liters(x.target)} л` : `${+v || 0} из ${x.target} ${esc(x.unit || '')}`;
+    return `<div class="item"><span class="ic">${x.icon}</span><span class="grow"><div class="t">${esc(x.name)}</div><div class="s">${sub}</div></span><div class="cnt"><button data-act="dec" data-id="${x.id}" aria-label="Меньше">−</button><button data-act="inc" data-id="${x.id}" aria-label="Больше">+</button></div>${chk}</div>`;
   }
   const arr = Array.isArray(v) ? v : [];
-  return `<div class="habit multi ${done ? 'done' : ''}" style="--c:${c.color}"><div class="fill" style="width:${f * 100}%"></div>
-    <div class="ic">${x.icon}</div><div class="nm"><b>${esc(x.name)}${xpTag}</b><span>${sub}</span></div>
-    <div class="pills" style="flex-basis:100%">${x.labels.map((l, i) => `<button class="pill ${arr[i] ? 'on' : ''}" data-act="multi" data-id="${x.id}" data-i="${i}">${esc(l)}</button>`).join('')}</div></div>`;
+  return `<div class="item" style="flex-wrap:wrap"><span class="ic">${x.icon}</span><span class="grow"><div class="t">${esc(x.name)}</div></span>${chk}
+    <div class="pills" style="flex-basis:100%;padding-left:40px;margin-top:2px">${x.labels.map((l, i) => `<button class="pill ${arr[i] ? 'on' : ''}" data-act="multi" data-id="${x.id}" data-i="${i}">${esc(l)}</button>`).join('')}</div></div>`;
 }
-function setVal(id, val) {
-  const d = ui.day;
+function setVal(id, val, d = ui.day) {
   const before = dayScore(d);
   const o = S.days[d] || (S.days[d] = { h: {} });
   o.h = o.h || {}; o.h[id] = val; o.u = now();
-  _xpCache = null;
-  checkBooks();
-  save();
+  _xp = null; checkBooks(); save();
   const after = dayScore(d);
-  if (after >= 100 && before < 100) celebrate('💯 Идеальный день! +50 XP');
-  else if (after >= GOOD_DAY && before < GOOD_DAY) toast(`🔥 День засчитан (${after}%) — серия жива!`);
+  if (after >= 100 && before < 100) toast('Идеальный день! +50 XP');
+  else if (after >= GOOD_DAY && before < GOOD_DAY) toast(`День засчитан (${after}%) — серия продолжается`);
   render();
 }
-function onTodayAction(act, el) {
-  const id = el.dataset.id, h = S.habits.find(x => x.id === id), cur = dayObj(ui.day).h?.[id];
-  if (act === 'tog') { if (!cur) vibrate(); setVal(id, !cur); }
-  else if (act === 'inc') { vibrate(); setVal(id, (+cur || 0) + (h.type === 'count' && h.target >= 20 ? 5 : 1)); }
-  else if (act === 'dec') setVal(id, Math.max(0, (+cur || 0) - (h.type === 'count' && h.target >= 20 ? 5 : 1)));
-  else if (act === 'multi') { const a = Array.isArray(cur) ? [...cur] : []; a[+el.dataset.i] = !a[+el.dataset.i]; if (a[+el.dataset.i]) vibrate(); setVal(id, a); }
-  else if (act === 'day-prev') { ui.day = addDays(ui.day, -1); render(); }
-  else if (act === 'day-next') { ui.day = addDays(ui.day, 1); render(); }
-  else if (act === 'report') openReport(ui.day);
-  else if (act === 'go-money') { ui.tab = 'money'; render(); scrollTo(0, 0); }
-}
-const vibrate = () => { try { navigator.vibrate?.(12); } catch {} };
+const vibrate = () => { try { navigator.vibrate?.(10); } catch {} };
 
-/* ============ REPORT ============ */
+/* ============ быстрые вопросы ============ */
+function openWaterAsk(d = ui.day) {
+  const wt = S.habits.find(x => x.id === 'water' && !x.del); if (!wt) return;
+  let v = +dayObj(d).h?.water || 0;
+  const draw = root => { root.querySelector('#w-g').innerHTML = Array.from({ length: Math.max(wt.target, v) }, (_, i) => `<button class="glass ${i < v ? 'on' : ''}" data-i="${i}" aria-label="стакан ${i + 1}"></button>`).join(''); root.querySelector('#w-v').textContent = `${liters(v)} л из ${liters(wt.target)} л`; };
+  openSheet(`<h2>Сколько воды выпил?</h2><div class="sub">1 стакан = 250 мл. Нажми на стакан.</div><div class="big" id="w-v" style="margin-top:10px"></div><div class="glasses" id="w-g"></div>
+    <div class="grid3"><button class="btn" data-w="1">+1 стакан</button><button class="btn" data-w="2">+0,5 л</button><button class="btn" data-w="-1">−1</button></div>
+    <button class="btn dark block" id="w-s" style="margin-top:14px">Готово</button>`, root => {
+    draw(root);
+    root.querySelector('#w-g').onclick = e => { const b = e.target.closest('[data-i]'); if (!b) return; const i = +b.dataset.i; v = v === i + 1 ? i : i + 1; draw(root); };
+    root.querySelectorAll('[data-w]').forEach(b => b.onclick = () => { v = Math.max(0, v + +b.dataset.w); draw(root); });
+    root.querySelector('#w-s').onclick = () => { closeSheet(); setVal('water', v, d); };
+  });
+}
+function openPagesAsk(d = ui.day) {
+  const rh = readHabit(); if (!rh) return;
+  const cb = currentBook();
+  openSheet(`<h2>Сколько страниц прочитал?</h2>${cb ? `<div class="sub" style="margin-bottom:12px">«${esc(cb.title)}» · прочитано ${bookProgress(cb)} из ${cb.pages}</div>` : ''}
+    <div class="field"><input id="p-v" type="number" inputmode="numeric" placeholder="0" value="${+dayObj(d).h?.[rh.id] || ''}" style="font-size:28px;font-weight:700"></div>
+    <div class="opts" style="margin-bottom:14px">${[5, 10, 20, 30, 50].map(n => `<button data-n="${n}">${n}</button>`).join('')}</div>
+    <button class="btn dark block" id="p-s">Сохранить</button>`, root => {
+    const inp = root.querySelector('#p-v'); setTimeout(() => inp.focus(), 250);
+    root.querySelectorAll('[data-n]').forEach(b => b.onclick = () => inp.value = b.dataset.n);
+    root.querySelector('#p-s').onclick = () => { closeSheet(); setVal(rh.id, Math.max(0, Math.round(+inp.value || 0)), d); };
+  });
+}
+function openSpendAsk(d = ui.day) {
+  const ms = moneyOn(d);
+  openSheet(`<h2>Траты · ${d === today() ? 'сегодня' : dayTitle(d)}</h2>
+    ${ms.length ? `<div class="list">${ms.map(txRow).join('')}</div>` : '<div class="sub" style="margin-bottom:12px">Пока ничего не записано.</div>'}
+    <button class="btn dark block" id="s-add">Добавить трату</button>
+    <div class="grid2" style="margin-top:8px"><button class="btn" id="s-in">Доход</button><button class="btn" id="s-none">${dayObj(d).noSpend ? '✓ Не тратил' : 'Сегодня не тратил'}</button></div>`, root => {
+    root.querySelector('#s-add').onclick = () => { closeSheet(); setTimeout(() => openMoneyAdd('out', d), 260); };
+    root.querySelector('#s-in').onclick = () => { closeSheet(); setTimeout(() => openMoneyAdd('in', d), 260); };
+    root.querySelector('#s-none').onclick = () => { const o = S.days[d] || (S.days[d] = { h: {} }); o.noSpend = !o.noSpend; o.u = now(); save(); closeSheet(); render(); };
+    root.querySelectorAll('[data-act="del-money"]').forEach(b => b.onclick = () => { delMoney(b.dataset.id); closeSheet(); render(); });
+  });
+}
+
+/* ============ ОТЧЁТ ============ */
 function openReport(d) {
   const r = { ...(dayObj(d).r || {}) };
-  const ms = S.money.filter(m => !m.del && m.date === d);
-  const mi = ms.filter(m => m.type === 'in').reduce((s, m) => s + +m.amount, 0), mo = ms.filter(m => m.type === 'out').reduce((s, m) => s + +m.amount, 0);
-  const sc = dayScore(d) ?? 0;
-  const moods = ['😞','😐','🙂','😄','🔥'];
-  const missed = habitsOn(d).filter(h => frac(h, d) < 1).map(h => h.icon + ' ' + h.name);
-  openSheet(`<h2>Итог дня · ${dayTitle(d)}</h2>
-    <div class="card flat row" style="gap:14px"><div class="ring" style="width:70px;height:70px">${ring(sc, 70, 8)}<div class="val"><b style="font-size:16px">${sc}%</b></div></div>
-      <div class="small"><div>Выполнено привычек: <b>${habitsOn(d).filter(h => frac(h, d) >= 1).length}/${habitsOn(d).length}</b></div>
-      <div>Деньги за день: <span class="in-c">+${money(mi)}</span> · <span class="out-c">−${money(mo)}</span></div>
-      ${missed.length ? `<div class="muted tiny" style="margin-top:4px">Не доделал: ${esc(missed.slice(0, 5).join(', '))}${missed.length > 5 ? '…' : ''}</div>` : '<div style="color:var(--good)" class="tiny">Все привычки выполнены 💯</div>'}</div></div>
-    <div class="field"><label>Как ты себя чувствуешь?</label><div class="moods" id="r-mood">${moods.map(m => `<button class="${r.mood === m ? 'on' : ''}" data-m="${m}">${m}</button>`).join('')}</div></div>
-    <div class="field"><label>Оценка дня (честно)</label><div class="rate" id="r-rate">${[1,2,3,4,5,6,7,8,9,10].map(n => `<button data-n="${n}" class="${r.rate === n ? 'on' : ''}" style="${r.rate === n ? `background:${scoreHex(n * 10)}` : ''}">${n}</button>`).join('')}</div></div>
-    <div class="field"><label>🏆 Что получилось сегодня</label><textarea id="r-wins" placeholder="Сделал зал, прочитал 25 стр, закрыл задачу на работе…">${esc(r.wins)}</textarea></div>
-    <div class="field"><label>🎯 Что улучшу завтра</label><textarea id="r-fix" placeholder="Лечь до 23:00, не пропустить Фаджр…">${esc(r.fix)}</textarea></div>
-    <div class="field"><label>🤲 За что благодарен Аллаху</label><textarea id="r-thanks" placeholder="Здоровье, семья, хорошая работа…">${esc(r.thanks)}</textarea></div>
-    <div class="row" style="gap:8px;margin-bottom:12px"><button class="btn sm" id="r-addin">+ Доход</button><button class="btn sm" id="r-addout">− Расход</button><span class="muted tiny">запишется в «Деньги»</span></div>
-    <button class="btn primary block" id="r-save">${r.closed ? 'Сохранить' : 'Закрыть день · +30 XP'}</button>`, root => {
+  const out = sum(moneyOn(d).filter(m => m.type === 'out'), m => m.amount), meals = mealsOn(d);
+  const sc = dayScore(d) ?? 0, hs = habitsOn(d), done = hs.filter(h => frac(h, d) >= 1).length;
+  const missed = hs.filter(h => frac(h, d) < 1).map(h => h.name);
+  openSheet(`<h2>Отчёт · ${d === today() ? 'сегодня' : dayTitle(d)}</h2>
+    <div class="box"><div class="grid3"><div><div class="sub tiny">Балл дня</div><div class="b" style="font-size:20px">${sc}%</div></div><div><div class="sub tiny">Дела</div><div class="b" style="font-size:20px">${done}/${hs.length}</div></div><div><div class="sub tiny">Потратил</div><div class="b" style="font-size:20px">${money(out)}</div></div></div>
+    <div class="sub tiny" style="margin-top:10px">Еда: ${meals.length ? `${meals.length} приём., ${num(sum(meals, m => m.kcal))} ккал` : 'не записана'} · Вода: ${liters(dayObj(d).h?.water)} л${missed.length ? `<br>Не сделал: ${esc(missed.slice(0, 6).join(', '))}` : ''}</div></div>
+    <div class="field"><label>Как настроение?</label><div class="moods" id="r-mood">${['😞','😐','🙂','😄','🔥'].map(m => `<button class="${r.mood === m ? 'on' : ''}" data-m="${m}">${m}</button>`).join('')}</div></div>
+    <div class="field"><label>Оцени день честно</label><div class="rate" id="r-rate">${[1,2,3,4,5,6,7,8,9,10].map(n => `<button data-n="${n}" class="${r.rate === n ? 'on' : ''}">${n}</button>`).join('')}</div></div>
+    <div class="field"><label>Что получилось?</label><textarea id="r-wins" placeholder="Сходил в зал, закрыл задачу на работе…">${esc(r.wins)}</textarea></div>
+    <div class="field"><label>Что улучшу завтра?</label><textarea id="r-fix" placeholder="Лечь до 23:00, не пропустить Фаджр…">${esc(r.fix)}</textarea></div>
+    <div class="field"><label>За что благодарен Аллаху?</label><textarea id="r-thanks" placeholder="Здоровье, семья, работа…" style="min-height:60px">${esc(r.thanks)}</textarea></div>
+    <button class="btn dark block" id="r-save">${r.closed ? 'Сохранить' : 'Закрыть день · +30 XP'}</button>`, root => {
     root.querySelector('#r-mood').onclick = e => { const b = e.target.closest('[data-m]'); if (!b) return; r.mood = b.dataset.m; root.querySelectorAll('#r-mood button').forEach(x => x.classList.toggle('on', x === b)); };
-    root.querySelector('#r-rate').onclick = e => { const b = e.target.closest('[data-n]'); if (!b) return; r.rate = +b.dataset.n; root.querySelectorAll('#r-rate button').forEach(x => { x.classList.toggle('on', x === b); x.style.background = x === b ? scoreHex(r.rate * 10) : ''; }); };
-    const collect = () => { r.wins = root.querySelector('#r-wins').value.trim(); r.fix = root.querySelector('#r-fix').value.trim(); r.thanks = root.querySelector('#r-thanks').value.trim(); };
-    root.querySelector('#r-addin').onclick = () => { collect(); stash(); closeSheet(); openMoneyAdd('in', d, () => openReport(d)); };
-    root.querySelector('#r-addout').onclick = () => { collect(); stash(); closeSheet(); openMoneyAdd('out', d, () => openReport(d)); };
-    const stash = () => { const o = S.days[d] || (S.days[d] = { h: {} }); o.r = { ...r }; o.u = now(); save(); };
+    root.querySelector('#r-rate').onclick = e => { const b = e.target.closest('[data-n]'); if (!b) return; r.rate = +b.dataset.n; root.querySelectorAll('#r-rate button').forEach(x => x.classList.toggle('on', x === b)); };
     root.querySelector('#r-save').onclick = () => {
-      collect();
-      if (!r.rate) { toast('Поставь оценку дню 1–10'); return; }
+      r.wins = root.querySelector('#r-wins').value.trim(); r.fix = root.querySelector('#r-fix').value.trim(); r.thanks = root.querySelector('#r-thanks').value.trim();
+      if (!r.rate) return toast('Поставь оценку от 1 до 10');
       const first = !dayObj(d).r?.closed;
-      r.closed = true; r.at = now(); stash(); closeSheet(); render();
-      if (first) celebrate(`✅ День закрыт! +30 XP${sc >= GOOD_DAY ? ' · 🔥 серия ' + streak() : ''}`);
+      const o = S.days[d] || (S.days[d] = { h: {} }); o.r = { ...r, closed: true, at: now() }; o.u = now();
+      save(); closeSheet(); render();
+      if (first) toast('День закрыт · +30 XP');
     };
   });
 }
 
-/* ============ MONTH ============ */
-function viewMonth() {
-  const ym = ui.month, prev = addMonth(ym, -1);
-  const ms = monthStats(ym), pm = monthStats(prev);
-  const delta = ms && pm ? ms.avg - pm.avg : null;
-  const dl = delta == null ? '' : delta > 0 ? `<span class="delta up">▲ +${delta}% Прогресс</span>` : delta < 0 ? `<span class="delta down">▼ ${delta}% Регресс</span>` : `<span class="delta eq">= без изменений</span>`;
-  let h = `<div class="mnav"><button data-act="m-prev" ${ym <= ymOf(startDate()) ? 'disabled style="opacity:.3"' : ''}>‹</button><div class="t">${monthName(ym)}</div><button data-act="m-next" ${ym >= ymOf(today()) ? 'disabled style="opacity:.3"' : ''}>›</button></div>`;
-  h += `<div class="card"><div class="row between"><div><div class="muted small">Средний балл</div><div class="big-num" style="color:${scoreColor(ms?.avg)}">${ms ? ms.avg + '%' : '—'}</div></div><div style="text-align:right">${dl}<div class="muted tiny" style="margin-top:6px">${pm ? `прошлый месяц: ${pm.avg}%` : 'сравнение появится через месяц'}</div></div></div>
-    <div class="grid3" style="margin-top:14px">
-      <div><div class="muted tiny">Засчитано дней</div><b>${ms?.good ?? 0}/${ms?.n ?? 0}</b></div>
-      <div><div class="muted tiny">Лучшая серия</div><b>🔥 ${ms?.best ?? 0}</b></div>
-      <div><div class="muted tiny">Отчётов</div><b>📝 ${ms?.closed ?? 0}</b></div></div></div>`;
-  // calendar
-  const first = parse(ym + '-01'), off = (first.getDay() + 6) % 7, n = daysIn(ym);
-  let cal = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(x => `<div class="wd">${x}</div>`).join('') + '<div></div>'.repeat(off);
-  for (let i = 1; i <= n; i++) {
-    const d = `${ym}-${pad(i)}`, s = dayScore(d), fut = d > today();
-    cal += `<button class="c ${fut ? 'fut' : ''} ${d === today() ? 'today' : ''}" data-act="open-day" data-d="${d}" style="background:${scoreColor(s)};${s != null && s >= 30 && s < 90 ? 'color:#1a1300' : s != null ? 'color:#fff' : ''}" ${fut || d < startDate() ? 'disabled' : ''}>${i}${dayObj(d).r?.closed ? '<span class="rep"></span>' : ''}</button>`;
+/* ============ ЕДА ============ */
+function viewFood() {
+  const d = ui.day, ms = mealsOn(d), norm = kcalNorm(), kc = sum(ms, m => m.kcal);
+  const items = ms.flatMap(m => m.items || []), kGood = sum(items.filter(i => i.verdict === 'good'), i => i.kcal), kBad = sum(items.filter(i => i.verdict === 'bad'), i => i.kcal), kAll = sum(items, i => i.kcal) || 1;
+  const outCost = sum(ms, m => m.cost), over = kc > norm * 1.1;
+  const w = +dayObj(d).h?.water || 0, wt = S.habits.find(x => x.id === 'water' && !x.del)?.target || 8;
+  let h = `<div class="top"><div><div class="sub">${WD[parse(d).getDay()]}, ${dayTitle(d)}</div><h1>Еда</h1></div>${dayNav(d)}</div>`;
+  if (!S.body?.weight) h += `<div class="note" style="margin-top:12px">Укажи рост и вес — посчитаю твою норму калорий и воды.<br><button class="btn sm dark" data-act="body" style="margin-top:8px">Указать</button></div>`;
+  h += `<div class="box" style="margin-top:12px"><div class="row between"><div><div class="sub">Калории</div><div class="big" style="color:${over ? 'var(--red)' : 'var(--text)'}">${num(kc)} <span class="sub" style="font-size:16px;font-weight:500">из ${num(norm)}</span></div></div><div>${over ? `<span class="tag bad">перебор ${num(kc - norm)}</span>` : kc ? `<span class="tag good">осталось ${num(Math.max(0, norm - kc))}</span>` : ''}</div></div>
+    <div class="bar" style="margin:10px 0"><i style="width:${clamp(kc / norm * 100, 0, 100)}%;background:${over ? 'var(--red)' : 'var(--green)'}"></i></div>
+    <div class="grid3 small"><div><span class="sub tiny">Белки</span><div class="b">${num(sum(ms, m => m.p))} г</div></div><div><span class="sub tiny">Жиры</span><div class="b">${num(sum(ms, m => m.f))} г</div></div><div><span class="sub tiny">Углеводы</span><div class="b">${num(sum(ms, m => m.c))} г</div></div></div>
+    ${items.length ? `<div style="margin-top:12px"><div class="kbar"><i style="width:${kGood / kAll * 100}%;background:var(--green)"></i><i style="width:${(kAll - kGood - kBad) / kAll * 100}%;background:#d4d4da"></i><i style="width:${kBad / kAll * 100}%;background:var(--red)"></i></div><div class="sub tiny row between" style="margin-top:5px"><span>полезно ${Math.round(kGood / kAll * 100)}%</span><span>вредно ${Math.round(kBad / kAll * 100)}%</span></div></div>` : ''}
+    ${outCost ? `<div class="sub tiny" style="margin-top:8px">Еда вне дома: <b style="color:var(--text)">${money(outCost)}</b></div>` : ''}</div>
+    <button class="btn dark block" data-act="food-add" data-arg="" style="margin:4px 0 6px">+ Записать, что ел</button>`;
+  for (const [t, [name, icon, at]] of Object.entries(MEALS)) {
+    const list = ms.filter(m => m.meal === t);
+    if (!list.length && t === 'snack') continue;
+    h += `<h3><span>${icon} ${name}</span>${list.length ? `<span>${num(sum(list, m => m.kcal))} ккал</span>` : ''}</h3>`;
+    h += list.length ? list.map(m => mealCard(m, true)).join('') : `<button class="box" style="width:100%;text-align:left;color:var(--muted)" data-act="food-add" data-arg="${t}">${d === today() && hourNow() < at ? 'Ещё рано' : 'Не записан'} — <b style="color:var(--text)">записать</b></button>`;
   }
-  h += `<div class="card"><div class="cal">${cal}</div>
-    <div class="legend"><span><i style="background:var(--s1)"></i>&lt;30</span><span><i style="background:var(--s2)"></i>30–49</span><span><i style="background:var(--s3)"></i>50–69</span><span><i style="background:var(--s4)"></i>70–89</span><span><i style="background:var(--s5)"></i>90+</span><span>● отчёт</span></div></div>`;
-  h += `<div class="sec-title"><span>Динамика по дням</span><span class="pct muted">— этот · ┄ прошлый</span></div><div class="card">${lineChart(ym, prev)}</div>`;
-  // categories
-  h += `<div class="sec-title"><span>Сферы жизни</span><span class="pct muted">vs прошлый</span></div><div class="card">`;
-  for (const [cid, c] of Object.entries(CATS)) {
-    const a = monthStats(ym, cid)?.avg, b = monthStats(prev, cid)?.avg;
-    h += `<div class="hrow"><div style="font-size:20px">${c.icon}</div><div><div class="nm"><span>${c.name}</span><span style="color:${scoreColor(a)}">${a ?? '—'}%</span></div><div class="bar"><i style="width:${a || 0}%;background:${c.color}"></i></div></div>${deltaTag(a, b)}</div>`;
-  }
-  h += `</div><div class="sec-title"><span>Привычки</span><span class="pct muted">% выполнения</span></div><div class="card">`;
-  for (const x of habits()) {
-    const a = habitMonthPct(x, ym), b = habitMonthPct(x, prev);
-    h += `<div class="hrow"><div style="font-size:18px">${x.icon}</div><div><div class="nm"><span>${esc(x.name)}</span><span style="color:${scoreColor(a)}">${a ?? '—'}%</span></div><div class="bar"><i style="width:${a || 0}%;background:${scoreColor(a)}"></i></div></div>${deltaTag(a, b)}</div>`;
-  }
-  h += `</div>`;
-  const m = moneyStats(ym), pmn = moneyStats(prev);
-  h += `<div class="sec-title"><span>Деньги за месяц</span></div><div class="card"><div class="grid3">
-    <div><div class="muted tiny">Доход</div><b class="in-c">${money(m.inc)}</b>${deltaTag(m.inc, pmn.inc, true)}</div>
-    <div><div class="muted tiny">Расход</div><b class="out-c">${money(m.out)}</b>${deltaTag(m.out, pmn.out, true, true)}</div>
-    <div><div class="muted tiny">Отложено</div><b class="save-c">${money(m.save)}</b>${deltaTag(m.save, pmn.save, true)}</div></div></div>`;
-  const reps = Object.entries(S.days).filter(([d, o]) => d.startsWith(ym) && o?.r?.closed).sort((a, b) => a[0] < b[0] ? 1 : -1);
-  h += `<div class="sec-title"><span>Отчёты месяца</span></div><div class="card">${reps.length ? reps.map(([d, o]) => `<button class="list-item" style="width:100%;text-align:left" data-act="open-report" data-d="${d}"><span style="font-size:22px">${o.r.mood || '📝'}</span><div class="grow"><b>${dayTitle(d)}</b> <span class="muted small">· ${o.r.rate}/10 · ${dayScore(d)}%</span><div class="muted tiny" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(o.r.wins || o.r.fix || '')}</div></div><span style="width:10px;height:10px;border-radius:3px;background:${scoreColor(dayScore(d))}"></span></button>`).join('') : '<div class="empty">Пока нет отчётов. Закрывай каждый день — тут будет твоя история.</div>'}</div>`;
+  h += `<h3><span>💧 Вода</span><span>${liters(w)} из ${liters(wt)} л</span></h3>
+    <button class="box" style="width:100%;text-align:left" data-act="water-ask"><div class="glasses" style="margin:0">${Array.from({ length: Math.max(wt, w) }, (_, i) => `<span class="glass ${i < w ? 'on' : ''}"></span>`).join('')}</div><div class="sub tiny" style="margin-top:8px">Нажми, чтобы отметить</div></button>`;
   return h;
 }
-function deltaTag(a, b, raw = false, invert = false) {
-  if (a == null || b == null) return `<span class="delta eq tiny" style="justify-self:end">—</span>`;
-  const dlt = a - b; if (!dlt) return `<span class="delta eq tiny" style="justify-self:end">=</span>`;
-  const good = invert ? dlt < 0 : dlt > 0;
-  const txt = raw ? (b ? `${dlt > 0 ? '+' : ''}${Math.round(dlt / b * 100)}%` : '') : `${dlt > 0 ? '+' : ''}${dlt}`;
-  if (!txt) return '';
-  return `<span class="delta ${good ? 'up' : 'down'} tiny" style="justify-self:end;margin-top:4px">${dlt > 0 ? '▲' : '▼'} ${txt}</span>`;
+function mealCard(m, clickable) {
+  const pl = PLACES[m.place] || PLACES.home, tag = clickable ? 'button' : 'div';
+  return `<${tag} class="box" style="width:100%;text-align:left" ${clickable ? `data-act="meal-open" data-id="${m.id}"` : ''}>
+    <div class="row between"><div class="b">${esc(m.text)}</div><span class="tag ${m.score >= 7 ? 'good' : m.score <= 4 ? 'bad' : 'warn'}">${m.score}/10</span></div>
+    <div class="sub tiny" style="margin-top:3px">${m.time ? m.time + ' · ' : ''}${pl[0]} ${pl[1]}${m.cost ? ' · ' + money(m.cost) : ''} · ${num(m.kcal)} ккал</div>
+    ${m.items?.length ? `<ul class="meal-items">${m.items.map(i => `<li><span>${i.verdict === 'bad' ? '🔴' : i.verdict === 'good' ? '🟢' : '⚪'} ${esc(i.name)}</span><span class="sub">${num(i.kcal)}</span></li>`).join('')}</ul>` : ''}
+    ${m.comment ? `<div class="sub tiny" style="margin-top:6px">${esc(m.comment)}</div>` : ''}</${tag}>`;
 }
-function lineChart(ym, prev) {
-  const W = 320, H = 130, P = 8, n = daysIn(ym), x = i => P + (i - 1) * (W - 2 * P) / (n - 1), y = v => H - 18 - v / 100 * (H - 30);
-  const pts = (m, len) => { const a = []; for (let i = 1; i <= len; i++) { const s = dayScore(`${m}-${pad(i)}`); if (s != null) a.push([i, s]); } return a; };
-  const cur = pts(ym, n), pv = pts(prev, Math.min(n, daysIn(prev)));
-  const path = a => a.map((p, i) => `${i ? 'L' : 'M'}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join('');
-  let g = '';
-  for (const v of [0, 50, 100]) g += `<line x1="${P}" x2="${W - P}" y1="${y(v)}" y2="${y(v)}" stroke="#232d45" stroke-dasharray="${v === 70 ? '' : '2 4'}"/><text x="${W - P}" y="${y(v) - 3}" fill="#5c6680" font-size="9" text-anchor="end">${v}%</text>`;
-  g += `<line x1="${P}" x2="${W - P}" y1="${y(GOOD_DAY)}" y2="${y(GOOD_DAY)}" stroke="#84cc16" stroke-opacity=".35"/>`;
-  if (pv.length > 1) g += `<path d="${path(pv)}" fill="none" stroke="#5c6680" stroke-width="1.5" stroke-dasharray="4 4"/>`;
-  if (cur.length > 1) {
-    g += `<defs><linearGradient id="lg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f5b942" stop-opacity=".35"/><stop offset="1" stop-color="#f5b942" stop-opacity="0"/></linearGradient></defs>`;
-    g += `<path d="${path(cur)}L${x(cur.at(-1)[0])},${y(0)}L${x(cur[0][0])},${y(0)}Z" fill="url(#lg)"/><path d="${path(cur)}" fill="none" stroke="#f5b942" stroke-width="2.2" stroke-linejoin="round"/>`;
-  }
-  g += cur.map(p => `<circle cx="${x(p[0])}" cy="${y(p[1])}" r="3.2" fill="${scoreHex(p[1])}" stroke="#0a0e18" stroke-width="1.2"/>`).join('');
-  for (const i of [1, 10, 20, n]) g += `<text x="${x(i)}" y="${H - 3}" fill="#5c6680" font-size="9" text-anchor="middle">${i}</text>`;
-  return cur.length ? `<svg viewBox="0 0 ${W} ${H}" width="100%">${g}</svg>` : '<div class="empty">Данные появятся после первого дня</div>';
+function guessMeal() { const h = hourNow(); return h < 11 ? 'breakfast' : h < 16.5 ? 'lunch' : h < 22 ? 'dinner' : 'snack'; }
+function openFoodAdd(mealType, d = ui.day, prev) {
+  const st = prev || { meal: mealType || (d === today() ? guessMeal() : 'lunch'), place: 'home', portion: 'm', text: '', cost: 0 };
+  const recent = [...new Set(S.meals.filter(m => !m.del).sort((a, b) => b.u - a.u).map(m => m.text))].slice(0, 8);
+  openSheet(`<h2>Что ты ел?</h2>
+    <div class="field"><div class="opts" id="f-meal">${Object.entries(MEALS).map(([k, [n, i]]) => `<button data-v="${k}" class="${st.meal === k ? 'on' : ''}">${i} ${n}</button>`).join('')}</div></div>
+    <div class="field"><label>Что ел и пил? <small>— через запятую</small></label><textarea id="f-text" placeholder="Например: плов, салат из помидоров, чай с сахаром">${esc(st.text)}</textarea>
+      ${recent.length ? `<div class="pills" id="f-recent">${recent.map(t => `<button class="pill" data-t="${esc(t)}">${esc(t.length > 28 ? t.slice(0, 28) + '…' : t)}</button>`).join('')}</div>` : ''}</div>
+    <div class="field"><label>Где ел?</label><div class="opts col" id="f-place">${Object.entries(PLACES).map(([k, [i, n, s]]) => `<button data-v="${k}" class="${st.place === k ? 'on' : ''}">${i} ${n}<small>${s}</small></button>`).join('')}</div></div>
+    <div class="field" id="f-costw" style="display:${st.place === 'home' ? 'none' : ''}"><label>Сколько заплатил?</label><input id="f-cost" type="number" inputmode="numeric" placeholder="0 ${esc(S.settings.currency)}" value="${st.cost || ''}"><div class="sub tiny" style="margin-top:6px">Запишется в траты автоматически</div></div>
+    <div class="field"><label>Порция</label><div class="opts" id="f-port">${[['s', 'Маленькая'], ['m', 'Обычная'], ['l', 'Большая']].map(([k, n]) => `<button data-v="${k}" class="${st.portion === k ? 'on' : ''}">${n}</button>`).join('')}</div></div>
+    <button class="btn dark block" id="f-go">Посчитать калории</button>`, root => {
+    const pick = (id, key, cb) => root.querySelector(id).onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; st[key] = b.dataset.v; root.querySelectorAll(id + ' button').forEach(x => x.classList.toggle('on', x === b)); cb && cb(); };
+    pick('#f-meal', 'meal'); pick('#f-port', 'portion');
+    pick('#f-place', 'place', () => { root.querySelector('#f-costw').style.display = st.place === 'home' ? 'none' : ''; if (st.place !== 'home') setTimeout(() => root.querySelector('#f-cost').focus(), 50); });
+    const ta = root.querySelector('#f-text'); if (!prev) setTimeout(() => ta.focus(), 260);
+    root.querySelector('#f-recent')?.addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b) ta.value = b.dataset.t; });
+    root.querySelector('#f-go').onclick = async () => {
+      st.text = ta.value.trim(); st.cost = st.place === 'home' ? 0 : Math.max(0, +root.querySelector('#f-cost').value || 0);
+      if (!st.text) return toast('Напиши, что ел');
+      if (st.place !== 'home' && !st.cost) return toast('Сколько заплатил? Если бесплатно — выбери «Дома»');
+      const btn = root.querySelector('#f-go'); btn.disabled = true; btn.innerHTML = '<span class="spin" style="border-color:rgba(255,255,255,.3);border-top-color:#fff"></span> Считаю…';
+      showFoodResult(st, await analyzeFood(st), d);
+    };
+  });
+}
+async function analyzeFood(st) {
+  try {
+    const ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), 45000);
+    const r = await fetch('/api/food', { method: 'POST', signal: ctrl.signal, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: st.text, meal: st.meal, place: st.place, portion: st.portion, body: { ...S.body, norm: kcalNorm() } }) });
+    clearTimeout(tm);
+    if (!r.ok) throw 0;
+    const j = await r.json(); if (!j.items?.length) throw 0;
+    return { ...j, local: false };
+  } catch { return localEstimate(st.text, st.portion, st.place); }
+}
+function showFoodResult(st, res, d) {
+  const items = res.items.map(i => ({ name: i.name, g: i.grams, kcal: i.kcal, p: i.protein, f: i.fat, c: i.carbs, verdict: i.verdict, why: i.why }));
+  const kc = sum(items, i => i.kcal);
+  openSheet(`<h2>${MEALS[st.meal][1]} ${MEALS[st.meal][0]} · ${num(kc)} ккал</h2>
+    <div class="list">${items.map(i => `<div class="item"><span class="grow"><div class="t">${esc(i.name)}${i.g ? ` <span class="sub tiny">${i.g} г</span>` : ''}</div><div class="s">${i.why ? esc(i.why) + ' · ' : ''}Б ${i.p} · Ж ${i.f} · У ${i.c}</div></span><span style="text-align:right"><div class="b">${num(i.kcal)}</div><span class="tag ${i.verdict === 'good' ? 'good' : i.verdict === 'bad' ? 'bad' : ''}">${i.verdict === 'good' ? 'полезно' : i.verdict === 'bad' ? 'вредно' : 'нормально'}</span></span></div>`).join('')}</div>
+    <div class="box"><div class="row between"><span class="b">Оценка</span><span class="tag ${res.score >= 7 ? 'good' : res.score <= 4 ? 'bad' : 'warn'}" style="font-size:15px">${res.score}/10</span></div><div class="sub small" style="margin-top:6px">${esc(res.comment)}</div>
+    ${res.local ? '<div class="sub tiny" style="margin-top:6px">Примерный расчёт по базе блюд — сервер сейчас недоступен.</div>' : ''}</div>
+    ${st.cost ? `<div class="sub small" style="margin-bottom:12px">${money(st.cost)} запишется в «Деньги» → Еда.</div>` : ''}
+    <div class="grid2"><button class="btn" id="r-back">Изменить</button><button class="btn dark" id="r-ok">Сохранить</button></div>`, root => {
+    root.querySelector('#r-back').onclick = () => { closeSheet(); setTimeout(() => openFoodAdd(st.meal, d, st), 260); };
+    root.querySelector('#r-ok').onclick = () => {
+      const id = uid();
+      const meal = { id, u: now(), date: d, time: d === today() ? hhmm() : '', meal: st.meal, text: st.text, place: st.place, cost: st.cost || 0, portion: st.portion, items, kcal: kc, p: sum(items, i => i.p), f: sum(items, i => i.f), c: sum(items, i => i.c), score: res.score, comment: res.comment, ai: !res.local };
+      if (st.cost) { const mid = uid(); S.money.push({ id: mid, u: now(), type: 'out', amount: st.cost, cat: 'Еда', date: d, note: `${MEALS[st.meal][0]}: ${st.text.slice(0, 40)}`, mealId: id }); meal.moneyId = mid; }
+      S.meals.push(meal); _xp = null; save(); closeSheet(); render();
+      toast(res.score >= 7 ? 'Записано. Хороший выбор 👍' : res.score <= 4 ? 'Записано. В следующий раз — что-то полезнее' : 'Записано');
+    };
+  });
+}
+function openMeal(id) {
+  const m = S.meals.find(x => x.id === id); if (!m) return;
+  openSheet(`<h2>${MEALS[m.meal][1]} ${MEALS[m.meal][0]}</h2>${mealCard(m, false)}<button class="btn red block" id="m-del" style="margin-top:6px">Удалить запись</button>`, root => {
+    root.querySelector('#m-del').onclick = () => {
+      if (!confirm('Удалить эту запись еды?')) return;
+      m.del = true; m.u = now();
+      if (m.moneyId) { const x = S.money.find(y => y.id === m.moneyId); if (x) { x.del = true; x.u = now(); } }
+      save(); closeSheet(); render();
+    };
+  });
+}
+function openBody() {
+  const b = { sex: 'm', goal: 'keep', activity: 1.375, ...S.body };
+  openSheet(`<h2>Твои параметры</h2><div class="sub" style="margin-bottom:14px">Нужны, чтобы посчитать норму калорий и воды.</div>
+    <div class="field"><div class="seg" id="b-sex"><button data-v="m" class="${b.sex !== 'f' ? 'on' : ''}">Мужчина</button><button data-v="f" class="${b.sex === 'f' ? 'on' : ''}">Женщина</button></div></div>
+    <div class="grid3"><div class="field"><label>Возраст</label><input id="b-age" type="number" inputmode="numeric" value="${b.age || ''}"></div><div class="field"><label>Рост, см</label><input id="b-h" type="number" inputmode="numeric" value="${b.height || ''}"></div><div class="field"><label>Вес, кг</label><input id="b-w" type="number" inputmode="decimal" value="${b.weight || ''}"></div></div>
+    <div class="field"><label>Цель</label><div class="seg" id="b-goal"><button data-v="lose" class="${b.goal === 'lose' ? 'on' : ''}">Похудеть</button><button data-v="keep" class="${b.goal === 'keep' ? 'on' : ''}">Держать вес</button><button data-v="gain" class="${b.goal === 'gain' ? 'on' : ''}">Набрать</button></div></div>
+    <div class="field"><label>Активность</label><select id="b-act"><option value="1.2">Почти не двигаюсь</option><option value="1.375">Немного (прогулки, 1–2 тренировки)</option><option value="1.55">Средне (3–4 тренировки)</option><option value="1.725">Много (спорт почти каждый день)</option></select></div>
+    <button class="btn dark block" id="b-s">Сохранить</button>`, root => {
+    root.querySelector('#b-act').value = String(b.activity);
+    for (const [id, k] of [['#b-sex', 'sex'], ['#b-goal', 'goal']]) root.querySelector(id).onclick = e => { const x = e.target.closest('[data-v]'); if (!x) return; b[k] = x.dataset.v; root.querySelectorAll(id + ' button').forEach(y => y.classList.toggle('on', y === x)); };
+    root.querySelector('#b-s').onclick = () => {
+      const age = +root.querySelector('#b-age').value, height = +root.querySelector('#b-h').value, weight = +String(root.querySelector('#b-w').value).replace(',', '.');
+      if (!(age > 5 && height > 100 && weight > 30)) return toast('Проверь возраст, рост и вес');
+      S.body = { ...b, age, height, weight, activity: +root.querySelector('#b-act').value, u: now() };
+      const wh = S.habits.find(x => x.id === 'water'); if (wh) { wh.target = waterGoalMl() / 250; wh.u = now(); }
+      save(); closeSheet(); render(); toast(`Твоя норма: ${num(kcalNorm())} ккал и ${liters(waterGoalMl() / 250)} л воды`);
+    };
+  });
 }
 
-/* ============ MONEY ============ */
+/* ============ ДЕНЬГИ ============ */
+function txRow(x) {
+  const em = MONEY_CATS[x.type]?.find(c => c[1] === x.cat)?.[0] || '•';
+  return `<div class="item"><span class="ic">${em}</span><span class="grow"><div class="t">${esc(x.cat)}</div><div class="s">${dayTitle(x.date)}${x.note ? ' · ' + esc(x.note) : ''}</div></span><span class="b" style="color:${x.type === 'in' ? 'var(--green)' : x.type === 'save' ? 'var(--blue)' : 'var(--text)'};white-space:nowrap">${x.type === 'in' ? '+' : x.type === 'out' ? '−' : ''}${money(x.amount)}</span><button class="dim" data-act="del-money" data-id="${x.id}" style="padding:4px 2px 4px 6px" aria-label="Удалить">✕</button></div>`;
+}
+function delMoney(id) { const m = S.money.find(x => x.id === id); if (!m || !confirm('Удалить запись?')) return; m.del = true; m.u = now(); if (m.mealId) { const ml = S.meals.find(x => x.id === m.mealId); if (ml) { ml.cost = 0; ml.moneyId = null; ml.u = now(); } } save(); }
 function viewMoney() {
-  const ym = ui.moneyMonth, m = moneyStats(ym), g = S.goals, fund = fundTotal();
-  const bal = m.inc - m.out - m.save;
-  let h = `<div class="mnav"><button data-act="mm-prev">‹</button><div class="t">${monthName(ym)}</div><button data-act="mm-next" ${ym >= ymOf(today()) ? 'disabled style="opacity:.3"' : ''}>›</button></div>`;
-  h += `<div class="card"><div class="muted small">Остаток за месяц</div><div class="big-num" style="color:${bal >= 0 ? '#86efac' : '#fca5a5'}">${bal >= 0 ? '' : '−'}${money(Math.abs(bal))}</div>
-    <div class="grid3" style="margin-top:12px"><div><div class="muted tiny">Доход</div><b class="in-c">+${money(m.inc)}</b></div><div><div class="muted tiny">Расход</div><b class="out-c">−${money(m.out)}</b></div><div><div class="muted tiny">В копилку</div><b class="save-c">${money(m.save)}</b></div></div>
-    ${m.inc ? `<div class="muted tiny" style="margin-top:10px">Откладываешь ${Math.round(m.save / m.inc * 100)}% дохода · цель 20%+</div>` : ''}</div>`;
-  h += `<div class="card trip"><span class="em-bg">🏝️</span><div class="muted small">Фонд отдыха</div><div class="row between" style="margin:4px 0 10px"><b style="font-size:18px">${esc(g.tripName)}</b><span class="save-c" style="font-weight:800">${Math.round(g.fundTarget ? fund / g.fundTarget * 100 : 0)}%</span></div>
-    <div class="bar"><i style="width:${g.fundTarget ? clamp(fund / g.fundTarget * 100, 0, 100) : 0}%;background:linear-gradient(90deg,#f5b942,#34d399)"></i></div>
-    <div class="row between small" style="margin-top:8px"><span>${money(fund)}</span><span class="muted">из ${money(g.fundTarget)}</span></div></div>`;
-  h += `<div class="grid3" style="margin-bottom:14px"><button class="btn" data-act="add-in" style="color:#86efac">+ Доход</button><button class="btn" data-act="add-out" style="color:#fca5a5">− Расход</button><button class="btn" data-act="add-save" style="color:var(--gold2)">🏝 Отложить</button></div>`;
+  const ym = ui.moneyMonth, m = moneyStats(ym), g = S.goals, fund = fundTotal(), t = today(), bal = m.inc - m.out - m.save;
+  let h = `<div class="top"><div><div class="sub">${monthName(ym)}</div><h1>Деньги</h1></div><div class="daynav"><button data-act="mm-prev">‹</button><button data-act="mm-next" ${ym >= ymOf(t) ? 'disabled' : ''}>›</button></div></div>`;
+  if (ym === ymOf(t)) h += `<div class="box" style="margin-top:12px"><div class="row between"><div><div class="sub">Сегодня потратил</div><div class="big">${money(sum(moneyOn(t).filter(x => x.type === 'out'), x => x.amount))}</div></div><button class="btn dark" data-act="add-out">+ Трата</button></div></div>`;
+  h += `<div class="box"><div class="grid3"><div><div class="sub tiny">Доход</div><div class="b" style="color:var(--green)">${money(m.inc)}</div></div><div><div class="sub tiny">Расход</div><div class="b">${money(m.out)}</div></div><div><div class="sub tiny">Отложено</div><div class="b" style="color:var(--blue)">${money(m.save)}</div></div></div>
+    <div class="row between" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)"><span class="sub">Остаток за месяц</span><span class="b" style="color:${bal >= 0 ? 'var(--green)' : 'var(--red)'}">${bal < 0 ? '−' : ''}${money(Math.abs(bal))}</span></div></div>
+    <div class="grid2" style="margin-bottom:10px"><button class="btn" data-act="add-in">+ Доход</button><button class="btn" data-act="add-save">Отложить на отдых</button></div>
+    <div class="box"><div class="row between"><div><div class="sub">Фонд отдыха · ${esc(g.tripName)}</div><div class="b" style="font-size:20px">${money(fund)} <span class="sub small" style="font-weight:500">из ${money(g.fundTarget)}</span></div></div><span class="b">${Math.round(g.fundTarget ? fund / g.fundTarget * 100 : 0)}%</span></div><div class="bar" style="margin-top:10px"><i style="width:${g.fundTarget ? clamp(fund / g.fundTarget * 100, 0, 100) : 0}%;background:var(--blue)"></i></div></div>`;
   const byCat = {}; m.list.filter(x => x.type === 'out').forEach(x => byCat[x.cat] = (byCat[x.cat] || 0) + +x.amount);
   const cats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
-  if (cats.length) {
-    h += `<div class="sec-title"><span>Куда ушли деньги</span></div><div class="card">` + cats.map(([c, v]) => {
-      const em = MONEY_CATS.out.find(x => x[1] === c)?.[0] || '•';
-      return `<div class="hrow"><div style="font-size:18px">${em}</div><div><div class="nm"><span>${esc(c)}</span><span>${money(v)}</span></div><div class="bar"><i style="width:${v / cats[0][1] * 100}%;background:#fb7185"></i></div></div><span class="muted tiny" style="text-align:right">${Math.round(v / m.out * 100)}%</span></div>`;
-    }).join('') + `</div>`;
-  }
+  if (cats.length) h += `<h3>Куда уходят деньги</h3><div class="box">${cats.map(([c, v]) => `<div class="hrow"><span>${MONEY_CATS.out.find(x => x[1] === c)?.[0] || '•'}</span><div><div class="nm"><span>${esc(c)}</span><span>${money(v)}</span></div><div class="bar" style="height:6px"><i style="width:${v / cats[0][1] * 100}%"></i></div></div><span class="sub tiny">${Math.round(v / m.out * 100)}%</span></div>`).join('')}</div>`;
   const list = [...m.list].sort((a, b) => a.date === b.date ? b.u - a.u : a.date < b.date ? 1 : -1);
-  h += `<div class="sec-title"><span>Записи</span><span class="pct muted">${list.length}</span></div><div class="card">${list.length ? list.map(x => {
-    const em = MONEY_CATS[x.type]?.find(c => c[1] === x.cat)?.[0] || '•';
-    return `<div class="tx"><div class="e">${em}</div><div class="grow" style="flex:1;min-width:0"><b>${esc(x.cat)}</b><div class="muted tiny">${dayTitle(x.date)}${x.note ? ' · ' + esc(x.note) : ''}</div></div><span class="a ${x.type}-c">${x.type === 'in' ? '+' : x.type === 'out' ? '−' : ''}${money(x.amount)}</span><button class="dim" data-act="del-money" data-id="${x.id}" style="padding:6px">✕</button></div>`;
-  }).join('') : '<div class="empty">Записывай каждый доход и расход — привычка «Записал расходы» отметится сама.</div>'}</div>`;
-  return h;
+  return h + `<h3>Все записи <span>${list.length}</span></h3>${list.length ? `<div class="list">${list.map(txRow).join('')}</div>` : '<div class="empty">Записей пока нет.</div>'}`;
 }
-function openMoneyAdd(type, date = today(), after) {
-  let t = type, cat = MONEY_CATS[type][0][1];
-  const catsHtml = () => MONEY_CATS[t].map(([e, n]) => `<button data-c="${esc(n)}" class="${n === cat ? 'on' : ''}">${e} ${esc(n)}</button>`).join('');
-  openSheet(`<h2>Новая запись</h2>
-    <div class="seg field" id="m-type"><button data-t="in" class="${t === 'in' ? 'on' : ''}">Доход</button><button data-t="out" class="${t === 'out' ? 'on' : ''}">Расход</button><button data-t="save" class="${t === 'save' ? 'on' : ''}">Отложить</button></div>
-    <div class="field"><label>Сумма, ${esc(S.settings.currency)}</label><input id="m-amt" type="number" inputmode="decimal" placeholder="0" style="font-size:24px;font-weight:800"></div>
-    <div class="field"><label>Категория</label><div class="cats" id="m-cats">${catsHtml()}</div></div>
+function openMoneyAdd(type, date = today()) {
+  const t = type; let cat = MONEY_CATS[type][0][1];
+  openSheet(`<h2>${{ out: 'Трата', in: 'Доход', save: 'Отложить' }[t]}</h2>
+    <div class="field"><label>Сумма</label><input id="m-amt" type="number" inputmode="decimal" placeholder="0 ${esc(S.settings.currency)}" style="font-size:28px;font-weight:700"></div>
+    <div class="field"><label>${t === 'out' ? 'На что?' : 'Откуда / куда'}</label><div class="opts" id="m-cats">${MONEY_CATS[t].map(([e, n]) => `<button data-c="${esc(n)}" class="${n === cat ? 'on' : ''}">${e} ${esc(n)}</button>`).join('')}</div></div>
     <div class="grid2"><div class="field"><label>Дата</label><input id="m-date" type="date" value="${date}" max="${today()}"></div><div class="field"><label>Заметка</label><input id="m-note" placeholder="необязательно"></div></div>
-    <button class="btn primary block" id="m-save">Сохранить</button>`, root => {
-    const amt = root.querySelector('#m-amt'); setTimeout(() => amt.focus(), 300);
-    root.querySelector('#m-type').onclick = e => { const b = e.target.closest('[data-t]'); if (!b) return; t = b.dataset.t; cat = MONEY_CATS[t][0][1]; root.querySelectorAll('#m-type button').forEach(x => x.classList.toggle('on', x === b)); root.querySelector('#m-cats').innerHTML = catsHtml(); };
+    <button class="btn dark block" id="m-save">Сохранить</button>`, root => {
+    const amt = root.querySelector('#m-amt'); setTimeout(() => amt.focus(), 260);
     root.querySelector('#m-cats').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; cat = b.dataset.c; root.querySelectorAll('#m-cats button').forEach(x => x.classList.toggle('on', x === b)); };
     root.querySelector('#m-save').onclick = () => {
       const a = parseFloat(String(amt.value).replace(',', '.'));
-      if (!(a > 0)) { toast('Введи сумму'); return; }
-      const d = root.querySelector('#m-date').value || today();
-      S.money.push({ id: uid(), u: now(), type: t, amount: a, cat, date: d, note: root.querySelector('#m-note').value.trim() });
-      const firstToday = S.money.filter(m => !m.del && m.date === d).length === 1;
-      save(); closeSheet(); render();
-      toast(t === 'save' ? `🏝 +${money(a)} в фонд отдыха` : firstToday ? '🧾 Записано · привычка отмечена +5 XP' : '🧾 Записано');
-      if (t === 'save' && fundTotal() >= S.goals.fundTarget && fundTotal() - a < S.goals.fundTarget) celebrate('🏝 Фонд отдыха собран!');
-      after && setTimeout(after, 350);
+      if (!(a > 0)) return toast('Введи сумму');
+      S.money.push({ id: uid(), u: now(), type: t, amount: a, cat, date: root.querySelector('#m-date').value || today(), note: root.querySelector('#m-note').value.trim() });
+      save(); closeSheet(); render(); toast(t === 'save' ? `+${money(a)} в фонд отдыха` : 'Записано');
     };
   });
 }
 
-/* ============ REWARDS ============ */
-function viewRewards() {
-  const c = coins(), ym = ymOf(today()), gg = grandGoal(ym);
-  let h = `<div class="card" style="text-align:center;background:radial-gradient(400px 180px at 50% 0,rgba(245,185,66,.18),transparent),var(--card)">
-    <div class="muted small">Твои монеты</div><div class="big-num" style="color:var(--gold2);font-size:38px">🪙 ${c.toLocaleString('ru-RU')}</div>
-    <div class="muted tiny">1 XP = 1 монета · трать на награды, которые заслужил</div></div>`;
-  h += `<div class="card trip"><span class="em-bg">✈️</span><div class="muted small">Главная награда · ${MONTHS[+ym.slice(5) - 1]}</div>
-    <div class="h-font" style="font-size:18px;margin:4px 0 10px">${gg.done ? '🎉 ' : ''}${esc(S.goals.tripName)}</div>
-    <div class="bar" style="margin-bottom:10px"><i style="width:${gg.p * 100}%;background:linear-gradient(90deg,#f5b942,#34d399)"></i></div>
-    ${gg.conds.map(x => `<div class="cond ${x.met ? 'met' : ''}"><span class="ok">${x.met ? '✓' : ''}</span><span style="flex:1">${esc(x.t)}</span><b class="small">${esc(x.v)}</b></div>`).join('')}
-    <div class="small" style="margin-top:10px;color:${gg.done ? '#86efac' : 'var(--muted)'}">${gg.done ? 'Все условия выполнены — ты заслужил отдых. Езжай с чистой совестью! 🏝' : 'Выполни все 4 условия в этом месяце — и отдых заслужен.'}</div></div>`;
-  h += `<div class="sec-title"><span>Магазин наград</span><button class="btn sm" data-act="rw-add">+ Своя</button></div><div class="shop">`;
-  for (const r of S.rewards.filter(x => !x.del).sort((a, b) => a.cost - b.cost)) {
-    const can = c >= r.cost, times = S.purchases.filter(p => !p.del && p.rid === r.id).length;
-    h += `<div class="rw ${can ? '' : 'locked'}"><div class="row between"><span class="em">${r.icon}</span><button class="dim small" data-act="rw-edit" data-id="${r.id}">✎</button></div><b>${esc(r.name)}</b><span class="cost">🪙 ${r.cost.toLocaleString('ru-RU')}${times ? ` <span class="muted tiny">· взято ${times}×</span>` : ''}</span>
-      ${can ? `<button class="btn sm primary" data-act="buy" data-id="${r.id}">Забрать</button>` : `<div class="bar"><i style="width:${c / r.cost * 100}%;background:var(--gold)"></i></div><span class="muted tiny">ещё ${(r.cost - c).toLocaleString('ru-RU')}</span>`}</div>`;
+/* ============ ИТОГИ ============ */
+function viewStats() {
+  return `<h1>Итоги</h1><div class="seg" style="margin-top:12px">${[['month', 'Месяц'], ['analysis', 'Анализ'], ['rewards', 'Награды']].map(([k, n]) => `<button data-act="seg" data-v="${k}" class="${ui.statsSeg === k ? 'on' : ''}">${n}</button>`).join('')}</div>`
+    + ({ month: viewMonth, analysis: viewAnalysis, rewards: viewRewards })[ui.statsSeg]();
+}
+function deltaTxt(a, b) {
+  if (a == null || b == null) return '<span class="dim tiny">—</span>';
+  const d = a - b; if (!d) return '<span class="dim tiny">=</span>';
+  return `<span class="${d > 0 ? 'up' : 'down'} tiny">${d > 0 ? '▲ +' : '▼ '}${d}</span>`;
+}
+function viewMonth() {
+  const ym = ui.month, prev = addMonth(ym, -1), ms = monthStats(ym), pm = monthStats(prev), delta = ms && pm ? ms.avg - pm.avg : null;
+  let h = `<div class="row between" style="margin-bottom:10px"><b style="font-size:18px;text-transform:capitalize">${monthName(ym)}</b><div class="daynav"><button data-act="m-prev" ${ym <= ymOf(startDate()) ? 'disabled' : ''}>‹</button><button data-act="m-next" ${ym >= ymOf(today()) ? 'disabled' : ''}>›</button></div></div>
+    <div class="box"><div class="row between"><div><div class="sub">Средний балл</div><div class="big">${ms ? ms.avg + '%' : '—'}</div></div><div style="text-align:right">${delta == null ? '<span class="sub small">сравнение появится<br>в следующем месяце</span>' : delta > 0 ? `<span class="tag good" style="font-size:14px">▲ Прогресс +${delta}%</span>` : delta < 0 ? `<span class="tag bad" style="font-size:14px">▼ Регресс ${delta}%</span>` : '<span class="tag">без изменений</span>'}${pm ? `<div class="sub tiny" style="margin-top:4px">прошлый месяц ${pm.avg}%</div>` : ''}</div></div>
+    <div class="grid3" style="margin-top:14px"><div><div class="sub tiny">Хороших дней</div><b>${ms?.good ?? 0} из ${ms?.n ?? 0}</b></div><div><div class="sub tiny">Лучшая серия</div><b>${ms?.best ?? 0} дн.</b></div><div><div class="sub tiny">Отчётов</div><b>${ms?.closed ?? 0}</b></div></div></div>`;
+  const off = (parse(ym + '-01').getDay() + 6) % 7, n = daysIn(ym);
+  let cal = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(x => `<div class="wd">${x}</div>`).join('') + '<div></div>'.repeat(off);
+  for (let i = 1; i <= n; i++) {
+    const d = `${ym}-${pad(i)}`, s = dayScore(d), fut = d > today() || d < startDate(), fg = s == null ? '' : s >= 50 && s < 70 ? '#713f12' : '#fff';
+    cal += `<button class="c ${fut ? 'fut' : ''} ${d === today() ? 'today' : ''}" ${fut ? 'disabled' : `data-act="open-day" data-d="${d}"`} style="${s != null ? `background:${scoreColor(s)};color:${fg}` : ''}">${i}${dayObj(d).r?.closed ? '<span class="r"></span>' : ''}</button>`;
   }
-  h += `</div><div class="sec-title"><span>Достижения</span></div><div class="ach">${achievements().map(a => `<div class="a ${a.on ? 'on' : ''}"><div class="em">${a.e}</div><b>${a.t}</b><span>${a.d}</span></div>`).join('')}</div>`;
+  h += `<div class="box"><div class="cal">${cal}</div><div class="legend"><span><i style="background:var(--s1)"></i>до 30%</span><span><i style="background:var(--s2)"></i>30–49</span><span><i style="background:var(--s3)"></i>50–69</span><span><i style="background:var(--s4)"></i>70–89</span><span><i style="background:var(--s5)"></i>90+</span><span>• отчёт</span></div></div>
+    <h3>По дням <span class="tiny" style="text-transform:none">— этот, ┄ прошлый</span></h3><div class="box">${lineChart(ym, prev)}</div>
+    <h3>Сферы жизни <span class="tiny" style="text-transform:none">к прошлому месяцу</span></h3><div class="box">`;
+  for (const [cid, c] of Object.entries(CATS)) { const a = monthStats(ym, cid)?.avg, b = monthStats(prev, cid)?.avg; h += `<div class="hrow"><span class="dot" style="background:${c.color}"></span><div><div class="nm"><span>${c.name}</span><span>${a ?? '—'}%</span></div><div class="bar" style="height:6px"><i style="width:${a || 0}%;background:${scoreColor(a)}"></i></div></div>${deltaTxt(a, b)}</div>`; }
+  h += `</div><h3>Каждое дело</h3><div class="box">`;
+  for (const x of habits()) { const a = habitMonthPct(x, ym), b = habitMonthPct(x, prev); h += `<div class="hrow"><span>${x.icon}</span><div><div class="nm"><span>${esc(x.name)}</span><span>${a ?? '—'}%</span></div><div class="bar" style="height:6px"><i style="width:${a || 0}%;background:${scoreColor(a)}"></i></div></div>${deltaTxt(a, b)}</div>`; }
+  h += `</div>`;
+  const reps = Object.entries(S.days).filter(([d, o]) => d.startsWith(ym) && o?.r?.closed).sort((a, b) => a[0] < b[0] ? 1 : -1);
+  return h + `<h3>Отчёты</h3>${reps.length ? `<div class="list">${reps.map(([d, o]) => `<button class="item" data-act="open-report" data-d="${d}"><span class="ic">${o.r.mood || '📝'}</span><span class="grow"><div class="t">${dayTitle(d)} · ${o.r.rate}/10</div><div class="s" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(o.r.wins || o.r.fix || '—')}</div></span><span class="dot" style="width:10px;height:10px;background:${scoreColor(dayScore(d))}"></span></button>`).join('')}</div>` : '<div class="empty">Закрывай каждый день отчётом — здесь будет история.</div>'}`;
+}
+function lineChart(ym, prev) {
+  const W = 320, H = 120, P = 6, n = daysIn(ym), x = i => P + (i - 1) * (W - 2 * P) / (n - 1), y = v => H - 16 - v / 100 * (H - 26);
+  const pts = (m, len) => { const a = []; for (let i = 1; i <= len; i++) { const s = dayScore(`${m}-${pad(i)}`); if (s != null) a.push([i, s]); } return a; };
+  const cur = pts(ym, n), pv = pts(prev, Math.min(n, daysIn(prev)));
+  if (!cur.length) return '<div class="empty">Появится после первого дня</div>';
+  const path = a => a.map((p, i) => `${i ? 'L' : 'M'}${x(p[0]).toFixed(1)},${y(p[1]).toFixed(1)}`).join('');
+  let g = '';
+  for (const v of [0, 50, 100]) g += `<line x1="${P}" x2="${W - P}" y1="${y(v)}" y2="${y(v)}" stroke="#e4e4e9"/><text x="${W - P}" y="${y(v) - 3}" fill="#a3a3ad" font-size="9" text-anchor="end">${v}%</text>`;
+  if (pv.length > 1) g += `<path d="${path(pv)}" fill="none" stroke="#c9c9d1" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+  if (cur.length > 1) g += `<path d="${path(cur)}" fill="none" stroke="#111114" stroke-width="2" stroke-linejoin="round"/>`;
+  g += cur.map(p => `<circle cx="${x(p[0])}" cy="${y(p[1])}" r="3.2" fill="${scoreHex(p[1])}" stroke="#fff" stroke-width="1.2"/>`).join('');
+  for (const i of [1, 10, 20, n]) g += `<text x="${x(i)}" y="${H - 2}" fill="#a3a3ad" font-size="9" text-anchor="middle">${i}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="font-family:inherit">${g}</svg>`;
+}
+
+/* ============ АНАЛИЗ — приложение изучает тебя ============ */
+function collectStats(days) {
+  const to = today(); let from = addDays(to, -(days - 1)); if (from < startDate()) from = startDate();
+  const dates = []; for (let d = from; d <= to; d = addDays(d, 1)) dates.push(d);
+  const n = dates.length, meals = S.meals.filter(m => !m.del && m.date >= from && m.date <= to), norm = kcalNorm();
+  const fedDays = dates.filter(d => mealsOn(d).length), kcalByDay = fedDays.map(d => sum(mealsOn(d), m => m.kcal));
+  const items = meals.flatMap(m => m.items || []), badCount = {};
+  items.filter(i => i.verdict === 'bad').forEach(i => badCount[i.name] = (badCount[i.name] || 0) + 1);
+  const kAll = sum(items, i => i.kcal), kBad = sum(items.filter(i => i.verdict === 'bad'), i => i.kcal);
+  const outMeals = meals.filter(m => m.place !== 'home');
+  const water = dates.map(d => +dayObj(d).h?.water || 0);
+  const spendList = S.money.filter(m => !m.del && m.type === 'out' && m.date >= from && m.date <= to), byCat = {};
+  spendList.forEach(m => byCat[m.cat] = (byCat[m.cat] || 0) + +m.amount);
+  const scores = dates.map(d => dayScore(d) ?? 0);
+  const by = id => { const h = S.habits.find(x => x.id === id && !x.del); if (!h) return null; const w = [], wo = []; dates.forEach((d, i) => (frac(h, d) >= 1 ? w : wo).push(scores[i])); return w.length && wo.length ? [Math.round(sum(w) / w.length), Math.round(sum(wo) / wo.length), w.length] : null; };
+  const wd = {}; dates.forEach((d, i) => (wd[parse(d).getDay()] = wd[parse(d).getDay()] || []).push(scores[i]));
+  return {
+    from, to, n, norm, avgK: kcalByDay.length ? Math.round(sum(kcalByDay) / kcalByDay.length) : null, overDays: kcalByDay.filter(k => k > norm * 1.1).length, fedDays: fedDays.length,
+    topBad: Object.entries(badCount).sort((a, b) => b[1] - a[1]).slice(0, 4), badShare: kAll ? Math.round(kBad / kAll * 100) : null,
+    outMeals: outMeals.length, outCost: sum(outMeals, m => m.cost), noBreakfast: fedDays.filter(d => !mealsOn(d).some(m => m.meal === 'breakfast')).length,
+    lateMeals: meals.filter(m => m.time && m.time >= '21:30').length, avgW: sum(water) / n * .25, waterGoal: waterGoalMl() / 1000,
+    spend: sum(spendList, m => m.amount), byCat, avgScore: Math.round(sum(scores) / n), sport: by('sport'), sleep: by('sleep'), namaz: by('namaz'),
+    wdAvg: Object.entries(wd).map(([k, a]) => [+k, Math.round(sum(a) / a.length)]).sort((a, b) => b[1] - a[1]),
+    habitsPct: habits().map(h => [h.name, habitPct(h, from, to)]).filter(x => x[1] != null),
+    reports: dates.map(d => dayObj(d).r).filter(r => r?.closed), meals: meals.length,
+  };
+}
+function viewAnalysis() {
+  const s = collectStats(ui.period), L = [];
+  const add = (e, t) => L.push(`<div class="insight"><span class="e">${e}</span><div class="small">${t}</div></div>`);
+  if (s.meals) {
+    if (s.avgK != null) add('🔥', `В среднем <b>${num(s.avgK)} ккал</b> в день при норме ${num(s.norm)}. ${s.overDays ? `Перебор был в <b>${s.overDays}</b> из ${s.fedDays} дн.` : 'Перебора не было 👍'}`);
+    if (s.badShare != null) add(s.badShare > 30 ? '🔴' : '🟢', `Вредная еда — <b>${s.badShare}%</b> калорий.${s.topBad.length ? ` Чаще всего: ${s.topBad.map(([n, c]) => `${esc(n)} (${c}×)`).join(', ')}.` : ''}`);
+    if (s.outMeals) add('🍽️', `Ел вне дома <b>${s.outMeals} раз</b> и потратил <b>${money(s.outCost)}</b> — это ~${money(s.outCost / s.n * 30)} в месяц. Готовя дома, большую часть можно отложить на отдых.`);
+    if (s.noBreakfast) add('🍳', `Пропускал завтрак <b>${s.noBreakfast}</b> из ${s.fedDays} дн. Без завтрака чаще переедаешь вечером.`);
+    if (s.lateMeals) add('🌙', `Ел поздно (после 21:30) — <b>${s.lateMeals} раз</b>.`);
+  } else add('🥗', 'Записывай еду — и здесь появятся калории, вредная еда и сколько уходит на кафе.');
+  add('💧', `Вода: в среднем <b>${s.avgW.toFixed(1).replace('.', ',')} л</b> в день, цель — ${String(s.waterGoal).replace('.', ',')} л.`);
+  if (s.spend) add('🧾', `Потрачено <b>${money(s.spend)}</b>. Больше всего: ${Object.entries(s.byCat).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([c, v]) => `${esc(c)} ${money(v)}`).join(', ')}.`);
+  if (s.sport) add('🏃', `В дни со спортом балл дня <b>${s.sport[0]}%</b>, без спорта — ${s.sport[1]}%.`);
+  if (s.sleep) add('😴', `Когда ложишься до 23:00, балл дня <b>${s.sleep[0]}%</b>, иначе — ${s.sleep[1]}%.`);
+  if (s.wdAvg.length > 2) add('📅', `Лучший день недели — <b>${WD[s.wdAvg[0][0]]}</b> (${s.wdAvg[0][1]}%), самый слабый — <b>${WD[s.wdAvg.at(-1)[0]]}</b> (${s.wdAvg.at(-1)[1]}%).`);
+  const weak = [...s.habitsPct].sort((a, b) => a[1] - b[1]).slice(0, 3);
+  if (weak.length) add('🎯', `Слабее всего: ${weak.map(([n, v]) => `${esc(n)} — ${v}%`).join(', ')}.`);
+  if (s.reports.length) add('📝', `Отчётов: ${s.reports.length} из ${s.n}, средняя оценка дня <b>${(sum(s.reports, r => r.rate) / s.reports.length).toFixed(1).replace('.', ',')}</b>.`);
+  const ins = S.insight;
+  let h = `<div class="seg">${[[7, '7 дней'], [30, '30 дней']].map(([k, n]) => `<button data-act="period" data-v="${k}" class="${ui.period === k ? 'on' : ''}">${n}</button>`).join('')}</div>
+    <div class="box" style="padding:4px 2px"><div class="insight"><span class="e">📊</span><div><div class="b">Средний балл ${s.avgScore}%</div><div class="sub tiny">${dayTitle(s.from)} — ${dayTitle(s.to)}</div></div></div>${L.join('')}</div>
+    <h3>Разбор от ИИ</h3>`;
+  if (ins?.data) h += `<div class="box"><div class="sub tiny" style="margin-bottom:6px">${new Date(ins.at).toLocaleDateString('ru-RU')} · за ${ins.days} дн.</div><div class="small" style="margin-bottom:8px">${esc(ins.data.summary)}</div>${(ins.data.points || []).map(x => `<div style="padding:8px 0;border-top:1px solid var(--line)"><span class="tag ${x.kind === 'good' ? 'good' : x.kind === 'bad' ? 'bad' : 'warn'}">${esc(x.title)}</span><div class="small" style="margin-top:4px">${esc(x.text)}</div></div>`).join('')}<div style="padding-top:10px;border-top:1px solid var(--line)"><div class="sub tiny">Главное на неделю</div><div class="b">${esc(ins.data.focus)}</div></div></div>`;
+  return h + `<button class="btn dark block" data-act="ai-review">${ins?.data ? 'Обновить разбор' : 'Разобрать мои привычки'}</button><div class="sub tiny" style="text-align:center;margin-top:6px">ИИ смотрит на цифры за выбранный период и находит, что мешает</div>`;
+}
+async function runReview() {
+  const s = collectStats(ui.period);
+  const payload = { период_дней: s.n, средний_балл: s.avgScore, норма_ккал: s.norm, средние_ккал: s.avgK, дней_с_перебором: s.overDays, дней_с_записью_еды: s.fedDays, доля_вредной_еды_процент: s.badShare, частая_вредная_еда: s.topBad, раз_ел_вне_дома: s.outMeals, потрачено_на_еду_вне_дома: s.outCost, пропуски_завтрака: s.noBreakfast, поздние_приёмы_пищи: s.lateMeals, вода_литров_в_день: +s.avgW.toFixed(2), цель_воды_литров: s.waterGoal, траты_всего: s.spend, траты_по_категориям: s.byCat, балл_со_спортом_и_без: s.sport, балл_со_сном_до_23_и_без: s.sleep, балл_с_намазами_и_без: s.namaz, дни_недели_средний_балл: s.wdAvg.map(([k, v]) => [WD[k], v]), выполнение_дел_процент: s.habitsPct, отчёты: s.reports.slice(-10).map(r => ({ оценка: r.rate, получилось: (r.wins || '').slice(0, 120), улучшить: (r.fix || '').slice(0, 120) })), валюта: S.settings.currency };
+  openSheet(`<div style="text-align:center;padding:30px 0"><span class="spin"></span><div class="sub" style="margin-top:12px">Изучаю твои данные…</div></div>`);
+  try {
+    const r = await fetch('/api/review', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+    if (!r.ok) throw new Error(r.status === 503 ? 'ИИ на сервере пока не подключён' : 'Сервер ответил ' + r.status);
+    S.insight = { u: now(), at: now(), days: ui.period, data: await r.json() };
+    save(); closeSheet(); render();
+  } catch (e) { closeSheet(); toast(e.message || 'Нет связи с сервером'); }
+}
+
+/* ============ НАГРАДЫ ============ */
+function viewRewards() {
+  const c = coins(), gg = grandGoal(ymOf(today()));
+  let h = `<div class="box"><div class="sub">Монеты</div><div class="big">${num(c)}</div><div class="sub tiny">Зарабатываешь за дела: 1 XP = 1 монета</div></div>
+    <h3>Главная награда месяца</h3><div class="box"><div class="row between"><b style="font-size:18px">${esc(S.goals.tripName)}</b><span class="tag ${gg.done ? 'good' : ''}">${gg.n}/4</span></div>
+    <div style="margin-top:8px">${gg.conds.map(x => `<div class="row" style="padding:8px 0;border-top:1px solid var(--line)"><span class="chk ${x.met ? 'on' : ''}" style="width:22px;height:22px;font-size:12px">${x.met ? '✓' : ''}</span><span class="grow small">${esc(x.t)}</span><span class="small b">${esc(x.v)}</span></div>`).join('')}</div>
+    <div class="sub small" style="margin-top:8px">${gg.done ? '✓ Все условия выполнены — отдых заслужен!' : 'Выполни все 4 условия в этом месяце — и отдых заслужен.'}</div></div>
+    <h3>Награды <button class="btn sm" data-act="rw-add">+ Своя</button></h3><div class="list">`;
+  for (const r of S.rewards.filter(x => !x.del).sort((a, b) => a.cost - b.cost)) {
+    const can = c >= r.cost;
+    h += `<div class="item"><span class="ic">${r.icon}</span><span class="grow"><div class="t">${esc(r.name)}</div><div class="s">${num(r.cost)} монет${can ? '' : ` · ещё ${num(r.cost - c)}`}</div></span>${can ? `<button class="btn sm green" data-act="buy" data-id="${r.id}">Взять</button>` : ''}<button class="dim" data-act="rw-edit" data-id="${r.id}" style="padding:4px" aria-label="Изменить">✎</button></div>`;
+  }
+  h += `</div><h3>Достижения</h3><div class="list">${achievements().map(([e, t, on]) => `<div class="item" style="${on ? '' : 'opacity:.45'}"><span class="ic">${e}</span><span class="grow t">${t}</span>${on ? '<span class="tag good">есть</span>' : ''}</div>`).join('')}</div>`;
   const ps = S.purchases.filter(p => !p.del).sort((a, b) => b.u - a.u).slice(0, 10);
-  if (ps.length) h += `<div class="sec-title"><span>История наград</span></div><div class="card">${ps.map(p => `<div class="list-item"><span style="font-size:20px">${p.icon}</span><div class="grow"><b>${esc(p.name)}</b><div class="muted tiny">${dayTitle(p.date)}</div></div><span class="muted small">−${p.cost}</span><button class="dim" data-act="unbuy" data-id="${p.id}" title="Отменить">↺</button></div>`).join('')}</div>`;
+  if (ps.length) h += `<h3>История</h3><div class="list">${ps.map(p => `<div class="item"><span class="ic">${p.icon}</span><span class="grow"><div class="t">${esc(p.name)}</div><div class="s">${dayTitle(p.date)} · −${num(p.cost)}</div></span><button class="dim small" data-act="unbuy" data-id="${p.id}">отменить</button></div>`).join('')}</div>`;
   return h;
 }
 function openRewardEdit(id) {
   const r = id ? S.rewards.find(x => x.id === id) : { icon: '🎁', name: '', cost: 1000 };
   openSheet(`<h2>${id ? 'Награда' : 'Новая награда'}</h2>
-    <div class="grid2" style="grid-template-columns:80px 1fr"><div class="field"><label>Иконка</label><input id="w-i" value="${esc(r.icon)}" maxlength="4" style="text-align:center;font-size:22px"></div><div class="field"><label>Название</label><input id="w-n" value="${esc(r.name)}" placeholder="Например: новая кофта"></div></div>
-    <div class="field"><label>Цена в монетах (идеальный день ≈ 290)</label><input id="w-c" type="number" inputmode="numeric" value="${r.cost}"></div>
-    <button class="btn primary block" id="w-s">Сохранить</button>${id ? '<button class="btn danger block" id="w-d" style="margin-top:8px">Удалить</button>' : ''}`, root => {
+    <div class="grid2" style="grid-template-columns:72px 1fr"><div class="field"><label>Значок</label><input id="w-i" value="${esc(r.icon)}" maxlength="4" style="text-align:center"></div><div class="field"><label>Что это</label><input id="w-n" value="${esc(r.name)}" placeholder="Например: новые кроссовки"></div></div>
+    <div class="field"><label>Цена в монетах <small>— хороший день ≈ 250</small></label><input id="w-c" type="number" inputmode="numeric" value="${r.cost}"></div>
+    <button class="btn dark block" id="w-s">Сохранить</button>${id ? '<button class="btn red block" id="w-d" style="margin-top:8px">Удалить</button>' : ''}`, root => {
     root.querySelector('#w-s').onclick = () => {
-      const name = root.querySelector('#w-n').value.trim(), cost = Math.round(+root.querySelector('#w-c').value);
+      const name = root.querySelector('#w-n').value.trim(), cost = Math.round(+root.querySelector('#w-c').value), icon = root.querySelector('#w-i').value.trim() || '🎁';
       if (!name || !(cost > 0)) return toast('Заполни название и цену');
-      if (id) Object.assign(r, { name, cost, icon: root.querySelector('#w-i').value.trim() || '🎁', u: now() });
-      else S.rewards.push({ id: uid(), u: now(), name, cost, icon: root.querySelector('#w-i').value.trim() || '🎁' });
+      if (id) Object.assign(r, { name, cost, icon, u: now() }); else S.rewards.push({ id: uid(), u: now(), name, cost, icon });
       save(); closeSheet(); render();
     };
     if (id) root.querySelector('#w-d').onclick = () => { r.del = true; r.u = now(); save(); closeSheet(); render(); };
   });
 }
 
-/* ============ MORE / SETTINGS ============ */
+/* ============ ЕЩЁ ============ */
 const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+function installNote() {
+  if (isIOS()) return `<div class="note"><b>Установи на iPhone:</b> открой сайт в Safari → кнопка «Поделиться» → «На экран Домой». Открывай приложение с иконки — так будут приходить уведомления.</div>`;
+  return `<div class="note"><b>Установи на ноутбук:</b> в Chrome или Edge — значок установки в адресной строке (или меню ⋮ → «Установить приложение»). В Safari на Mac: Файл → «Добавить в Dock».${deferredInstall ? '<br><button class="btn sm dark" data-act="install" style="margin-top:8px">Установить</button>' : ''}</div>`;
+}
 function viewMore() {
-  const pushOn = lsGet(LS_PUSH) === '1';
-  let h = '';
-  if (!isStandalone()) h += installBanner();
-  const cb = currentBook();
-  h += `<div class="sec-title"><span>📗 Книга месяца</span><button class="btn sm" data-act="book-add">+ Книга</button></div><div class="card">`;
+  const pushOn = lsGet(LS_PUSH) === '1', b = S.body;
+  let h = `<h1>Ещё</h1><div style="height:10px"></div>`;
+  if (!isStandalone()) h += installNote();
+  h += `<h3>Уведомления</h3><div class="list"><div class="item"><span class="grow"><div class="t">Напоминания на это устройство</div><div class="s">${pushOn ? 'Включены — придут, даже если приложение закрыто' : isIOS() && !isStandalone() ? 'Сначала установи на экран «Домой»' : 'Выключены'}</div></span><button class="switch ${pushOn ? 'on' : ''}" data-act="push-toggle" aria-label="Уведомления"></button></div>
+    ${S.reminders.filter(r => !r.del).sort((a, b) => a.time < b.time ? -1 : 1).map(r => `<div class="item"><b style="width:52px;flex:none">${r.time}</b><span class="grow" data-act="rem-edit" data-id="${r.id}" role="button"><div class="t small">${esc(r.title)}</div><div class="s" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.body)}</div></span><button class="switch ${r.on ? 'on' : ''}" data-act="rem-toggle" data-id="${r.id}" aria-label="Вкл/выкл"></button></div>`).join('')}</div>
+    <div class="row" style="gap:8px"><button class="btn sm" data-act="rem-add">+ Напоминание</button>${pushOn ? '<button class="btn sm" data-act="push-test">Проверить</button>' : ''}</div>
+    <h3>Книга месяца <button class="btn sm" data-act="book-add">+ Книга</button></h3>`;
   const bl = booksAll();
-  h += bl.length ? bl.slice(0, 6).map(b => { const p = bookProgress(b); return `<div class="list-item"><span style="font-size:22px">${b.finished ? '📗' : '📖'}</span><div class="grow"><b>${esc(b.title)}</b><div class="bar" style="margin:6px 0 4px;height:7px"><i style="width:${p / b.pages * 100}%;background:var(--mind)"></i></div><span class="muted tiny">${p}/${b.pages} стр · ${b.finished ? 'прочитана ' + dayTitle(b.finished) : 'с ' + dayTitle(b.start)}</span></div><button class="dim" data-act="book-edit" data-id="${b.id}">✎</button></div>`; }).join('')
-    : '<div class="empty">Добавь книгу, которую читаешь в этом месяце. Страницы из привычки «Чтение» будут засчитываться в неё.</div>';
-  h += `</div>`;
-  h += `<div class="sec-title"><span>🔔 Уведомления</span></div><div class="card">
-    <div class="list-item"><div class="grow"><b>Напоминания на это устройство</b><div class="muted tiny">${pushOn ? 'Включены · придут даже если приложение закрыто' : isIOS() && !isStandalone() ? 'Сначала установи приложение на экран «Домой»' : 'Выключены'}</div></div><button class="switch ${pushOn ? 'on' : ''}" data-act="push-toggle"></button></div>
-    ${S.reminders.filter(r => !r.del).sort((a, b) => a.time < b.time ? -1 : 1).map(r => `<div class="list-item"><b style="font-size:17px;width:56px">${r.time}</b><div class="grow" data-act="rem-edit" data-id="${r.id}" role="button"><b class="small">${esc(r.title)}</b><div class="muted tiny" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.body)}${r.onlyIfNoReport ? ' · если нет отчёта' : ''}</div></div><button class="switch ${r.on ? 'on' : ''}" data-act="rem-toggle" data-id="${r.id}"></button></div>`).join('')}
-    <div class="row" style="margin-top:10px;gap:8px"><button class="btn sm" data-act="rem-add">+ Напоминание</button>${pushOn ? '<button class="btn sm" data-act="push-test">Проверить</button>' : ''}</div></div>`;
-  h += `<div class="sec-title"><span>✅ Мои привычки</span><button class="btn sm" data-act="hab-add">+ Привычка</button></div><div class="card">`;
+  h += bl.length ? `<div class="list">${bl.slice(0, 6).map(x => { const p = bookProgress(x); return `<button class="item" data-act="book-edit" data-id="${x.id}"><span class="ic">${x.finished ? '📗' : '📖'}</span><span class="grow"><div class="t">${esc(x.title)}</div><div class="bar" style="margin:6px 0 4px;height:5px"><i style="width:${p / x.pages * 100}%;background:var(--mind)"></i></div><div class="s">${p} из ${x.pages} стр${x.finished ? ' · прочитана' : ''}</div></span></button>`; }).join('')}</div>` : '<div class="box sub small">Добавь книгу, которую читаешь. Страницы из «Чтения» будут считаться сами.</div>';
+  h += `<h3>Тело</h3><div class="list"><button class="item" data-act="body"><span class="ic">⚖️</span><span class="grow"><div class="t">${b?.weight ? `${b.weight} кг · ${b.height} см · ${b.age} лет` : 'Рост и вес не указаны'}</div><div class="s">Норма ${num(kcalNorm())} ккал, вода ${liters(waterGoalMl() / 250)} л</div></span><span class="dim">›</span></button></div>
+    <h3>Мои дела <button class="btn sm" data-act="hab-add">+ Дело</button></h3>`;
   for (const [cid, c] of Object.entries(CATS)) {
     const hs = habits().filter(x => x.cat === cid); if (!hs.length) continue;
-    h += `<div class="muted tiny" style="margin:8px 0 0;font-weight:800;color:${c.color}">${c.name.toUpperCase()}</div>` + hs.map(x => `<div class="list-item" data-act="hab-edit" data-id="${x.id}" role="button"><span style="font-size:20px">${x.icon}</span><div class="grow"><b class="small">${esc(x.name)}</b><div class="muted tiny">${{ check: 'галочка', count: `счётчик · цель ${x.target} ${esc(x.unit || '')}`, multi: x.labels?.join(' · '), auto: 'авто' }[x.type]} · ${x.xp} XP</div></div><span class="dim">›</span></div>`).join('');
+    h += `<div class="sub tiny" style="margin:10px 4px 6px;font-weight:650;color:${c.color}">${c.name}</div><div class="list">${hs.map(x => `<button class="item" data-act="hab-edit" data-id="${x.id}"><span class="ic">${x.icon}</span><span class="grow"><div class="t small">${esc(x.name)}</div><div class="s">${{ check: 'галочка', count: `цель ${x.target} ${esc(x.unit || '')}`, multi: (x.labels || []).join(' · '), auto: 'отмечается само', food: 'по записям еды' }[x.type]} · ${x.xp} XP</div></span><span class="dim">›</span></button>`).join('')}</div>`;
   }
-  h += `</div>`;
   const g = S.goals;
-  h += `<div class="sec-title"><span>🎯 Цели и профиль</span></div><div class="card">
+  return h + `<h3>Цели</h3><div class="box">
     <div class="field"><label>Имя</label><input id="s-name" value="${esc(S.profile.name)}"></div>
-    <div class="field"><label>Главная награда месяца (куда поедешь)</label><input id="s-trip" value="${esc(g.tripName)}"></div>
-    <div class="grid2"><div class="field"><label>Фонд отдыха, ${esc(S.settings.currency)}</label><input id="s-fund" type="number" inputmode="numeric" value="${g.fundTarget}"></div><div class="field"><label>Цель месяца, %</label><input id="s-score" type="number" inputmode="numeric" value="${g.monthScore}"></div></div>
-    <div class="grid2"><div class="field"><label>Намаз, % дней</label><input id="s-namaz" type="number" inputmode="numeric" value="${g.namazPct}"></div><div class="field"><label>Валюта</label><input id="s-cur" value="${esc(S.settings.currency)}" maxlength="4"></div></div>
-    <button class="btn primary block" data-act="save-goals">Сохранить</button></div>`;
-  h += `<div class="sec-title"><span>☁️ Ноутбук + iPhone</span></div><div class="card">
-    <div class="small" style="margin-bottom:10px">Данные сохраняются в облако. Чтобы видеть тот же прогресс на другом устройстве — открой там приложение и введи этот код:</div>
-    <div class="code" id="s-code">${esc(syncKey())}</div>
-    <div class="grid2" style="margin-top:10px"><button class="btn sm" data-act="copy-code">Скопировать код</button><button class="btn sm" data-act="link-device">Ввести код</button></div>
-    <div class="muted tiny" style="margin-top:8px">Никому не показывай код — по нему открываются твои данные.</div></div>`;
-  h += `<div class="sec-title"><span>💾 Данные</span></div><div class="card"><div class="grid2"><button class="btn sm" data-act="export">Скачать копию</button><button class="btn sm" data-act="import">Загрузить копию</button></div>
-    <div class="muted tiny" style="margin-top:10px">Ведёшь с ${dayTitle(startDate())} · всего XP ${totalXP().toLocaleString('ru-RU')} · книг ${booksDone().length}</div></div>
-    <div style="text-align:center;margin:22px 0 4px" class="dim tiny">Истикама — «стойкость на прямом пути» 🤍</div>`;
-  return h;
-}
-function installBanner() {
-  if (isIOS()) return `<div class="banner"><b>📲 Установи на iPhone</b><div style="margin-top:6px">Открой этот сайт в <b>Safari</b> → нажми <b>Поделиться</b> <span style="font-size:17px">⎋</span> → <b>«На экран Домой»</b>. Потом открывай Истикаму с иконки — так будут приходить уведомления.</div></div>`;
-  return `<div class="banner"><b>💻 Установи на ноутбук</b><div style="margin-top:6px">В Chrome/Edge нажми значок установки ⊕ в адресной строке (или меню ⋮ → «Установить приложение»). В Safari на Mac: Файл → «Добавить в Dock».</div>${deferredInstall ? '<button class="btn sm primary" data-act="install" style="margin-top:10px">Установить</button>' : ''}</div>`;
+    <div class="field"><label>Куда поедешь отдыхать</label><input id="s-trip" value="${esc(g.tripName)}"></div>
+    <div class="grid2"><div class="field"><label>Накопить</label><input id="s-fund" type="number" inputmode="numeric" value="${g.fundTarget}"></div><div class="field"><label>Валюта</label><input id="s-cur" value="${esc(S.settings.currency)}" maxlength="4"></div></div>
+    <div class="grid2"><div class="field"><label>Цель месяца, %</label><input id="s-score" type="number" inputmode="numeric" value="${g.monthScore}"></div><div class="field"><label>Намаз, % дней</label><input id="s-namaz" type="number" inputmode="numeric" value="${g.namazPct}"></div></div>
+    <button class="btn dark block" data-act="save-goals">Сохранить</button></div>
+    <h3>Ноутбук и iPhone</h3><div class="box"><div class="small" style="margin-bottom:10px">Чтобы видеть те же данные на другом устройстве, открой там приложение и введи этот код:</div><div class="code">${esc(syncKey())}</div>
+    <div class="grid2" style="margin-top:10px"><button class="btn sm line" data-act="copy-code">Скопировать</button><button class="btn sm line" data-act="link-device">Ввести код</button></div><div class="sub tiny" style="margin-top:8px">Не показывай код другим людям. Синхронизация<span class="sync"></span></div></div>
+    <h3>Копия данных</h3><div class="grid2"><button class="btn sm" data-act="export">Скачать</button><button class="btn sm" data-act="import">Загрузить</button></div>
+    <p class="sub tiny" style="text-align:center;margin-top:24px">Истикама — стойкость на прямом пути</p>`;
 }
 function openHabitEdit(id) {
   const x = id ? S.habits.find(h => h.id === id) : { icon: '⭐', name: '', cat: 'body', type: 'check', xp: 10, target: 10, unit: '', labels: [] };
-  openSheet(`<h2>${id ? 'Привычка' : 'Новая привычка'}</h2>
-    <div class="grid2" style="grid-template-columns:80px 1fr"><div class="field"><label>Иконка</label><input id="h-i" value="${esc(x.icon)}" maxlength="4" style="text-align:center;font-size:22px"></div><div class="field"><label>Название</label><input id="h-n" value="${esc(x.name)}" placeholder="Например: без сахара"></div></div>
-    <div class="field"><label>Сфера</label><select id="h-c">${Object.entries(CATS).map(([k, c]) => `<option value="${k}" ${x.cat === k ? 'selected' : ''}>${c.icon} ${c.name}</option>`).join('')}</select></div>
-    ${x.type === 'auto' ? '' : `<div class="field"><label>Тип</label><select id="h-t"><option value="check" ${x.type === 'check' ? 'selected' : ''}>Галочка (сделал / нет)</option><option value="count" ${x.type === 'count' ? 'selected' : ''}>Счётчик (страницы, стаканы…)</option><option value="multi" ${x.type === 'multi' ? 'selected' : ''}>Несколько отметок (утро, обед…)</option></select></div>
-    <div class="grid2" id="h-cnt"><div class="field"><label>Цель в день</label><input id="h-tg" type="number" value="${x.target || 10}"></div><div class="field"><label>Единица</label><input id="h-u" value="${esc(x.unit || '')}" placeholder="стр, мин…"></div></div>
+  const fixed = x.type === 'auto' || x.type === 'food';
+  openSheet(`<h2>${id ? 'Дело' : 'Новое дело'}</h2>
+    <div class="grid2" style="grid-template-columns:72px 1fr"><div class="field"><label>Значок</label><input id="h-i" value="${esc(x.icon)}" maxlength="4" style="text-align:center"></div><div class="field"><label>Название</label><input id="h-n" value="${esc(x.name)}" placeholder="Например: без сахара"></div></div>
+    <div class="field"><label>Сфера</label><select id="h-c">${Object.entries(CATS).map(([k, c]) => `<option value="${k}" ${x.cat === k ? 'selected' : ''}>${c.name}</option>`).join('')}</select></div>
+    ${fixed ? '' : `<div class="field"><label>Как отмечать</label><select id="h-t"><option value="check" ${x.type === 'check' ? 'selected' : ''}>Галочка — сделал или нет</option><option value="count" ${x.type === 'count' ? 'selected' : ''}>Число — страницы, стаканы, минуты</option><option value="multi" ${x.type === 'multi' ? 'selected' : ''}>Несколько отметок — утро, вечер…</option></select></div>
+    <div class="grid2" id="h-cnt"><div class="field"><label>Цель в день</label><input id="h-tg" type="number" value="${x.target || 10}"></div><div class="field"><label>Единица</label><input id="h-u" value="${esc(x.unit || '')}" placeholder="стр, мин"></div></div>
     <div class="field" id="h-mul"><label>Отметки через запятую</label><input id="h-l" value="${esc((x.labels || []).join(', '))}" placeholder="Утро, Обед, Вечер"></div>`}
-    <div class="field"><label>Важность (XP за выполнение)</label><input id="h-x" type="number" inputmode="numeric" value="${x.xp}"></div>
-    <button class="btn primary block" id="h-s">Сохранить</button>${id ? '<button class="btn danger block" id="h-d" style="margin-top:8px">Удалить привычку</button><div class="muted tiny" style="margin-top:6px;text-align:center">История прошлых дней сохранится</div>' : ''}`, root => {
+    <div class="field"><label>Важность <small>— сколько XP даёт</small></label><input id="h-x" type="number" inputmode="numeric" value="${x.xp}"></div>
+    <button class="btn dark block" id="h-s">Сохранить</button>${id ? '<button class="btn red block" id="h-d" style="margin-top:8px">Удалить</button>' : ''}`, root => {
     const tSel = root.querySelector('#h-t');
-    const sync = () => { if (!tSel) return; root.querySelector('#h-cnt').style.display = tSel.value === 'count' ? '' : 'none'; root.querySelector('#h-mul').style.display = tSel.value === 'multi' ? '' : 'none'; };
-    tSel && (tSel.onchange = sync); sync();
+    const upd = () => { if (!tSel) return; root.querySelector('#h-cnt').style.display = tSel.value === 'count' ? '' : 'none'; root.querySelector('#h-mul').style.display = tSel.value === 'multi' ? '' : 'none'; };
+    if (tSel) tSel.onchange = upd; upd();
     root.querySelector('#h-s').onclick = () => {
       const name = root.querySelector('#h-n').value.trim(); if (!name) return toast('Название?');
       const o = { name, icon: root.querySelector('#h-i').value.trim() || '⭐', cat: root.querySelector('#h-c').value, xp: Math.max(1, Math.round(+root.querySelector('#h-x').value || 10)), u: now() };
@@ -900,9 +971,9 @@ function openHabitEdit(id) {
         if (o.type === 'multi') { o.labels = root.querySelector('#h-l').value.split(',').map(s => s.trim()).filter(Boolean).slice(0, 8); if (o.labels.length < 2) return toast('Нужно минимум 2 отметки'); }
       }
       if (id) Object.assign(x, o); else S.habits.push({ id: uid(), from: today(), o: S.habits.length, ...o });
-      save(); closeSheet(); render(); toast('Сохранено');
+      save(); closeSheet(); render();
     };
-    if (id) root.querySelector('#h-d').onclick = () => { if (!confirm('Удалить привычку «' + x.name + '»?')) return; x.del = true; x.delAt = today(); x.u = now(); save(); closeSheet(); render(); };
+    if (id) root.querySelector('#h-d').onclick = () => { if (!confirm(`Удалить «${x.name}»? История сохранится.`)) return; x.del = true; x.delAt = today(); x.u = now(); save(); closeSheet(); render(); };
   });
 }
 function openReminderEdit(id) {
@@ -911,8 +982,8 @@ function openReminderEdit(id) {
     <div class="field"><label>Время</label><input id="n-t" type="time" value="${r.time}"></div>
     <div class="field"><label>Заголовок</label><input id="n-ti" value="${esc(r.title)}" placeholder="Например: Аср 🕌"></div>
     <div class="field"><label>Текст</label><input id="n-b" value="${esc(r.body)}" placeholder="Время намаза"></div>
-    <div class="list-item"><div class="grow small">Только если отчёт дня ещё не сдан</div><button class="switch ${r.onlyIfNoReport ? 'on' : ''}" id="n-o"></button></div>
-    <button class="btn primary block" id="n-s" style="margin-top:12px">Сохранить</button>${id ? '<button class="btn danger block" id="n-d" style="margin-top:8px">Удалить</button>' : ''}`, root => {
+    <div class="row" style="padding:6px 0"><span class="grow small">Только если отчёт дня ещё не сдан</span><button class="switch ${r.onlyIfNoReport ? 'on' : ''}" id="n-o"></button></div>
+    <button class="btn dark block" id="n-s" style="margin-top:12px">Сохранить</button>${id ? '<button class="btn red block" id="n-d" style="margin-top:8px">Удалить</button>' : ''}`, root => {
     let only = !!r.onlyIfNoReport;
     root.querySelector('#n-o').onclick = e => { only = !only; e.currentTarget.classList.toggle('on', only); };
     root.querySelector('#n-s').onclick = () => {
@@ -924,18 +995,16 @@ function openReminderEdit(id) {
   });
 }
 function openBookEdit(id) {
-  const b = id ? S.books.find(x => x.id === id) : { title: '', pages: 250, offset: 0, start: today() };
+  const b = id ? S.books.find(x => x.id === id) : { title: '', pages: 250, offset: 0 };
   openSheet(`<h2>${id ? 'Книга' : 'Книга месяца'}</h2>
     <div class="field"><label>Название</label><input id="b-t" value="${esc(b.title)}" placeholder="Например: Атомные привычки"></div>
     <div class="grid2"><div class="field"><label>Страниц всего</label><input id="b-p" type="number" inputmode="numeric" value="${b.pages}"></div><div class="field"><label>Уже прочитано</label><input id="b-o" type="number" inputmode="numeric" value="${b.offset || 0}"></div></div>
-    <div class="muted tiny" style="margin-bottom:12px">Дальше страницы из привычки «Чтение книги» добавляются сами.</div>
-    <button class="btn primary block" id="b-s">Сохранить</button>${id ? '<button class="btn danger block" id="b-d" style="margin-top:8px">Удалить</button>' : ''}`, root => {
+    <button class="btn dark block" id="b-s">Сохранить</button>${id ? '<button class="btn red block" id="b-d" style="margin-top:8px">Удалить</button>' : ''}`, root => {
     root.querySelector('#b-s').onclick = () => {
       const title = root.querySelector('#b-t').value.trim(), pages = Math.round(+root.querySelector('#b-p').value);
       if (!title || !(pages > 0)) return toast('Название и страницы?');
       const o = { title, pages, offset: Math.max(0, Math.round(+root.querySelector('#b-o').value || 0)), u: now() };
-      if (id) { Object.assign(b, o); if (b.finished && bookProgress({ ...b, finished: null }) < b.pages) b.finished = null; }
-      else S.books.push({ id: uid(), start: today(), ...o });
+      if (id) { Object.assign(b, o); if (b.finished && bookProgress({ ...b, finished: null }) < b.pages) b.finished = null; } else S.books.push({ id: uid(), start: today(), ...o });
       checkBooks(); save(); closeSheet(); render();
     };
     if (id) root.querySelector('#b-d').onclick = () => { b.del = true; b.u = now(); save(); closeSheet(); render(); };
@@ -945,41 +1014,55 @@ function openBookEdit(id) {
 /* ============ push ============ */
 function urlB64(b) { const p = '='.repeat((4 - b.length % 4) % 4); const r = atob((b + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from([...r].map(c => c.charCodeAt(0))); }
 async function pushEnable() {
-  if (isIOS() && !isStandalone()) { openSheet(`<h2>Сначала установи приложение</h2>${installBanner()}<div class="small muted">iPhone присылает уведомления только приложениям, добавленным на экран «Домой» (iOS 16.4+).</div>`); return; }
-  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) { toast('Этот браузер не поддерживает уведомления'); return; }
-  const perm = await Notification.requestPermission();
-  if (perm !== 'granted') { toast('Разреши уведомления в настройках'); return; }
+  if (isIOS() && !isStandalone()) { openSheet(`<h2>Сначала установи приложение</h2>${installNote()}<div class="sub small">iPhone присылает уведомления только приложениям на экране «Домой» (iOS 16.4 и новее).</div>`); return; }
+  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return toast('Этот браузер не поддерживает уведомления');
+  if (await Notification.requestPermission() !== 'granted') return toast('Разреши уведомления в настройках');
   try {
     const reg = await navigator.serviceWorker.ready;
     const { key } = await (await fetch('/api/push')).json();
-    if (!key) throw new Error('Сервер уведомлений не настроен');
+    if (!key) throw new Error('сервер уведомлений не настроен');
     let sub = await reg.pushManager.getSubscription();
     if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64(key) });
-    await pushSave(sub);
-    lsSet(LS_PUSH, '1'); render();
-    celebrate('🔔 Уведомления включены!');
+    await pushSave(sub); lsSet(LS_PUSH, '1'); render(); toast('Уведомления включены');
   } catch (e) { toast('Не получилось: ' + (e.message || e)); }
 }
 async function pushSave(sub) {
-  const reminders = S.reminders.filter(r => r.on && !r.del).map(({ id, time, title, body, onlyIfNoReport }) => ({ id, time, title, body, onlyIfNoReport }));
+  const reminders = S.reminders.filter(r => r.on && !r.del).map(({ id, time, title, body, onlyIfNoReport, open }) => ({ id, time, title, body, onlyIfNoReport, open }));
   const r = await fetch('/api/push', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'save', device: deviceId(), sub: sub.toJSON(), tz: Intl.DateTimeFormat().resolvedOptions().timeZone, reminders, key: syncKey() }) });
   if (!r.ok) throw new Error('сервер ответил ' + r.status);
 }
 async function pushResave() {
   if (lsGet(LS_PUSH) !== '1' || !('serviceWorker' in navigator)) return;
-  try { const reg = await navigator.serviceWorker.ready; const sub = await reg.pushManager.getSubscription(); if (sub) await pushSave(sub); else { lsSet(LS_PUSH, '0'); } } catch {}
+  try { const reg = await navigator.serviceWorker.ready; const sub = await reg.pushManager.getSubscription(); if (sub) await pushSave(sub); else lsSet(LS_PUSH, '0'); } catch {}
 }
 async function pushDisable() {
   try { await fetch('/api/push', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'off', device: deviceId() }) }); const reg = await navigator.serviceWorker.ready; (await reg.pushManager.getSubscription())?.unsubscribe(); } catch {}
   lsSet(LS_PUSH, '0'); render(); toast('Уведомления выключены');
 }
 
-/* ============ global actions ============ */
+/* ============ действия ============ */
 $('#app').addEventListener('click', async e => {
   const el = e.target.closest('[data-act]'); if (!el || el.disabled) return;
-  const a = el.dataset.act, id = el.dataset.id;
-  if (['tog','inc','dec','multi','day-prev','day-next','report','go-money'].includes(a)) return onTodayAction(a, el);
+  const a = el.dataset.act, id = el.dataset.id, d = ui.day;
+  const cur = id ? dayObj(d).h?.[id] : null, hb = id ? S.habits.find(x => x.id === id) : null;
   switch (a) {
+    case 'tog': if (!cur) vibrate(); setVal(id, !cur); break;
+    case 'inc': vibrate(); setVal(id, (+cur || 0) + (hb.target >= 20 ? 5 : 1)); break;
+    case 'dec': setVal(id, Math.max(0, (+cur || 0) - (hb.target >= 20 ? 5 : 1))); break;
+    case 'multi': { const arr = Array.isArray(cur) ? [...cur] : []; arr[+el.dataset.i] = !arr[+el.dataset.i]; if (arr[+el.dataset.i]) vibrate(); setVal(id, arr); break; }
+    case 'day-prev': ui.day = addDays(d, -1); render(); break;
+    case 'day-next': ui.day = addDays(d, 1); render(); break;
+    case 'report': openReport(d); break;
+    case 'go-food': ui.tab = 'food'; render(); scrollTo(0, 0); break;
+    case 'food-add': openFoodAdd(el.dataset.arg || null, d); break;
+    case 'meal-open': openMeal(id); break;
+    case 'water-ask': openWaterAsk(d); break;
+    case 'pages-ask': openPagesAsk(d); break;
+    case 'spend-ask': openSpendAsk(d); break;
+    case 'body': openBody(); break;
+    case 'seg': ui.statsSeg = el.dataset.v; render(); break;
+    case 'period': ui.period = +el.dataset.v; render(); break;
+    case 'ai-review': runReview(); break;
     case 'm-prev': ui.month = addMonth(ui.month, -1); render(); break;
     case 'm-next': ui.month = addMonth(ui.month, 1); render(); break;
     case 'open-day': ui.day = el.dataset.d; ui.tab = 'today'; render(); scrollTo(0, 0); break;
@@ -989,14 +1072,12 @@ $('#app').addEventListener('click', async e => {
     case 'add-in': openMoneyAdd('in'); break;
     case 'add-out': openMoneyAdd('out'); break;
     case 'add-save': openMoneyAdd('save'); break;
-    case 'del-money': { const m = S.money.find(x => x.id === id); if (m && confirm('Удалить запись?')) { m.del = true; m.u = now(); save(); render(); } break; }
+    case 'del-money': delMoney(id); render(); break;
     case 'buy': {
-      const r = S.rewards.find(x => x.id === id); if (!r || coins() < r.cost) return;
-      if (!confirm(`Забрать награду «${r.name}» за ${r.cost} монет?`)) return;
-      S.purchases.push({ id: uid(), u: now(), rid: r.id, name: r.name, icon: r.icon, cost: r.cost, date: today() });
-      save(); render(); celebrate(`${r.icon} Награда твоя! Ты её заслужил.`); break;
+      const r = S.rewards.find(x => x.id === id); if (!r || coins() < r.cost || !confirm(`Взять «${r.name}» за ${num(r.cost)} монет?`)) return;
+      S.purchases.push({ id: uid(), u: now(), rid: r.id, name: r.name, icon: r.icon, cost: r.cost, date: today() }); save(); render(); toast('Награда твоя — ты её заслужил'); break;
     }
-    case 'unbuy': { const p = S.purchases.find(x => x.id === id); if (p && confirm('Вернуть монеты за эту награду?')) { p.del = true; p.u = now(); save(); render(); } break; }
+    case 'unbuy': { const p = S.purchases.find(x => x.id === id); if (p && confirm('Вернуть монеты?')) { p.del = true; p.u = now(); save(); render(); } break; }
     case 'rw-add': openRewardEdit(); break;
     case 'rw-edit': openRewardEdit(id); break;
     case 'hab-add': openHabitEdit(); break;
@@ -1005,7 +1086,7 @@ $('#app').addEventListener('click', async e => {
     case 'rem-edit': openReminderEdit(id); break;
     case 'rem-toggle': { const r = S.reminders.find(x => x.id === id); r.on = !r.on; r.u = now(); save(); pushResave(); render(); break; }
     case 'push-toggle': lsGet(LS_PUSH) === '1' ? pushDisable() : pushEnable(); break;
-    case 'push-test': { const r = await fetch('/api/push', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'test', device: deviceId() }) }); toast(r.ok ? 'Отправлено — смотри уведомление' : 'Ошибка отправки, включи уведомления заново'); break; }
+    case 'push-test': { const r = await fetch('/api/push', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'test', device: deviceId() }) }); toast(r.ok ? 'Отправлено — смотри уведомление' : 'Ошибка — включи уведомления заново'); break; }
     case 'book-add': openBookEdit(); break;
     case 'book-edit': openBookEdit(id); break;
     case 'install': deferredInstall?.prompt(); break;
@@ -1014,100 +1095,91 @@ $('#app').addEventListener('click', async e => {
       S.profile = { ...S.profile, name: v('#s-name').trim() || S.profile.name, u: now() };
       S.goals = { ...S.goals, tripName: v('#s-trip').trim() || S.goals.tripName, fundTarget: Math.max(0, +v('#s-fund') || 0), monthScore: clamp(+v('#s-score') || 80, 10, 100), namazPct: clamp(+v('#s-namaz') || 90, 10, 100), u: now() };
       S.settings = { ...S.settings, currency: v('#s-cur').trim() || '₸', u: now() };
-      save(); render(); toast('Сохранено ✓'); break;
+      save(); render(); toast('Сохранено'); break;
     }
     case 'copy-code': try { await navigator.clipboard.writeText(syncKey()); toast('Код скопирован'); } catch { toast('Выдели код и скопируй вручную'); } break;
     case 'link-device': openLink(); break;
-    case 'export': {
-      const blob = new Blob([JSON.stringify(S, null, 1)], { type: 'application/json' });
-      const a2 = document.createElement('a'); a2.href = URL.createObjectURL(blob); a2.download = `istiqama-${today()}.json`; a2.click(); break;
-    }
+    case 'export': { const blob = new Blob([JSON.stringify(S)], { type: 'application/json' }); const l = document.createElement('a'); l.href = URL.createObjectURL(blob); l.download = `istiqama-${today()}.json`; l.click(); break; }
     case 'import': {
       const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
-      inp.onchange = async () => { try { const d = JSON.parse(await inp.files[0].text()); if (d.v !== 1) throw 0; S = mergeState(S, d); save(); render(); toast('Копия загружена ✓'); } catch { toast('Не тот файл'); } };
+      inp.onchange = async () => { try { const x = JSON.parse(await inp.files[0].text()); if (x.v !== 1) throw 0; S = mergeState(S, normalize(x)); save(); render(); toast('Копия загружена'); } catch { toast('Не тот файл'); } };
       inp.click(); break;
     }
   }
 });
-function openLink(prefill = '') {
-  openSheet(`<h2>Подключить устройство</h2><div class="small" style="margin-bottom:12px">Введи код с другого устройства (Ещё → Ноутбук + iPhone). Данные этого устройства заменятся данными из облака.</div>
-    <div class="field"><input id="l-k" placeholder="Код синхронизации" value="${esc(prefill)}" autocapitalize="off" autocorrect="off" spellcheck="false" style="font-family:ui-monospace,monospace"></div>
-    <button class="btn primary block" id="l-s">Подключить</button>`, root => {
+function openLink() {
+  openSheet(`<h2>Подключить устройство</h2><div class="sub small" style="margin-bottom:12px">Введи код с другого устройства (Ещё → Ноутбук и iPhone). Данные на этом устройстве заменятся данными из облака.</div>
+    <div class="field"><input id="l-k" placeholder="Код" autocapitalize="off" autocorrect="off" spellcheck="false" style="font-family:ui-monospace,monospace"></div>
+    <button class="btn dark block" id="l-s">Подключить</button>`, root => {
     root.querySelector('#l-s').onclick = async () => {
       const k = root.querySelector('#l-k').value.trim();
       if (!/^[A-Za-z0-9-]{16,64}$/.test(k)) return toast('Код неверный');
       try {
-        const r = await fetch('/api/sync', { headers: { 'x-sync-key': k } }); const { data } = await r.json();
+        const { data } = await (await fetch('/api/sync', { headers: { 'x-sync-key': k } })).json();
         if (!data) return toast('По этому коду данных нет');
-        lsSet(LS_KEY, k); S = data; persist(); closeSheet(); ui.tab = 'today'; render(); pushResave();
-        celebrate('☁️ Устройства связаны!');
+        lsSet(LS_KEY, k); S = normalize(data); persist(); closeSheet(); ui.tab = 'today'; render(); pushResave(); toast('Устройства связаны');
       } catch { toast('Нет связи с сервером'); }
     };
   });
 }
 
-/* ============ sheet, toast, confetti ============ */
-let sheetCleanup = null;
+/* ============ окно снизу, уведомление ============ */
+let sheetGen = 0;
 function openSheet(html, mount) {
-  const root = $('#sheet-root');
-  root.innerHTML = `<div class="sheet-bg"></div><div class="sheet" role="dialog"><div class="grab"></div>${html}</div>`;
-  root.querySelector('.sheet-bg').onclick = closeSheet;
-  requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add('show')));
+  const root = $('#sheet-root'), gen = ++sheetGen; root.classList.remove('show');
+  root.innerHTML = `<div class="bg"></div><div class="sheet" role="dialog"><div class="grab"></div>${html}</div>`;
+  root.querySelector('.bg').onclick = closeSheet;
+  requestAnimationFrame(() => requestAnimationFrame(() => { if (gen === sheetGen) root.classList.add('show'); }));
   mount && mount(root.querySelector('.sheet'));
 }
-function closeSheet() { const root = $('#sheet-root'); root.classList.remove('show'); setTimeout(() => { if (!root.classList.contains('show')) root.innerHTML = ''; }, 280); }
+function closeSheet() {
+  const root = $('#sheet-root'), gen = ++sheetGen; root.classList.remove('show');
+  setTimeout(() => { if (gen === sheetGen) root.innerHTML = ''; }, 260);
+}
 let toastT;
 function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2600); }
-function celebrate(t) { toast(t); confetti(); try { navigator.vibrate?.([20, 40, 20]); } catch {} }
-function confetti() {
-  const c = $('#fx'), x = c.getContext('2d'), dpr = devicePixelRatio || 1;
-  c.width = innerWidth * dpr; c.height = innerHeight * dpr; x.scale(dpr, dpr);
-  const cols = ['#f5b942','#34d399','#a78bfa','#60a5fa','#fb923c','#ffffff'];
-  const ps = Array.from({ length: 110 }, () => ({ x: innerWidth / 2, y: innerHeight * .35, vx: (Math.random() - .5) * 13, vy: Math.random() * -13 - 3, s: Math.random() * 7 + 4, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: cols[Math.random() * cols.length | 0] }));
-  let f = 0;
-  (function tick() {
-    x.clearRect(0, 0, innerWidth, innerHeight);
-    for (const p of ps) { p.vy += .38; p.x += p.vx; p.y += p.vy; p.vx *= .99; p.r += p.vr; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); x.restore(); }
-    if (++f < 130) requestAnimationFrame(tick); else x.clearRect(0, 0, innerWidth, innerHeight);
-  })();
-}
 
-/* ============ onboarding ============ */
+/* ============ первый запуск ============ */
 function renderOnboarding() {
   $('#tabs').innerHTML = '';
-  $('#app').innerHTML = `<div style="text-align:center;padding:30px 4px 10px">
-    <img src="/icon-192.png" alt="" width="88" height="88" style="border-radius:24px;box-shadow:0 18px 40px -14px rgba(245,185,66,.5)">
-    <h1 class="h-font" style="font-size:30px;margin:18px 0 6px">Истикама</h1>
-    <div class="muted">Игра дисциплины. Иман, тело, разум, деньги —<br>каждый день, с отчётом и наградами.</div></div>
-    <div class="card" style="margin-top:18px">
-      <div class="field"><label>Как тебя зовут?</label><input id="o-name" placeholder="Имя" autocomplete="given-name"></div>
-      <div class="field"><label>📗 Книга этого месяца</label><input id="o-book" placeholder="Название книги"></div>
-      <div class="grid2"><div class="field"><label>Страниц в книге</label><input id="o-pages" type="number" inputmode="numeric" value="250"></div><div class="field"><label>Валюта</label><input id="o-cur" value="₸" maxlength="4"></div></div>
-      <div class="field"><label>🏝 Главная награда — куда хочешь поехать?</label><input id="o-trip" placeholder="Например: Иссык-Куль, Стамбул, Дубай"></div>
-      <div class="field"><label>Сколько нужно накопить на отдых</label><input id="o-fund" type="number" inputmode="numeric" value="300000"></div>
-      <button class="btn primary block" id="o-go" style="margin-top:6px">Начать путь 🔥</button>
-      <button class="btn ghost block small muted" id="o-link" style="margin-top:6px">У меня уже есть код с другого устройства</button>
+  $('#app').innerHTML = `<div style="padding:24px 0 8px"><img src="/icon-192.png" alt="" width="64" height="64" style="border-radius:16px"><h1 style="margin-top:16px">Истикама</h1>
+    <div class="sub">Дисциплина каждый день: намаз, еда, вода, спорт, работа, деньги, книга. Вечером — отчёт, за результат — награды.</div></div>
+    <div style="margin-top:18px">
+      <div class="field"><label>Как тебя зовут?</label><input id="o-name" autocomplete="given-name"></div>
+      <div class="field"><label>Какую книгу читаешь в этом месяце?</label><input id="o-book" placeholder="Название"></div>
+      <div class="grid2"><div class="field"><label>Страниц в ней</label><input id="o-pages" type="number" inputmode="numeric" value="250"></div><div class="field"><label>Валюта</label><input id="o-cur" value="₸" maxlength="4"></div></div>
+      <div class="field"><label>Куда хочешь поехать отдыхать?</label><input id="o-trip" placeholder="Например: Иссык-Куль, Стамбул"></div>
+      <div class="field"><label>Сколько нужно накопить на отдых?</label><input id="o-fund" type="number" inputmode="numeric" value="300000"></div>
+      <button class="btn dark block" id="o-go">Начать</button>
+      <button class="btn block" id="o-link" style="margin-top:8px;background:none;color:var(--muted)">У меня есть код с другого устройства</button>
     </div>`;
   $('#o-go').onclick = () => {
     const name = $('#o-name').value.trim(); if (!name) return toast('Напиши имя');
     S = newState({ name, book: $('#o-book').value.trim(), pages: $('#o-pages').value, currency: $('#o-cur').value.trim(), trip: $('#o-trip').value.trim(), fund: $('#o-fund').value });
-    save(); render(); celebrate(`Бисмиллях, ${name}! Путь начат 🔥`);
+    save(); render(); toast(`Бисмиллях, ${name}! Начинаем`);
+    setTimeout(openBody, 900);
   };
   $('#o-link').onclick = () => openLink();
 }
 
-/* ============ boot ============ */
+/* ============ запуск ============ */
 let deferredInstall = null;
 addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; });
 S = load();
-if (S) syncKey();
 render();
-if (S) { syncPull(); pushResave(); }
-if (new URLSearchParams(location.search).get('open') === 'report' && S) { history.replaceState(null, '', '/'); setTimeout(() => openReport(today()), 300); }
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S) { render(); syncPull(); } });
+if (S) { syncKey(); syncPull(); pushResave(); }
+function handleOpen(what) {
+  if (!S) return;
+  if (what === 'report') setTimeout(() => openReport(today()), 300);
+  if (what === 'food') { ui.tab = 'food'; ui.day = today(); render(); setTimeout(() => openFoodAdd(null, today()), 300); }
+}
+{ const o = new URLSearchParams(location.search).get('open'); if (o) { history.replaceState(null, '', '/'); handleOpen(o); } }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S) { if (!sheetOpen()) render(); syncPull(); } });
 addEventListener('online', () => S && syncPush());
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
-navigator.serviceWorker?.addEventListener('message', e => { if (e.data?.open === 'report' && S) openReport(today()); });
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.addEventListener('message', e => handleOpen(e.data?.open));
+}
 </script>
 </body>
 </html>
