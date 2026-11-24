@@ -579,12 +579,39 @@ async function ask(input,opts={}){if(!cap.sample)throw{code:"unavailable"};retur
 async function askJson(input,opts={}){if(!cap.sample)throw{code:"unavailable"};return cap.sample.json(input,opts)}
 
 /* ---------- speech ---------- */
-async function speak(text,rate,lang="en"){
-  const r=rate??(monthIndex()<4?0.85:1);
-  const opts={rate:r};if(lang)opts.language=lang;
-  if(cap.tts){try{await cap.tts.speak(String(text).slice(0,2000),opts);return}catch(e){if(e&&e.code==="not_granted")cap.tts=null;else return}}
-  return new Promise(res=>{try{const u=new SpeechSynthesisUtterance(text);u.lang=lang==="en"?"en-GB":(/[а-яё]/i.test(text)?"ru-RU":"en-GB");u.rate=r;u.onend=u.onerror=()=>res();speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){toast("Озвучка недоступна в этом браузере");res()}});
+const VOICE={berkut:{tts:"rounded",pitch:.72,rate:.97},sokol:{tts:"glassy",pitch:.92,rate:1},zefir:{tts:"airy",pitch:1.4,rate:.97},den:{tts:"buttery",pitch:1.12,rate:1.06}};
+let speechRate=+(ls.get(LS_KEY+".rate")||1);
+let speechUnlocked=false;
+document.addEventListener("pointerdown",()=>{if(speechUnlocked)return;speechUnlocked=true;try{const u=new SpeechSynthesisUtterance(" ");u.volume=0;speechSynthesis.speak(u)}catch(e){}},{capture:true});
+function speechSegments(text,lang){
+  const t=String(text).replace(/\s+/g," ").trim();if(!t)return[];
+  if(lang)return[{text:t,lang}];
+  const parts=t.match(/[^.!?…]+[.!?…]*["»)]*\s*/g)||[t];const segs=[];
+  for(const p of parts){const cy=(p.match(/[а-яё]/gi)||[]).length,la=(p.match(/[a-z]/gi)||[]).length;const l=cy>=la?"ru":"en";const last=segs[segs.length-1];if(last&&last.lang===l)last.text+=p;else segs.push({text:p,lang:l})}
+  return segs.map(s=>({text:s.text.trim(),lang:s.lang})).filter(s=>s.text);
 }
+function pickVoice(lang,charId){try{const vs=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.toLowerCase().startsWith(lang));if(!vs.length)return null;const pref=lang==="en"?vs.filter(v=>/en[-_](GB|US)/i.test(v.lang)):vs;const pool=pref.length?pref:vs;return pool[Math.max(0,Object.keys(VOICE).indexOf(charId))%pool.length]}catch(e){return null}}
+try{speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>{}}catch(e){}
+async function speak(text,rate,lang="en",charId){
+  const ch=charId||S.profile.char||"berkut",vc=VOICE[ch]||VOICE.berkut;
+  const r=Math.max(.7,Math.min(1.5,(rate??(monthIndex()<4?0.85:1))*vc.rate*speechRate));
+  const segs=speechSegments(String(text).slice(0,2000),lang);if(!segs.length)return;
+  const m=curMascot&&curMascot.svg.isConnected&&(!charId||curMascot.svg.dataset.char===charId)?curMascot:null;
+  if(m)mascotTalk(m,true);
+  try{
+    if(cap.tts){try{await cap.tts.speak(segs.map(s=>({text:s.text.slice(0,2000),voice:vc.tts,language:s.lang})),{rate:r});return}catch(e){if(e&&e.code==="not_granted")cap.tts=null;else return}}
+    await new Promise(res=>{try{speechSynthesis.cancel();let left=segs.length;const done=()=>{if(--left<=0)res()};
+      segs.forEach(s=>{const u=new SpeechSynthesisUtterance(s.text);u.lang=s.lang==="ru"?"ru-RU":"en-GB";const v=pickVoice(s.lang,ch);if(v)u.voice=v;u.pitch=vc.pitch;u.rate=r;u.onend=done;u.onerror=done;speechSynthesis.speak(u)});
+      setTimeout(res,Math.min(90000,3000+String(text).length*95))}catch(e){toast("Озвучка недоступна в этом браузере");res()}});
+  }finally{if(m)mascotTalk(m,false)}
+}
+const QUIPS={
+ berkut:["Ну чё, курсант? Хватит спать — погнали говорить.","Опять без домашки? Шучу. Или нет. Проверю.","Ready for take-off? Тогда жми микрофон, чёрт возьми!","Ещё раз ткнёшь в меня — заставлю учить неправильные глаголы."],
+ sokol:["Good morning. Briefing starts now.","Точность — это безопасность. Повтори правило.","Cleared for practice. Proceed.","Не трогай инструктора. Займись делом."],
+ zefir:["Привет! Давай просто поболтаем?","Ты молодец, правда! Ещё чуть-чуть.","Every day a little better!","Хи-хи, щекотно! Давай лучше учиться."],
+ den:["Yo, bro! What's up?","Чё как? Погнали прокачаем инглиш.","No cap, ты уже лучше, чем вчера.","Бро, хорош тыкать, давай болтать."],
+};
+function talkTap(svg){svg.style.cursor="pointer";svg.addEventListener("click",()=>{const id=svg.dataset.char;const q=QUIPS[id]||QUIPS.berkut;const m=[...mascots].find(x=>x.svg===svg);if(m)mascotFlash(m,"happy",700);if(typeof talkBusy!=="undefined"&&talkBusy)return;stopSpeak();const prev=curMascot;if(m)curMascot=m;speak(q[Math.floor(Math.random()*q.length)],1,null,id).finally(()=>{if(prev&&prev.svg.isConnected)curMascot=prev})})}
 function stopSpeak(){try{cap.tts?.stop()}catch(e){}try{speechSynthesis.cancel()}catch(e){}}
 let dictSink=null,dictPartial=null,dictStateCb=null;
 function bindDictation(){
@@ -1024,7 +1051,7 @@ function viewToday(app){
       <div class="row"><button class="btn white" type="button" data-a="call">${I.phone} Позвонить ${esc(c.short)}</button>${doneN<list.length?`<button class="btn ghost-white" type="button" data-a="next">Продолжить →</button>`:""}</div></section>`);
   hero.querySelector("h1").textContent=greet+"!";hero.querySelector(".gl").textContent=greetLine(doneN,list.length);
   hero.querySelector(".speech").textContent=c.line;
-  hero.querySelector(".hero-char").prepend(mascotEl(S.profile.char,"",true));
+  {const ms=mascotEl(S.profile.char,"",true);talkTap(ms);hero.querySelector(".hero-char").prepend(ms)}
   hero.querySelector('[data-a="call"]').onclick=()=>startCall();
   hero.querySelector('[data-a="next"]')?.addEventListener("click",()=>{const nx=list.find(x=>!d.done.includes(x.id));if(nx)openMission(nx.id)});
   app.append(hero);
@@ -1133,15 +1160,18 @@ function viewTalk(app){
     <div class="ctrls"><button class="iconbtn" type="button" data-a="kb" aria-label="Написать текстом">${I.keyboard}</button><button class="micbig" type="button" data-a="mic" aria-label="Говорить">${I.mic}</button><button class="iconbtn" type="button" data-a="voice" aria-label="Голос учителя" aria-pressed="${voiceOn}">${I.speaker}</button></div>
     <div class="miclabel muted">${cap.dict?"Нажми и говори":"Нажми на клавиатуру и пиши"}</div>
     <form class="composer" ${kbOpen||!cap.dict?"":"hidden"}><input class="field" id="talkInput" autocomplete="off" placeholder="Write in English… (можно по-русски)"><button class="iconbtn send" type="submit" aria-label="Отправить">${I.send}</button></form>
+    <div class="row" style="justify-content:center"><span class="muted" style="font-size:13px;font-weight:700">Скорость голоса</span><div class="seg" role="group" aria-label="Скорость голоса"><button type="button" data-rate="0.8">Медленно</button><button type="button" data-rate="1">Обычно</button><button type="button" data-rate="1.2">Быстро</button></div></div>
     <div class="row" style="justify-content:center"><span class="muted" style="font-size:13px;font-weight:700">Я говорю на</span><div class="seg" role="group" aria-label="Язык микрофона"><button type="button" data-lang="en">English</button><button type="button" data-lang="ru">Русском</button></div></div>
   </section>`);
   stage.querySelector(".stage-name b").textContent=c.name;
-  stage.querySelector(".stage-char").append(mascotEl(S.profile.char,"",true));
+  {const ms=mascotEl(S.profile.char,"",true);talkTap(ms);stage.querySelector(".stage-char").append(ms)}
   const lastT=[...chatState.turns].reverse().find(t=>t.role==="assistant");
   if(lastT){const p=parseReply(lastT.content);stage.querySelector(".b-text").innerHTML=md(p.body);p.fixes.forEach(f=>stage.querySelector(".fixes").append(fixEl(f.wrong,f.right,f.why_ru)))}
   else stage.querySelector(".b-text").innerHTML=md(c.line+"\n\n"+modeHint());
   const lastU=[...chatState.turns].reverse().find(t=>t.role==="user"&&!t.hidden);if(lastU)stage.querySelector(".you").textContent="Ты: "+lastU.content;
   const syncLang=()=>stage.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===talkLang)));
+  const syncRate=()=>stage.querySelectorAll("[data-rate]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.rate===speechRate)));
+  stage.querySelectorAll("[data-rate]").forEach(b=>b.onclick=()=>{speechRate=+b.dataset.rate;ls.set(LS_KEY+".rate",speechRate);syncRate();speakTeacher(QUIPS[S.profile.char][0])});syncRate();
   stage.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{talkLang=b.dataset.lang;ls.set(LS_KEY+".mic",talkLang);syncLang()});syncLang();
   stage.querySelector('[data-a="rep"]').onclick=()=>{const t=[...chatState.turns].reverse().find(t=>t.role==="assistant");speakTeacher(t?parseReply(t.content).body:c.line)};
   stage.querySelector('[data-a="voice"]').onclick=e=>{voiceOn=!voiceOn;ls.set(LS_KEY+".voice",voiceOn);e.currentTarget.setAttribute("aria-pressed",String(voiceOn));if(!voiceOn)stopSpeak();toast(voiceOn?"Учитель говорит вслух":"Голос выключен — только текст")};
@@ -1183,7 +1213,7 @@ function viewTalk(app){
   if(autoStart&&cap.sample){autoStart=false;sendTalk("(Ты сам позвонил ученику голосом. Поздоровайся в своём стиле, коротко спроси про уроки и домашку и начни разговор по сценарию.)",true)}
 }
 function modeHint(){return({free:"Говори со мной о чём угодно — я поправлю ошибки.",atc:"Я диспетчер, ты пилот. Отвечай как в эфире: позывной и readback.",ceo:"Я CEO крупной компании. Продай мне свои услуги дизайна и SMM.",client:"Я клиент. Обсудим бриф, сроки и правки.",exam:"Я экзаменатор IELTS Speaking. Отвечай развёрнуто.",explain:"Спрашивай про любое правило — объясню на примерах."}[chatState.mode]||"")}
-async function speakTeacher(text){if(!text)return;const t=spoken(text);if(!t)return;setStatus("talking");try{await speak(t,monthIndex()<4?0.95:1,null)}finally{if(!talkBusy&&!talkListening)setStatus("idle")}}
+async function speakTeacher(text){if(!text)return;const t=spoken(text);if(!t)return;setStatus("talking");try{await speak(t,monthIndex()<4?0.95:1,null,S.profile.char)}finally{if(!talkBusy&&!talkListening)setStatus("idle")}}
 async function sendTalk(text,hidden){
   chatState.turns.push({role:"user",content:text,hidden});
   if(!hidden){const d=dayRec();d.talk=(d.talk||0)+1;if(d.talk>=TALK_TARGET&&!d.done.includes("talk"))award("talk",25);else persist("profile")}
@@ -1217,7 +1247,7 @@ function viewPicker(app){
   const hero=h(`<section class="pick-hero"><div class="mwrap" style="width:min(220px,58vw)"></div><h1>Учителя с характером</h1><p class="muted" style="margin:0;font-weight:700;font-size:17px">Выбери, кто будет тебя гонять, — и начинай говорить</p></section>`);
   hero.querySelector(".mwrap").append(mascotEl(S.profile.char,"",true));
   app.append(hero);
-  app.append(charCards(id=>{const changed=S.profile.char!==id;S.profile.char=id;S.profile.persona=CHARS[id].persona;S.profile.charChosen=true;persist("profile");if(changed){chatState.turns=[];saveChat()}talkPicker=false;go("teacher")}));
+  app.append(charCards(id=>{const changed=S.profile.char!==id;S.profile.char=id;S.profile.persona=CHARS[id].persona;S.profile.charChosen=true;persist("profile");if(changed){chatState.turns=[];saveChat()}talkPicker=false;go("teacher");setTimeout(()=>speakTeacher(CHARS[id].line),80)}));
 }
 function charCards(onPick,selected){
   const grid=h(`<section class="charcards"></section>`);
@@ -1261,7 +1291,7 @@ function viewOnboarding(app){
         b.querySelector(".eyebrow").textContent=o.eyebrow;b.querySelector(".t").textContent=o.t;b.querySelector("p").textContent=o.d;b.querySelector(".go").textContent=o.go+" →";b.querySelector(".tagb").textContent=o.tag;
         b.append(mascotEl(o.ch,""));b.onclick=()=>{ob.goal=o.v;next()};box.append(b)});
     }else if(st.type==="chars"){
-      box.append(charCards(id=>{S.profile.char=id;S.profile.persona=CHARS[id].persona;S.profile.charChosen=true;next()},S.profile.char||""));
+      box.append(charCards(id=>{speak(CHARS[id].line,1,null,id);S.profile.char=id;S.profile.persona=CHARS[id].persona;S.profile.charChosen=true;next()},S.profile.char||""));
     }else{
       const sel=new Set(st.multi?(ob[st.id]||[]):[]);
       st.opts.forEach(o=>{
