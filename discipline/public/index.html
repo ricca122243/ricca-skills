@@ -221,6 +221,17 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 #sheet-root .sfoot{position:sticky;bottom:0;z-index:3;background:#fff;margin:10px -18px 0;padding:10px 18px calc(var(--safe-b) + 12px);display:grid;gap:8px;box-shadow:0 -10px 14px -12px rgba(0,0,0,.18)}
 #sheet-root .sfoot > *{margin:0 !important}
 #sheet-root .sheet > :last-child:not(.sfoot){margin-bottom:calc(var(--safe-b) + 18px)}
+
+/* ---- v5: плавность ---- */
+#sheet-root .bg{transition:opacity .35s ease}
+#sheet-root .sheet{transition:transform .42s cubic-bezier(.32,.72,0,1),bottom .2s ease;will-change:transform;-webkit-overflow-scrolling:touch}
+#sheet-root .sheet.drag{transition:none}
+.btn,.q,.hcard,.item,.box[data-act],.opts button,.pill,.wd,.chk,.hbtn,nav.tabs button,.bdg .btn{transition:transform .12s ease,background-color .15s ease,opacity .15s ease}
+.btn:active,.q:active,.opts button:active,.pill:active,.wd:active,.hbtn:active,nav.tabs button:active{transform:scale(.95);opacity:1}
+.hcard:active,.item:active,button.box:active{transform:scale(.985)}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#app.fade{animation:fi .22s ease}
+@media (prefers-reduced-motion:reduce){#app.fade{animation:none}#sheet-root .sheet{transition:none}}
 </style>
 </head>
 <body>
@@ -368,7 +379,7 @@ const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 function load() { try { const s = JSON.parse(lsGet(LS)); return s && s.v === 1 ? normalize(s) : null; } catch { return null; } }
 function normalize(s) { for (const k of ['habits','money','rewards','purchases','reminders','books','meals','claims']) s[k] = s[k] || []; s.days = s.days || {}; s.body = s.body || { u: 0, sex: 'm', goal: 'keep', activity: 1.375 }; return s; }
 function persist() { lsSet(LS, JSON.stringify(S)); }
-function save() { S.updatedAt = now(); persist(); queueSync(); }
+function save() { memoReset(); S.updatedAt = now(); persist(); queueSync(); }
 function randKey(n = 24) { const a = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; const r = crypto.getRandomValues(new Uint8Array(n)); return [...r].map(x => a[x % a.length]).join(''); }
 function syncKey() { let k = lsGet(LS_KEY); if (!k) { k = randKey(); lsSet(LS_KEY, k); } return k; }
 function deviceId() { let k = lsGet(LS_DEV); if (!k) { k = 'd-' + randKey(16); lsSet(LS_DEV, k); } return k; }
@@ -449,7 +460,10 @@ const waterGoalMl = () => S.body?.weight ? Math.round(S.body.weight * 30 / 250) 
 
 /* ============ logic ============ */
 const habits = () => S.habits.filter(h => !h.del).sort((a, b) => (a.o ?? 0) - (b.o ?? 0));
-const habitsOn = d => S.habits.filter(h => (!h.from || h.from <= d) && (!h.del || (h.delAt && h.delAt > d))).sort((a, b) => (a.o ?? 0) - (b.o ?? 0));
+let _hon = new Map(), _ds = new Map();
+const memoReset = () => { _hon = new Map(); _ds = new Map(); _xp = null; };
+const habitsOn = d => { let r = _hon.get(d); if (!r) { r = habitsOn0(d); _hon.set(d, r); } return r; };
+const habitsOn0 = d => S.habits.filter(h => (!h.from || h.from <= d) && (!h.del || (h.delAt && h.delAt > d))).sort((a, b) => (a.o ?? 0) - (b.o ?? 0));
 const dayObj = d => S.days[d] || { h: {} };
 const mealsOn = d => S.meals.filter(m => !m.del && m.date === d).sort((a, b) => (a.time || '') < (b.time || '') ? -1 : 1);
 const moneyOn = d => S.money.filter(m => !m.del && m.date === d);
@@ -472,7 +486,8 @@ function frac(h, d) {
   return 0;
 }
 const startDate = () => S.profile.start || today();
-function dayScore(d, cat) {
+function dayScore(d, cat) { const k = d + (cat || ''); if (_ds.has(k)) return _ds.get(k); const v = dayScore0(d, cat); _ds.set(k, v); return v; }
+function dayScore0(d, cat) {
   if (d > today() || d < startDate()) return null;
   const hs = habitsOn(d).filter(h => !cat || h.cat === cat);
   const tot = sum(hs, h => h.xp);
@@ -485,7 +500,7 @@ function dayXP(d) {
   if (dayScore(d) >= 100) xp += 50;
   return Math.round(xp);
 }
-let _xp = null;
+var _xp = null;
 function totalXP() {
   if (_xp != null) return _xp;
   let xp = 0;
@@ -578,10 +593,10 @@ const ICONS = {
 };
 const TABS = [['today','Сегодня'],['food','Еда'],['money','Деньги'],['stats','Итоги'],['more','Ещё']];
 function renderTabs() { $('#tabs').innerHTML = TABS.map(([id, t]) => `<button class="${ui.tab === id ? 'on' : ''}" data-tab="${id}">${ICONS[id]}${t}</button>`).join(''); }
-$('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; ui.tab = b.dataset.tab; ui.day = today(); render(); scrollTo(0, 0); });
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; ui.tab = b.dataset.tab; ui.day = today(); render(); scrollTo(0, 0); const a = $('#app'); a.classList.remove('fade'); void a.offsetWidth; a.classList.add('fade'); });
 function render() {
   if (!S) return renderOnboarding();
-  _xp = null; renderTabs();
+  memoReset(); renderTabs();
   $('#app').innerHTML = ({ today: viewToday, food: viewFood, money: viewMoney, stats: viewStats, more: viewMore })[ui.tab]();
   setSync(syncState);
 }
@@ -718,7 +733,7 @@ function openHabit(id, keep) {
     root.querySelectorAll('[data-hm]').forEach(b => b.onclick = () => { const a = Array.isArray(dayObj(d).h?.[x.id]) ? [...dayObj(d).h[x.id]] : []; a[+b.dataset.hm] = !a[+b.dataset.hm]; upd(a); });
     root.querySelectorAll('[data-hc]').forEach(b => b.onclick = () => upd(Math.max(0, (+dayObj(d).h?.[x.id] || 0) + +b.dataset.hc * (x.target >= 20 ? 5 : 1))));
     root.querySelector('[data-ht]')?.addEventListener('click', () => upd(!dayObj(d).h?.[x.id]));
-    root.querySelector('#hd-edit').onclick = () => { closeSheet(); setTimeout(() => openHabitEdit(id), 260); };
+    root.querySelector('#hd-edit').onclick = () => { closeSheet(); setTimeout(() => openHabitEdit(id), 380); };
     root.querySelectorAll('[data-act="open-day"]').forEach(b => b.onclick = () => { closeSheet(); ui.day = b.dataset.d; ui.tab = 'today'; render(); scrollTo(0, 0); });
   });
 }
@@ -755,8 +770,8 @@ function openSpendAsk(d = ui.day) {
     ${ms.length ? `<div class="list">${ms.map(txRow).join('')}</div>` : '<div class="sub" style="margin-bottom:12px">Пока ничего не записано.</div>'}
     <button class="btn dark block" id="s-add">Добавить трату</button>
     <div class="grid2" style="margin-top:8px"><button class="btn" id="s-in">Доход</button><button class="btn" id="s-none">${dayObj(d).noSpend ? '✓ Не тратил' : 'Сегодня не тратил'}</button></div>`, root => {
-    root.querySelector('#s-add').onclick = () => { closeSheet(); setTimeout(() => openMoneyAdd('out', d), 260); };
-    root.querySelector('#s-in').onclick = () => { closeSheet(); setTimeout(() => openMoneyAdd('in', d), 260); };
+    root.querySelector('#s-add').onclick = () => { closeSheet(); setTimeout(() => openMoneyAdd('out', d), 380); };
+    root.querySelector('#s-in').onclick = () => { closeSheet(); setTimeout(() => openMoneyAdd('in', d), 380); };
     root.querySelector('#s-none').onclick = () => { const o = S.days[d] || (S.days[d] = { h: {} }); o.noSpend = !o.noSpend; o.u = now(); save(); closeSheet(); render(); };
     root.querySelectorAll('[data-act="del-money"]').forEach(b => b.onclick = () => { delMoney(b.dataset.id); closeSheet(); render(); });
   });
@@ -867,7 +882,7 @@ function showFoodResult(st, res, d) {
     ${res.local ? '<div class="sub tiny" style="margin-top:6px">Примерный расчёт по базе блюд — сервер сейчас недоступен.</div>' : ''}</div>
     ${st.cost ? `<div class="sub small" style="margin-bottom:12px">${money(st.cost)} запишется в «Деньги» → Еда.</div>` : ''}
     <div class="grid2"><button class="btn" id="r-back">Изменить</button><button class="btn dark" id="r-ok">Сохранить</button></div>`, root => {
-    root.querySelector('#r-back').onclick = () => { closeSheet(); setTimeout(() => openFoodAdd(st.meal, d, st), 260); };
+    root.querySelector('#r-back').onclick = () => { closeSheet(); setTimeout(() => openFoodAdd(st.meal, d, st), 380); };
     root.querySelector('#r-ok').onclick = () => {
       const id = uid();
       const meal = { id, u: now(), date: d, time: d === today() ? hhmm() : '', meal: st.meal, text: st.text, place: st.place, cost: st.cost || 0, portion: st.portion, items, kcal: kc, p: sum(items, i => i.p), f: sum(items, i => i.f), c: sum(items, i => i.c), score: res.score, comment: res.comment, ai: !res.local };
@@ -1141,7 +1156,7 @@ function viewMore() {
     <h3>Ноутбук и iPhone</h3><div class="box"><div class="small" style="margin-bottom:10px">Чтобы видеть те же данные на другом устройстве, открой там приложение и введи этот код:</div><div class="code">${esc(syncKey())}</div>
     <div class="grid2" style="margin-top:10px"><button class="btn sm line" data-act="copy-code">Скопировать</button><button class="btn sm line" data-act="link-device">Ввести код</button></div><div class="sub tiny" style="margin-top:8px">Не показывай код другим людям. Синхронизация<span class="sync"></span></div></div>
     <h3>Копия данных</h3><div class="grid2"><button class="btn sm" data-act="export">Скачать</button><button class="btn sm" data-act="import">Загрузить</button></div>
-    <p class="sub tiny" style="text-align:center;margin-top:24px">Истикама — стойкость на прямом пути</p>`;
+    <p class="sub tiny" style="text-align:center;margin-top:24px">Истикама — стойкость на прямом пути · версия ${APP_VERSION}</p>`;
 }
 function openHabitEdit(id) {
   const x = id ? S.habits.find(h => h.id === id) : { icon: '⭐', name: '', cat: 'body', type: 'check', xp: 10, target: 10, unit: '', labels: [] };
@@ -1339,10 +1354,28 @@ function stickFoot(sh) {
 function wireSheet(sh) {
   sh.querySelector('.sx').onclick = closeSheet;
   stickFoot(sh);
-  const head = sh.querySelector('.shead'); let y0 = null, dy = 0;
-  head.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; dy = 0; sh.style.transition = 'none'; }, { passive: true });
-  head.addEventListener('touchmove', e => { if (y0 == null) return; dy = Math.max(0, e.touches[0].clientY - y0); sh.style.transform = `translateY(${dy}px)`; }, { passive: true });
-  head.addEventListener('touchend', () => { sh.style.transition = ''; sh.style.transform = ''; if (dy > 80) closeSheet(); y0 = null; });
+  // тянуть окно вниз пальцем — за шапку или за любое место, когда окно прокручено к началу
+  let y0 = null, dy = 0, t0 = 0, drag = false, fromHead = false;
+  const bg = $('#sheet-root .bg');
+  sh.addEventListener('touchstart', e => { if (e.touches.length > 1) return; y0 = e.touches[0].clientY; t0 = performance.now(); dy = 0; drag = false; fromHead = !!e.target.closest('.shead'); }, { passive: true });
+  sh.addEventListener('touchmove', e => {
+    if (y0 == null) return;
+    const d = e.touches[0].clientY - y0;
+    if (!drag) { if (d > 6 && (fromHead || sh.scrollTop <= 0) && !e.target.closest('textarea,input,select')) { drag = true; sh.classList.add('drag'); y0 += 6; } else if (d < -4 || sh.scrollTop > 0) { y0 = null; return; } else return; }
+    dy = Math.max(0, e.touches[0].clientY - y0);
+    e.preventDefault();
+    sh.style.transform = `translateY(${dy}px)`;
+    if (bg) bg.style.opacity = String(Math.max(0, 1 - dy / (sh.offsetHeight || 600)));
+  }, { passive: false });
+  const end = () => {
+    if (!drag) { y0 = null; return; }
+    const v = dy / Math.max(1, performance.now() - t0);
+    sh.classList.remove('drag');
+    if (dy > Math.min(140, sh.offsetHeight * .28) || v > .6) closeSheet(true);
+    else { sh.style.transform = ''; if (bg) bg.style.opacity = ''; }
+    y0 = null; drag = false;
+  };
+  sh.addEventListener('touchend', end); sh.addEventListener('touchcancel', end);
   sh.addEventListener('focusin', e => { if (e.target.matches('input,textarea,select')) setTimeout(() => e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 320); });
 }
 function openSheet(html, mount) {
@@ -1360,10 +1393,13 @@ function refreshSheet(html, mount) {
   const top = sh.scrollTop; sh.innerHTML = sheetFrame(html); mount && mount(sh); wireSheet(sh); sh.scrollTop = top;
 }
 function closeSheet() {
-  const root = $('#sheet-root'), gen = ++sheetGen; root.classList.remove('show');
+  const root = $('#sheet-root'), gen = ++sheetGen, sh = root.querySelector('.sheet'), bg = root.querySelector('.bg');
+  if (sh) sh.style.transform = 'translateY(105%)';
+  if (bg) bg.style.opacity = '0';
+  root.classList.remove('show');
   document.activeElement?.blur?.();
   document.documentElement.classList.remove('lock');
-  setTimeout(() => { if (gen === sheetGen) root.innerHTML = ''; }, 260);
+  setTimeout(() => { if (gen === sheetGen) root.innerHTML = ''; }, 420);
 }
 // клавиатура iPhone: держим окно над ней
 function syncViewport() {
@@ -1413,8 +1449,15 @@ function handleOpen(what) {
 { const o = new URLSearchParams(location.search).get('open'); if (o) { history.replaceState(null, '', '/'); handleOpen(o); } }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S) { if (!sheetOpen()) render(); syncPull(); } });
 addEventListener('online', () => S && syncPush());
+/* обновления: приложение само подтягивает новую версию */
+const APP_VERSION = 5;
+async function checkUpdate() {
+  try { const r = await fetch('/version.json', { cache: 'no-store' }); const j = await r.json(); if (j.v > APP_VERSION && !sheetOpen()) { const k = 'istiqama-reloaded-' + j.v; if (!sessionStorage.getItem(k)) { sessionStorage.setItem(k, '1'); location.reload(); } } } catch {}
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { checkUpdate(); navigator.serviceWorker?.getRegistration().then(r => r?.update()).catch(() => {}); } });
+checkUpdate();
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(() => {});
   navigator.serviceWorker.addEventListener('message', e => handleOpen(e.data?.open));
 }
 </script>

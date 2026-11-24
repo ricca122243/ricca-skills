@@ -1,5 +1,5 @@
 // Истикама service worker: офлайн-оболочка + push-уведомления
-const CACHE = 'istiqama-v2';
+const CACHE = 'istiqama-v5';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
@@ -7,7 +7,7 @@ self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Pr
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-  if (e.request.method !== 'GET' || url.pathname.startsWith('/api/')) return;
+  if (e.request.method !== 'GET' || url.pathname.startsWith('/api/') || url.pathname === '/version.json') return;
   if (url.origin === location.origin) {
     // сеть в первую очередь (свежая версия), кэш — если нет интернета
     e.respondWith(fetch(e.request).then(r => { if (r.ok) { const cp = r.clone(); caches.open(CACHE).then(c => c.put(e.request, cp)); } return r; })
