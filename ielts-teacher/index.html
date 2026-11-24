@@ -1047,7 +1047,7 @@ function viewProgress(app){
   else wl.querySelector(".list").append(h(`<div class="empty">Пройди миссию «Слова дня» — новые слова появятся здесь.</div>`));
   grid.append(mist,wl);app.append(grid);
   if(S.profile.bands.length){const bh=h(`<section class="card"><h3>История IELTS-оценок</h3><div class="list" style="margin-top:10px;max-height:240px"></div></section>`);S.profile.bands.slice().reverse().forEach(b=>{const r=h(`<div class="word"><div><b class="mono"></b> <span></span></div><span class="mono muted" style="font-size:12px"></span></div>`);r.querySelector("b").textContent=Number(b.band).toFixed(1);r.querySelector("span").textContent=b.kind;r.querySelector(".mono.muted").textContent=b.date;bh.querySelector(".list").append(r)});app.append(bh)}
-  const redo=h(`<div><button class="btn" type="button">Пройти опрос и сменить цель</button></div>`);redo.querySelector("button").onclick=()=>{S.profile.onboarded=false;obStep=0;persist("profile");render();window.scrollTo({top:0})};app.append(redo);
+  const redo=h(`<div class="row"><button class="btn" type="button">Пройти опрос и сменить цель</button><button class="btn blue" type="button" data-a="pt">${S.profile.placement?"Пройти тест уровня заново ("+S.profile.placement.level+")":"Пройти тест уровня"}</button></div>`);redo.querySelector('[data-a="pt"]').onclick=openPlacement;redo.querySelector("button").onclick=()=>{S.profile.onboarded=false;obStep=0;persist("profile");render();window.scrollTo({top:0})};app.append(redo);
   app.append(h(`<p class="muted" style="font-size:13px;margin:0">${cap.db?"Прогресс сохраняется в твоём аккаунте и виден только тебе — можно заниматься с телефона и компьютера.":"Прогресс сохраняется в этом браузере. На claude.ai со входом в аккаунт он будет синхронизироваться между устройствами."}</p>`));
 }
 function reviewMistakes(){
@@ -1165,6 +1165,7 @@ function viewToday(app){
   {const ms=mascotEl(S.profile.char,"",true);talkTap(ms);hero.querySelector(".hero-char").prepend(ms)}
   hero.querySelector('[data-a="call"]').onclick=()=>startCall();
   hero.querySelector('[data-a="next"]')?.addEventListener("click",()=>{const nx=list.find(x=>!d.done.includes(x.id));if(nx)openMission(nx.id)});
+  if(!S.profile.placement)app.append(placementBanner());
   app.append(hero);
   app.append(bookCard());
   const card=h(`<section class="card"><div class="row" style="justify-content:space-between"><h2>Миссии на сегодня</h2><span class="eyebrow">${doneN}/${list.length}</span></div><div class="missions" style="margin-top:14px"></div></section>`);
@@ -1373,12 +1374,153 @@ function charCards(onPick,selected){
   return grid;
 }
 
+/* ---------- placement test ---------- */
+const LV=["A1","A2","B1","B2","C1"];
+const LV_BAND={A1:"2–3",A2:"3.5–4",B1:"4.5–5.5",B2:"6–6.5",C1:"7–8"};
+const LV_NAME={A1:"Начальный",A2:"Базовый",B1:"Средний",B2:"Выше среднего",C1:"Продвинутый"};
+const LV_MONTH={A1:0,A2:1,B1:3,B2:6,C1:9};
+const PLACEMENT=[
+ {lv:"A1",items:[
+  {q:"She ___ a pilot.",o:["am","is","are","be"],a:1},
+  {q:"I ___ coffee every morning.",o:["drinks","drinking","drink","am drink"],a:2},
+  {q:"There ___ two windows in the cockpit.",o:["is","are","be","am"],a:1},
+  {q:"What is the opposite of «big»?",o:["small","tall","long","old"],a:0},
+  {q:"___ you speak English?",o:["Do","Does","Are","Is"],a:0},
+  {q:"My brother ___ to work by bus.",o:["go","goes","going","gone"],a:1}]},
+ {lv:"A2",items:[
+  {q:"Yesterday we ___ to the airport at 6 a.m.",o:["go","goes","went","gone"],a:2},
+  {q:"This design is ___ than the old one.",o:["more good","better","best","gooder"],a:1},
+  {q:"I'm ___ to meet the client tomorrow.",o:["go","going","gone","went"],a:1},
+  {q:"How ___ money do we have for the project?",o:["many","much","lot","few"],a:1},
+  {q:"She was ___ when I called her.",o:["sleep","slept","sleeping","sleeps"],a:2},
+  {listen:"The flight to London is delayed. It will now leave at a quarter past ten.",q:"When does the flight leave?",o:["10:15","10:45","9:45","10:50"],a:0}]},
+ {lv:"B1",items:[
+  {q:"I ___ in this company since 2022.",o:["work","worked","have worked","am working"],a:2},
+  {q:"If it rains tomorrow, we ___ the meeting online.",o:["hold","will hold","would hold","held"],a:1},
+  {q:"The logo ___ by a famous designer.",o:["designed","was designed","has design","is designing"],a:1},
+  {q:"You ___ wear a seatbelt during take-off. It's the rule.",o:["must","might","can","would"],a:0},
+  {q:"The client wants to ___ the deadline by a week.",o:["extend","expand","extent","increase"],a:0},
+  {text:"Mark has been a designer for five years. Last month he left his job at an agency and started working for himself. He says he earns less now, but he enjoys choosing his own projects.",q:"Why does Mark like his new situation?",o:["He earns more money","He can choose his projects","He works fewer hours","He misses the agency"],a:1}]},
+ {lv:"B2",items:[
+  {q:"By the time we landed, the storm ___.",o:["stopped","has stopped","had stopped","was stopping"],a:2},
+  {q:"If I ___ about the problem, I would have told you.",o:["knew","have known","had known","would know"],a:2},
+  {q:"He suggested ___ the presentation until Monday.",o:["to postpone","postponing","postpone","postponed"],a:1},
+  {q:"___ the bad weather, the flight departed on time.",o:["Although","Despite","However","Because"],a:1},
+  {q:"Our sales have ___ significantly since the campaign started.",o:["risen","raised","arisen","rose"],a:0},
+  {listen:"I'd love to help with the campaign, but I'm afraid I'm completely snowed under this week. Could we look at it on Monday instead?",q:"What does the speaker mean?",o:["She is too busy this week","She doesn't like the campaign","It is snowing outside","She will do it today"],a:0}]},
+ {lv:"C1",items:[
+  {q:"Not only ___ the deadline, but he also went over budget.",o:["he missed","did he miss","he did miss","missed he"],a:1},
+  {q:"Had we known about the delay, we ___ a later flight.",o:["would book","will book","would have booked","had booked"],a:2},
+  {q:"The CEO's decision was met with considerable ___ from the board.",o:["scepticism","sceptic","sceptical","sceptically"],a:0},
+  {q:"It's high time the company ___ its pricing strategy.",o:["reviews","reviewed","has reviewed","review"],a:1},
+  {q:"We need to ___ a compromise before the end of the meeting.",o:["reach","make up","do","arrive"],a:0},
+  {q:"The proposal, ___ was rejected last year, is now being reconsidered.",o:["that","which","what","who"],a:1}]},
+];
+function runPlacement(host,onDone,opts={}){
+  const total=PLACEMENT.reduce((a,b)=>a+b.items.length,0);
+  let bi=0,qi=0,cur=0,answered=0;const scores=[];
+  const intro=()=>{
+    host.innerHTML="";
+    const v=h(`<div class="view" style="text-align:center;justify-items:center"><div class="mw" style="width:140px"></div><h1>Тест на уровень</h1>
+      <p class="muted" style="margin:0;font-weight:600;font-size:17px;max-width:46ch">До 30 вопросов от простого к сложному: грамматика, слова, чтение и аудирование. Тест сам остановится, когда станет слишком сложно. В конце — 5 предложений о себе, их оценит учитель.</p>
+      <div class="note info" style="text-align:left;max-width:520px">Не знаешь ответ — жми «Не знаю». Не угадывай: так план получится точнее. Займёт 7–10 минут.</div>
+      <button class="btn primary big" type="button" style="max-width:420px">Начать тест</button>${opts.skip?`<button class="btn ghost" type="button" data-a="skip">Я знаю свой уровень — выберу сам</button>`:""}</div>`);
+    v.querySelector(".mw").append(mascotEl(S.profile.char||"berkut",""));
+    v.querySelector(".btn.primary").onclick=()=>ask1();
+    v.querySelector('[data-a="skip"]')?.addEventListener("click",opts.skip);
+    host.append(v);
+  };
+  const ask1=()=>{
+    host.innerHTML="";window.scrollTo({top:0});
+    const blk=PLACEMENT[bi],it=blk.items[qi];
+    const v=h(`<div class="view"><div class="row" style="justify-content:space-between"><span class="eyebrow">Вопрос ${answered+1} · уровень ${blk.lv}</span><span class="eyebrow">${answered}/${total}</span></div><div class="goalbar"><i style="width:${answered/total*100}%"></i></div></div>`);
+    if(it.listen){const l=h(`<div class="note info"><b>Послушай запись</b><div class="row" style="margin-top:8px"><button class="btn blue" type="button">${I.speaker} Слушать</button><button class="btn ghost" type="button" data-a="tx">Не слышно? Показать текст</button></div><p class="tx" hidden style="margin:8px 0 0"></p></div>`);
+      l.querySelector(".tx").textContent=it.listen;l.querySelector(".btn.blue").onclick=()=>speak(it.listen,.9,"en");l.querySelector('[data-a="tx"]').onclick=e=>{l.querySelector(".tx").hidden=false;e.currentTarget.remove()};v.append(l);setTimeout(()=>speak(it.listen,.9,"en"),300)}
+    if(it.text){const t=h(`<div class="note"><b>Прочитай текст</b><p style="margin:6px 0 0"></p></div>`);t.querySelector("p").textContent=it.text;v.append(t)}
+    const q=h(`<p class="q" style="font-size:20px"></p>`);q.textContent=it.q;v.append(q);
+    const box=h(`<div class="opts"></div>`);
+    const pick=ok=>{box.querySelectorAll("button").forEach(b=>b.disabled=true);if(ok)cur++;answered++;setTimeout(next,350)};
+    it.o.forEach((o,j)=>{const b=h(`<button class="opt" type="button"></button>`);b.textContent=o;b.onclick=()=>{b.style.borderColor="var(--blue)";b.style.background="var(--blue-soft)";pick(j===it.a)};box.append(b)});
+    const dk=h(`<button class="opt" type="button" style="color:var(--muted)">Не знаю</button>`);dk.onclick=()=>pick(false);box.append(dk);
+    v.append(box);host.append(v);
+  };
+  const next=()=>{
+    qi++;
+    if(qi>=PLACEMENT[bi].items.length){scores.push(cur);if(cur<=2||bi===PLACEMENT.length-1)return finish();bi++;qi=0;cur=0}
+    ask1();
+  };
+  const finish=()=>{
+    let passed=-1;for(let k=0;k<scores.length;k++){if(scores[k]>=4)passed=k;else break}
+    const plus=passed+1<scores.length&&scores[passed+1]>=3;
+    const res={testIdx:Math.max(0,passed),below:passed<0,plus,scores,correct:scores.reduce((a,b)=>a+b,0),asked:answered,date:todayKey()};
+    if(cap.sample)writing(res);else results(res);
+  };
+  const writing=res=>{
+    host.innerHTML="";window.scrollTo({top:0});
+    const v=h(`<div class="view"><div class="eyebrow">Последний шаг · письмо</div><h2>Расскажи о себе по-английски</h2><p class="muted" style="margin:0;font-weight:600">4–6 предложений: кто ты, чем занимаешься, зачем тебе английский. Пиши как можешь — ошибки нормально. Можно сказать голосом через микрофон.</p>
+      <div class="row" style="flex-wrap:nowrap;align-items:flex-end"><textarea class="field" id="placeWrite" placeholder="My name is … I am 18 years old …"></textarea></div>
+      <div class="row" style="justify-content:space-between"><button class="btn ghost" type="button" data-a="skip">Пропустить</button><button class="btn primary" type="button" data-a="go">Отправить учителю</button></div><div class="out"></div></div>`);
+    const ta=v.querySelector("textarea");v.querySelector(".row").append(micButton(ta));
+    v.querySelector('[data-a="skip"]').onclick=()=>results(res);
+    v.querySelector('[data-a="go"]').onclick=async e=>{const btn=e.currentTarget;
+      const txt=ta.value.trim();if((txt.match(/\S+/g)||[]).length<12){toast("Напиши хотя бы 12 слов");return}
+      btn.disabled=true;v.querySelector(".out").innerHTML=thinking("Учитель оценивает письмо…");
+      try{
+        const r=await askJson(`Ты — опытный экзаменатор по шкале CEFR. Оцени уровень письменного английского ученика (18 лет, родной язык русский) по короткому тексту о себе. Будь реалистичен и не завышай.
+Текст ученика:
+"""${txt}"""
+Ответь только JSON: {"cefr":"A1|A2|B1|B2|C1","comment_ru":"2 предложения: что уже получается и что главное мешает","fixes":[{"wrong":"","right":"","why_ru":""}]} (fixes — до 4 главных ошибок)`,{modelTier:"default"});
+        const w=LV.indexOf(String(r.cefr||"").toUpperCase().slice(0,2));
+        results({...res,writeIdx:w>=0?w:null,writeComment:String(r.comment_ru||""),writeFixes:(r.fixes||[]).slice(0,4)});
+      }catch(err){v.querySelector(".out").innerHTML="";const p=h(`<p class="note bad"></p>`);p.textContent=errCopy(err)+" Можно пропустить письмо.";v.querySelector(".out").append(p);btn.disabled=false}
+    };
+    host.append(v);ta.focus();
+  };
+  const results=res=>{
+    let fin=res.testIdx;if(res.writeIdx!=null&&res.writeIdx<res.testIdx)fin=Math.max(0,res.testIdx-1);
+    const level=LV[fin];res.level=level;
+    host.innerHTML="";window.scrollTo({top:0});
+    const v=h(`<div class="view"><div style="text-align:center;display:grid;justify-items:center;gap:6px"><div class="mw" style="width:130px"></div><div class="eyebrow">Твой уровень</div>
+      <div style="font-family:var(--f-display);font-size:64px;font-weight:800;line-height:1;color:var(--coral)">${level}${fin===res.testIdx&&res.plus?"+":""}</div><h2>${LV_NAME[level]}${res.below?" (почти с нуля)":""}</h2>
+      <p class="muted" style="margin:0;font-weight:700">Примерно IELTS ${LV_BAND[level]} · правильных ответов ${res.correct} из ${res.asked}</p></div>
+      <div class="card"><div class="eyebrow">Результат по уровням</div><div class="lvbars" style="display:grid;gap:8px;margin-top:10px"></div></div>
+      <div class="wr"></div>
+      <div class="note info"></div>
+      <div class="acts view" style="gap:8px"></div></div>`);
+    v.querySelector(".mw").append(mascotEl(S.profile.char||"berkut","",true));
+    setTimeout(()=>curMascot&&mascotFlash(curMascot,"happy",1600),200);
+    PLACEMENT.forEach((b,k)=>{const sc=res.scores[k];const r=h(`<div style="display:grid;grid-template-columns:36px 1fr 52px;gap:10px;align-items:center;font-weight:800"><span>${b.lv}</span><div class="goalbar"><i style="width:${sc==null?0:sc/6*100}%;background:${sc==null?"var(--line)":sc>=4?"var(--green)":sc>=3?"var(--yellow)":"var(--bad)"}"></i></div><span class="muted" style="text-align:right">${sc==null?"—":sc+"/6"}</span></div>`);v.querySelector(".lvbars").append(r)});
+    if(res.writeIdx!=null){const w=h(`<div class="card"><div class="eyebrow">Письмо · оценка учителя</div><h3 style="margin-top:4px">${LV[res.writeIdx]}</h3><p style="margin:6px 0 0;font-weight:600"></p><div class="fx view" style="gap:8px;margin-top:10px"></div></div>`);w.querySelector("p").textContent=res.writeComment;(res.writeFixes||[]).forEach(f=>w.querySelector(".fx").append(fixEl(f.wrong,f.right,f.why_ru)));v.querySelector(".wr").append(w);if(res.writeFixes?.length)addMistakes(res.writeFixes)}
+    const mi=LV_MONTH[level];
+    v.querySelector(".note.info").textContent=(res.writeIdx!=null&&res.writeIdx<res.testIdx?`Тест показал ${LV[res.testIdx]}, но письмо слабее — поэтому начинаем с ${level}. `:"")+`План начнём с месяца ${mi+1} «${MONTHS[mi].title.ru}». До C1 — ${12-mi} мес. занятий.`;
+    const acts=v.querySelector(".acts");
+    if(opts.standalone){
+      const a=h(`<button class="btn primary big" type="button">Перестроить план под ${level}</button>`);a.onclick=()=>onDone(res,true);
+      const b=h(`<button class="btn" type="button">Оставить план как есть</button>`);b.onclick=()=>onDone(res,false);acts.append(a,b);
+    }else{const a=h(`<button class="btn primary big" type="button">Дальше</button>`);a.onclick=()=>onDone(res,true);acts.append(a)}
+    host.append(v);
+  };
+  intro();
+}
+function applyLevel(level){const sd=new Date();sd.setDate(sd.getDate()-Math.ceil((LV_MONTH[level]||0)*30.5));S.profile.startDate=dkey(sd);S.profile.monthOverride=null}
+function openPlacement(){
+  stopSpeak();const el=h(`<section class="view"></section>`);lesson={id:"placement",el};
+  const head=h(`<div class="lesson-head"><button class="btn ghost" type="button">${I.back} Назад</button></div>`);head.querySelector("button").onclick=()=>go("today");
+  const body=h(`<div class="card"></div>`);el.append(head,body);render();window.scrollTo({top:0});
+  runPlacement(body,(res,apply)=>{S.profile.placement={level:res.level,correct:res.correct,asked:res.asked,scores:res.scores,date:res.date};const ob=S.profile.ob||(S.profile.ob={});ob.level=res.level;ob.levelFrom="test";if(apply)applyLevel(res.level);persist("profile");toast(apply?"План перестроен под "+res.level:"Уровень сохранён");go("today")},{standalone:true});
+}
+function placementBanner(){
+  const c=h(`<section class="hero-card" style="--c:var(--blue);grid-template-columns:1fr 96px"><div><div class="eyebrow">Сначала — тест</div><h2 style="margin-top:6px">Определи свой уровень</h2><p>7–10 минут: грамматика, слова, чтение, аудирование и письмо. План подстроится под результат.</p></div><div class="hero-char mw"></div><div class="row"><button class="btn white" type="button">Пройти тест →</button></div></section>`);
+  c.querySelector(".mw").append(mascotEl("sokol",""));c.querySelector("button").onclick=openPlacement;return c;
+}
+
 /* ---------- onboarding ---------- */
 const OB_STEPS=[
  {id:"goal",type:"big",title:"Что ты хочешь учить?",sub:"Подберём программу под твою цель",opts:[
    {v:"speak",eyebrow:"Разговорный",t:"Английский",d:"Заговоришь свободно: на работе, в полётах, на переговорах",go:"Учить английский",c:"#EB5A46",ch:"berkut",tag:"Hi! Поболтаем?"},
    {v:"ielts",eyebrow:"Экзамен",t:"IELTS",d:"Подготовка к экзамену на нужный балл",go:"Готовиться к IELTS",c:"#2F5FE8",ch:"sokol",tag:"Band 7+"},
    {v:"both",eyebrow:"Всё сразу",t:"Оба",d:"Свободная речь и IELTS 7+ за один план",go:"Хочу всё",c:"#9257E0",ch:"den",tag:"C1"}]},
+ {id:"placement",type:"placement",title:"",sub:""},
  {id:"level",title:"Какой у тебя уровень сейчас?",sub:"Честно — так план будет точнее",opts:[["A1","A1","Почти с нуля","Знаю алфавит и пару фраз"],["A2","A2","Базовый","Понимаю простое, говорю с трудом"],["B1","B1","Средний","Могу объясниться, но с ошибками"],["B2","B2","Выше среднего","Говорю, но хочу свободнее"]],lv:true},
  {id:"why",title:"Зачем тебе английский?",sub:"Можно выбрать несколько",multi:true,opts:[["pilot","✈️","Пилот","Радиообмен, ИКАО, лётная школа"],["design","🎨","Дизайн","Клиенты, бриф, презентации"],["smm","📱","SMM","Соцсети, отчёты, контент"],["nego","🤝","Переговоры","Встречи с руководителями и CEO"],["study","🎓","Учёба за границей","Бакалавриат, магистратура"]]},
  {id:"band",title:"Какой балл IELTS нужен?",sub:"Цель, к которой будем идти",opts:[["6.0","6.0","Многие колледжи",""],["6.5","6.5","Большинство вузов",""],["7.0","7.0","Топ-вузы и хорошая работа",""],["7.5","7.5+","Максимум",""]],lv:true},
@@ -1388,18 +1530,22 @@ const OB_STEPS=[
  {id:"char",type:"chars",title:"Выбери своего учителя",sub:"Он будет звонить, проверять домашку и гонять тебя"},
 ];
 let obStep=0;
+function obSteps(){const ob=S.profile.ob||{};return OB_STEPS.filter(s=>!(s.id==="level"&&ob.levelFrom==="test"))}
 function viewOnboarding(app){
-  const total=OB_STEPS.length+2,ob=S.profile.ob||(S.profile.ob={});
-  const head=h(`<div class="ob-head" style="position:sticky"><div>${obStep>0&&obStep<=OB_STEPS.length?`<button class="btn ghost" type="button" aria-label="Назад" style="padding:6px">${I.back}</button>`:""}</div><div class="ob-logo"><span class="lg"></span>Беркут</div><div class="ob-count" style="text-align:right"><b>${Math.min(obStep+1,total)}</b> / ${total}</div><div class="ob-bar"><i style="width:${(obStep+1)/total*100}%"></i></div></div>`);
+  const OBS=obSteps();
+  const total=OBS.length+2,ob=S.profile.ob||(S.profile.ob={});
+  const head=h(`<div class="ob-head" style="position:sticky"><div>${obStep>0&&obStep<=OBS.length?`<button class="btn ghost" type="button" aria-label="Назад" style="padding:6px">${I.back}</button>`:""}</div><div class="ob-logo"><span class="lg"></span>Беркут</div><div class="ob-count" style="text-align:right"><b>${Math.min(obStep+1,total)}</b> / ${total}</div><div class="ob-bar"><i style="width:${(obStep+1)/total*100}%"></i></div></div>`);
   head.querySelector(".lg").append(mascotEl(S.profile.char||"berkut","m-static"));
   head.querySelector("button")?.addEventListener("click",()=>{obStep--;render()});
   app.append(head);
   const box=h(`<section class="ob"></section>`);app.append(box);
   const next=()=>{obStep++;persist("profile");render();window.scrollTo({top:0})};
-  if(obStep<OB_STEPS.length){
-    const st=OB_STEPS[obStep];
-    const t=h(`<div><h1></h1><p class="sub"></p></div>`);t.querySelector("h1").textContent=st.title;t.querySelector(".sub").textContent=st.sub;box.append(t);
-    if(st.type==="big"){
+  if(obStep<OBS.length){
+    const st=OBS[obStep];
+    if(st.type!=="placement"){const t=h(`<div><h1></h1><p class="sub"></p></div>`);t.querySelector("h1").textContent=st.title;t.querySelector(".sub").textContent=st.sub;box.append(t)}
+    if(st.type==="placement"){
+      runPlacement(box,res=>{S.profile.placement={level:res.level,correct:res.correct,asked:res.asked,scores:res.scores,date:res.date};ob.level=res.level;ob.levelFrom="test";next()},{skip:()=>{ob.levelFrom="self";next()}});
+    }else if(st.type==="big"){
       st.opts.forEach(o=>{const b=h(`<button class="bigopt" type="button" style="--c:${o.c}"><span class="eyebrow"></span><span class="t"></span><p></p><span class="go"></span><span class="tagb"></span></button>`);
         b.querySelector(".eyebrow").textContent=o.eyebrow;b.querySelector(".t").textContent=o.t;b.querySelector("p").textContent=o.d;b.querySelector(".go").textContent=o.go+" →";b.querySelector(".tagb").textContent=o.tag;
         b.append(mascotEl(o.ch,""));b.onclick=()=>{ob.goal=o.v;next()};box.append(b)});
@@ -1418,7 +1564,7 @@ function viewOnboarding(app){
       });
       let nb=null;if(st.multi){nb=h(`<button class="btn primary big" type="button" style="margin-top:8px">Дальше</button>`);nb.disabled=!sel.size;nb.onclick=next;box.append(nb)}
     }
-  }else if(obStep===OB_STEPS.length){
+  }else if(obStep===OBS.length){
     const c=curChar();
     const v=h(`<div class="ringprog"><div style="position:relative;width:200px;height:200px"><svg class="pr" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="var(--line)" stroke-width="6"/><circle class="arc" cx="50" cy="50" r="44" fill="none" stroke="var(--coral)" stroke-width="6" stroke-linecap="round" stroke-dasharray="0 400" transform="rotate(-90 50 50)"/></svg><div style="position:absolute;inset:0;display:grid;place-items:center"><span class="pct">0%</span></div></div>
       <p class="muted msgp" style="font-size:18px;font-weight:700;margin:0">Создаём твой персональный план…</p><div class="mw" style="width:120px"></div>
@@ -1431,12 +1577,12 @@ function viewOnboarding(app){
     const tick=now=>{if(!arc.isConnected)return;const p=Math.min(1,(now-t0)/dur);const e=1-Math.pow(1-p,2);arc.setAttribute("stroke-dasharray",`${C*e} 400`);pct.textContent=Math.round(e*100)+"%";msg.textContent=msgs[Math.min(msgs.length-1,Math.floor(p*msgs.length))];if(p<1)requestAnimationFrame(tick);else setTimeout(next,450)};
     requestAnimationFrame(tick);
   }else{
-    const c=curChar();const lvMonth={A1:0,A2:1,B1:3,B2:6}[ob.level||"A2"]??0;
+    const c=curChar();const lvMonth=LV_MONTH[ob.level||"A2"]??0;
     const v=h(`<div class="view"><div style="text-align:center;display:grid;justify-items:center;gap:6px"><div class="mw" style="width:150px"></div><h1>Твой план готов!</h1><p class="sub" style="margin:0">12 месяцев до C1. Первый урок — прямо сейчас.</p></div>
       <div class="card summary"></div><button class="btn primary big" type="button">Поехали!</button><button class="btn ghost" type="button" data-a="redo">Пройти опрос заново</button></div>`);
     v.querySelector(".mw").append(mascotEl(S.profile.char,"",true));
     const why={pilot:"Пилот",design:"Дизайн",smm:"SMM",nego:"Переговоры",study:"Учёба"};
-    const rows=[["Уровень сейчас",ob.level||"A2"],["Цель","C1 · IELTS "+(ob.band||"7.0")],["Экзамен","через ~"+(ob.when||12)+" мес."],["В день",(ob.minutes||60)+" мин · "+todayMissions().length+" миссии"],["Английский для",(ob.why||[]).map(x=>why[x]).join(", ")||"жизни"],["Учитель",c.name],["Старт плана","Месяц "+(lvMonth+1)+": "+MONTHS[lvMonth].title.ru]];
+    const rows=[["Уровень сейчас",(ob.level||"A2")+(ob.levelFrom==="test"?" · по тесту":"")],["Цель","C1 · IELTS "+(ob.band||"7.0")],["Экзамен","через ~"+(ob.when||12)+" мес."],["В день",(ob.minutes||60)+" мин · "+todayMissions().length+" миссии"],["Английский для",(ob.why||[]).map(x=>why[x]).join(", ")||"жизни"],["Учитель",c.name],["Старт плана","Месяц "+(lvMonth+1)+": "+MONTHS[lvMonth].title.ru]];
     rows.forEach(([k,val])=>{const r=h(`<div><span></span><span></span></div>`);r.children[0].textContent=k;r.children[1].textContent=val;v.querySelector(".summary").append(r)});
     v.querySelector(".btn.primary").onclick=()=>{const sd=new Date();sd.setDate(sd.getDate()-Math.ceil(lvMonth*30.5));S.profile.startDate=dkey(sd);S.profile.monthOverride=null;S.profile.onboarded=true;S.profile.charChosen=true;persist("profile");obStep=0;document.body.classList.remove("ob-on");go("today")};
     v.querySelector('[data-a="redo"]').onclick=()=>{obStep=0;render()};
