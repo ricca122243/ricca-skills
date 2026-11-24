@@ -1,0 +1,11 @@
+{
+  "name": "istiqama",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Истикама — игра дисциплины: привычки, иман, деньги, книга месяца, награды",
+  "dependencies": {
+    "@netlify/blobs": "^11.1.7",
+    "web-push": "^3.6.7"
+  }
+}
