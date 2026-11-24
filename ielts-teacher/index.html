@@ -320,6 +320,7 @@ textarea.field{min-height:160px;resize:vertical;line-height:1.55}
 .chips{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:10px;border-radius:16px;border:2px dashed var(--line)}
 .chips.answer{background:var(--surface-2)}
 .wchip{border:2px solid var(--line);background:var(--surface);padding:8px 13px;border-radius:12px;font-weight:800}
+.bk .mission{grid-template-columns:1fr auto;align-items:start}.bk .mission .ic,#books .mission .ic{display:none}#books .mission{grid-template-columns:1fr!important}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -523,6 +524,103 @@ async function flush(name){
   if(dirty[name]){dirty[name]=false;flush(name)}
 }
 
+/* ---------- books curriculum ---------- */
+const MURPHY=["Present continuous (I am doing)","Present simple (I do)","Present continuous and present simple 1","Present continuous and present simple 2","Past simple (I did)","Past continuous (I was doing)","Present perfect 1 (I have done)","Present perfect 2 (I have done)","Present perfect continuous (I have been doing)","Present perfect continuous and simple","how long have you (been) … ?","for and since, when … ? and how long … ?","Present perfect and past 1 (I have done and I did)","Present perfect and past 2 (I have done and I did)","Past perfect (I had done)","Past perfect continuous (I had been doing)","have and have got","used to (do)","Present tenses (I am doing / I do) for the future","I'm going to (do)","will and shall 1","will and shall 2","I will and I'm going to","will be doing and will have done","when I do and when I've done, if and when","can, could and (be) able to","could (do) and could have (done)","must and can't","may and might 1","may and might 2","have to and must","must, mustn't, needn't","should 1","should 2","I'd better … , it's time …","would","can/could/would you … ? (requests, offers, permission, invitations)","if I do … and if I did …","if I knew … , I wish I knew …","if I had known … , I wish I had known …","wish","Passive 1 (is done / was done)","Passive 2 (be done / been done / being done)","Passive 3","it is said that … , he is said to … , he is supposed to …","have something done","Reported speech 1 (he said that …)","Reported speech 2","Questions 1","Questions 2 (do you know where … ? / he asked me where …)","Auxiliary verbs (have/do/can etc.), I think so / I hope so","Question tags (do you? isn't it? etc.)","Verb + -ing (enjoy doing / stop doing etc.)","Verb + to … (decide to … / forget to … etc.)","Verb (+ object) + to … (I want you to …)","Verb + -ing or to … 1 (remember, regret etc.)","Verb + -ing or to … 2 (try, need, help)","Verb + -ing or to … 3 (like / would like etc.)","prefer and would rather","Preposition (in/for/about etc.) + -ing","be/get used to … (I'm used to …)","Verb + preposition + -ing (succeed in -ing / insist on -ing)","there's no point in -ing, it's worth -ing etc.","to … , for … and so that …","Adjective + to …","to … (afraid to do) and preposition + -ing (afraid of -ing)","see somebody do and see somebody doing","-ing clauses (He hurt his knee playing football.)","Countable and uncountable 1","Countable and uncountable 2","Countable nouns with a/an and some","a/an and the","the 1","the 2 (school / the school etc.)","the 3 (children / the children)","the 4 (the giraffe / the telephone / the old etc.)","Names with and without the 1","Names with and without the 2","Singular and plural","Noun + noun (a bus driver / a headache)","-'s (your sister's name) and of … (the name of the book)","myself/yourself/themselves etc.","a friend of mine, my own house, on my own / by myself","there … and it …","some and any","no/none/any, nothing/nobody etc.","much, many, little, few, a lot, plenty","all / all of, most / most of, no / none of etc.","both / both of, neither / neither of, either / either of","all, every, whole","each and every","Relative clauses 1: clauses with who/that/which","Relative clauses 2: clauses with and without who/that/which","Relative clauses 3: whose/whom/where","Relative clauses 4: extra information clauses (1)","Relative clauses 5: extra information clauses (2)","-ing and -ed clauses (the woman talking to Tom, the boy injured in the accident)","Adjectives ending in -ing and -ed (boring/bored etc.)","Adjectives: a nice new house, you look tired","Adjectives and adverbs 1 (quick/quickly)","Adjectives and adverbs 2 (well, fast, late, hard/hardly)","so and such","enough and too","quite, pretty, rather and fairly","Comparative 1 (cheaper, more expensive etc.)","Comparative 2 (much better / any better etc.)","Comparative 3 (as … as / than)","Superlative (the longest, the most enjoyable etc.)","Word order 1: verb + object; place and time","Word order 2: adverbs with the verb","still, any more, yet, already","even","although, though, even though, in spite of, despite","in case","unless, as long as, provided","as (as I walked … / as I was … etc.)","like and as","like, as if","during, for, while","by and until, by the time …","at/on/in (time)","on time and in time, at the end and in the end","in/at/on (position) 1","in/at/on (position) 2","in/at/on (position) 3","to, at, in and into","in/on/at (other uses)","by","Noun + preposition (reason for, cause of etc.)","Adjective + preposition 1","Adjective + preposition 2","Verb + preposition 1: to and at","Verb + preposition 2: about/for/of/after","Verb + preposition 3: about and of","Verb + preposition 4: of/for/from/on","Verb + preposition 5: in/into/with/to/on","Phrasal verbs 1: Introduction","Phrasal verbs 2: in/out","Phrasal verbs 3: out","Phrasal verbs 4: on/off (1)","Phrasal verbs 5: on/off (2)","Phrasal verbs 6: up/down","Phrasal verbs 7: up (1)","Phrasal verbs 8: up (2)","Phrasal verbs 9: away/back"];
+const CULLEN=[
+ {t:"Growing up",topics:"Relationships, families and early learning",p:"Listening Section 1"},
+ {t:"Mental and physical development",topics:"The body, the mind",p:"Speaking Part 2"},
+ {t:"Keeping fit",topics:"Diet, health and exercise",p:"Academic Reading"},
+ {t:"Lifestyles",topics:"Life, leisure",p:"Listening Section 2"},
+ {t:"Student life",topics:"Study, education, research",p:"General Training Reading Section 2"},
+ {t:"Effective communication",topics:"Language, linguistics",p:"Academic Reading"},
+ {t:"On the move",topics:"Tourism, travel",p:"General Training Reading Section 1"},
+ {t:"Through the ages",topics:"Time, history",p:"Listening Section 4"},
+ {t:"The natural world",topics:"Flora and fauna, agriculture",p:"Academic Reading"},
+ {t:"Reaching for the skies",topics:"Space, the planets",p:"Listening Section 3"},
+ {t:"Design and innovation",topics:"Building, engineering",p:"Academic Reading"},
+ {t:"Information technology",topics:"Telecommunications, computers and technology",p:"Speaking Parts 1, 2, 3"},
+ {t:"The modern world",topics:"Globalisation, changing attitudes and trends",p:"Academic Writing Task 1 (describing a chart)"},
+ {t:"Urbanisation",topics:"Problems and solutions, big city life",p:"Academic Reading"},
+ {t:"The green revolution",topics:"The environment, climate change and pollution",p:"Academic Writing Task 1 (describing a process)"},
+ {t:"The energy crisis",topics:"Natural resources, alternative fuels",p:"Academic Reading"},
+ {t:"Talking business",topics:"Employment, management and marketing",p:"Academic Writing Task 2"},
+ {t:"The law",topics:"Crime, punishment",p:"General Training Writing Task 2"},
+ {t:"The media",topics:"The news, fame",p:"Academic Writing Task 2"},
+ {t:"The arts",topics:"Art appreciation, the performing arts",p:"Academic Reading"},
+ {t:"Language building 1",topics:"Using a dictionary, word families",p:""},
+ {t:"Language building 2",topics:"Learning vocabulary, collocation",p:""},
+ {t:"Academic Writing Task 1",topics:"Data, graphs and tables, diagrams and processes",p:"Academic Writing Task 1"},
+ {t:"Academic Writing Task 2",topics:"Linking words, opinion words, register",p:"Academic Writing Task 2"},
+ {t:"General Training Writing",topics:"Vocabulary for Writing Tasks 1 and 2",p:"General Training Writing"},
+];
+const CULLEN_ORDER=[21,22,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,23,24,25];
+const CULLEN_DAYS=13;
+const BOOKS=[
+ {id:"egu",name:"English Grammar in Use",by:"Raymond Murphy · Cambridge · 5-е издание",role:"Грамматика каждый день: 145 юнитов, по юниту за 2 дня. Слева правило, справа упражнения, в конце ключ.",url:"https://www.cambridge.org/9781108457651"},
+ {id:"cvi",name:"Cambridge Vocabulary for IELTS",by:"Pauline Cullen · Cambridge",role:"Слова по темам IELTS: 25 юнитов, по юниту за ~2 недели, в каждом — тренировка формата экзамена. Новое издание называется «IELTS Vocabulary Up to Band 6.0», порядок юнитов в нём может отличаться.",url:"https://www.cambridge.es/en/catalogue/exams/supplementary-material/cambridge-vocabulary-for/ielts"},
+ {id:"c20",name:"Cambridge IELTS 20 Academic",by:"Cambridge · настоящие экзамены прошлых лет",role:"4 реальных теста. С 9-го месяца — каждую субботу полный Listening + Reading на время."},
+ {id:"ocg",name:"The Official Cambridge Guide to IELTS",by:"Cambridge · издание 2025 года",role:"Стратегии по всем 4 частям и 8 официальных тестов. Для финального захода в месяцы 10–12."},
+ {id:"bc",name:"British Council: бесплатные пробные тесты",by:"IELTS Ready · официально и бесплатно",role:"Пробные тесты из настоящих экзаменов. С 6-го месяца — по субботам.",url:"https://takeielts.britishcouncil.org/en-gb/prepare/ielts-free-practice-mock-tests/academic"},
+ {id:"awl",name:"Academic Word List",by:"Averil Coxhead · 570 академических слов",role:"Самые частые слова академических текстов. С 4-го месяца — 4–5 слов из списка каждый день."},
+];
+function dayIndex(){const start=new Date(S.profile.startDate+"T00:00:00");return Math.max(0,Math.floor((Date.now()-start)/864e5))}
+function booksFor(dI){
+  const raw=Math.floor(dI/2)+1,review=raw>145,mu=review?((raw-146)*11%145)+1:raw;
+  const ci=Math.min(CULLEN_ORDER.length-1,Math.floor(dI/CULLEN_DAYS)),cu=CULLEN_ORDER[ci],cuDay=ci===CULLEN_ORDER.length-1&&dI>=CULLEN_DAYS*ci?Math.min(CULLEN_DAYS-1,dI-CULLEN_DAYS*ci):dI%CULLEN_DAYS;
+  return{mu,review,muDay:dI%2,mt:MURPHY[mu-1],cu,cuDay,ct:CULLEN[cu-1],awl:dI>=90?Math.min(10,1+Math.floor((dI-90)/30)):null};
+}
+function todayBooks(){
+  const dI=dayIndex(),b=booksFor(dI);const mn=+((S.profile.ob||{}).minutes||60);
+  b.dI=dI;b.words=mn<=15?10:mn<=30?12:15;
+  const wd=new Date().getDay();b.test=null;
+  if(dI>=150&&wd===6)b.test=dI>=240?{book:"Cambridge IELTS 20",n:(Math.floor((dI-240)/7)%4)+1}:{book:"British Council"};
+  return b;
+}
+function cullenStep(b){
+  const s=b.cuDay;
+  if(!b.ct.p)return s<4?"прочитай юнит и сделай упражнения страницы "+(Math.min(3,Math.floor(s/2)+1)):"повтори юнит и примени советы в сегодняшнем письме или разговоре";
+  if(s<2)return"страница 1 юнита: прочитай тексты и сделай упражнения";
+  if(s<4)return"страница 2 юнита: упражнения";
+  if(s<6)return"страница 3 юнита: упражнения";
+  if(s<7)return"тренировка формата экзамена: "+b.ct.p;
+  return"повтори слова юнита и сверь ответы с ключом";
+}
+function booksLine(){const b=todayBooks();return `Сегодня по книгам (день ${b.dI+1}): English Grammar in Use (Murphy), Unit ${b.mu} «${b.mt}» (${b.muDay?"второй день юнита — закрепление":"первый день юнита — правило"}); Cambridge Vocabulary for IELTS (Cullen), Unit ${b.cu} «${b.ct.t}» — темы: ${b.ct.topics}${b.ct.p?"; формат экзамена юнита: "+b.ct.p:""}.${b.awl?` Академические слова: Academic Word List, sublist ${b.awl}.`:""} Всё, что ты даёшь ученику, привязывай к этим юнитам и темам. Не цитируй тексты и упражнения из книг дословно — давай свои задания на те же правила и темы.`}
+function bookCard(){
+  const b=todayBooks(),d=dayRec();d.book=d.book||{};
+  const items=[
+    {id:"egu",book:"English Grammar in Use",unit:`Unit ${b.mu}: ${b.mt}`,task:b.muDay?"Сделай все упражнения на правой странице юнита и сверь с ключом в конце книги. Ошибки разбери с учителем.":"Прочитай левую страницу юнита (правило с примерами). Потом миссия «Грамматика» здесь — по этому же юниту."},
+    {id:"cvi",book:"Cambridge Vocabulary for IELTS",unit:`Unit ${b.cu}: ${b.ct.t}`,task:cullenStep(b)[0].toUpperCase()+cullenStep(b).slice(1)+"."},
+    {id:"words",book:"Слова дня",unit:`${b.words} слов по теме «${b.ct.t}»${b.awl?` + AWL, sublist ${b.awl}`:""}`,task:"Выучи их в миссии «Слова дня» и повтори вчерашние. Вечером напиши 5 предложений с новыми словами."},
+  ];
+  if(b.test)items.push({id:"test",book:b.test.book==="British Council"?"Пробный тест":"Cambridge IELTS 20",unit:b.test.book==="British Council"?"British Council, бесплатный тест":`Test ${b.test.n}: Listening + Reading`,task:b.test.book==="British Council"?"Пройди бесплатный пробный тест на сайте British Council (ссылка во вкладке «План»). Результат напиши учителю.":"Сделай Listening (30 мин) и Reading (60 мин) строго на время, проверь по ключу и посчитай балл."});
+  const doneN=items.filter(x=>d.book[x.id]).length;
+  const c=h(`<section class="card"><div class="row" style="justify-content:space-between"><div><div class="eyebrow">День ${b.dI+1} · по книгам</div><h2 style="margin-top:4px">Сегодня по книгам</h2></div><span class="eyebrow">${doneN}/${items.length}</span></div><div class="missions bk" style="margin-top:14px"></div><button class="btn ghost" type="button" style="margin-top:8px">Какие книги нужны →</button></section>`);
+  items.forEach(x=>{
+    const on=!!d.book[x.id];
+    const r=h(`<button class="mission ${on?"done":""}" type="button" aria-pressed="${on}"><span class="ic ${on?"":"c-yellow"}">${on?I.check:I.words}</span><span><b></b><span class="sub" style="display:block;font-weight:800;color:var(--ink)"></span><span class="sub tk"></span></span><span class="xp">${on?"готово":"+10 XP"}</span></button>`);
+    r.querySelector("b").textContent=x.book;r.querySelector(".sub").textContent=x.unit;r.querySelector(".tk").textContent=x.task;
+    r.onclick=()=>{if(d.book[x.id])return;d.book[x.id]=true;if(!award(null,10))persist("profile");render()};
+    c.querySelector(".bk").append(r);
+  });
+  c.querySelector(".btn.ghost").onclick=()=>{go("plan");setTimeout(()=>document.getElementById("books")?.scrollIntoView({behavior:"smooth"}),60)};
+  return c;
+}
+function booksSection(){
+  const b=todayBooks();
+  const s=h(`<section class="card" id="books"><div class="eyebrow">Учебники</div><h2 style="margin-top:4px">Твои книги</h2><p class="muted" style="margin:6px 0 12px;font-weight:600">Лучшие книги для IELTS — официальные кембриджские. Каждый день в приложении привязан к их юнитам: правило и упражнения — в книге, закрепление, слова и проверка — здесь. Книги купи бумажные или электронные у Cambridge; пиратские PDF я не беру.</p><div class="missions"></div></section>`);
+  const prog={egu:`Ты на Unit ${b.mu} из 145`,cvi:`Ты на Unit ${b.cu} «${b.ct.t}»`,awl:b.awl?`Сейчас sublist ${b.awl} из 10`:"Начнём с 4-го месяца"};
+  BOOKS.forEach(x=>{
+    const r=h(`<div class="mission" style="grid-template-columns:48px 1fr"><span class="ic c-blue">${I.words}</span><span><b></b><span class="sub" style="display:block"></span><span class="sub rl" style="display:block;color:var(--ink);margin-top:4px"></span><span class="sub pg" style="display:block;color:var(--coral);font-weight:800;margin-top:4px"></span></span></div>`);
+    r.querySelector("b").textContent=x.name;r.querySelector(".sub").textContent=x.by;r.querySelector(".rl").textContent=x.role;
+    if(prog[x.id])r.querySelector(".pg").textContent=prog[x.id];else r.querySelector(".pg").remove();
+    if(x.url){const a=document.createElement("a");a.href=x.url;a.target="_blank";a.rel="noopener";a.textContent="Открыть сайт →";a.className="mini";a.style.paddingLeft="0";a.style.color="var(--blue)";r.children[1].append(a)}
+    s.querySelector(".missions").append(r);
+  });
+  return s;
+}
+function monthBooks(i){const a=booksFor(Math.round(i*30.4)),z=booksFor(Math.round((i+1)*30.4)-1);const cu=[];for(let k=Math.floor(Math.round(i*30.4)/CULLEN_DAYS);k<=Math.min(CULLEN_ORDER.length-1,Math.floor((Math.round((i+1)*30.4)-1)/CULLEN_DAYS));k++)cu.push(CULLEN_ORDER[k]);return `Grammar in Use: ${a.review?"повтор юнитов":`Units ${a.mu}–${z.review?145:z.mu}`} · Vocabulary for IELTS: Unit ${[...new Set(cu)].join(", ")}`}
+
 /* ---------- plan helpers ---------- */
 function monthIndex(){
   if(S.profile.monthOverride!=null)return S.profile.monthOverride;
@@ -537,7 +635,8 @@ function teacherContext(){
 Ученик: 18 лет, родной язык — русский. Сейчас уровень по плану ${m.cefr} (старт с A1–A2). Цель: C1 и IELTS 7.0+ до 20 лет, свободно разговаривать с людьми.
 Сферы ученика: пилот (авиационный английский, радиообмен ИКАО), дизайнер и SMM-специалист; часто переговоры с людьми высокого уровня (руководители, CEO, крупные клиенты).
 Годовой план, месяц ${i+1} из 12 «${m.title.ru}», неделя ${weekInMonth()}.
-Грамматика месяца: ${m.grammar.ru}. Лексика месяца: ${m.vocab.ru}. Профессиональный фокус: ${m.pro.ru}. IELTS-фокус: ${m.ielts.ru}.
+${booksLine()}
+Профессиональный фокус месяца: ${m.pro.ru}. IELTS-фокус месяца: ${m.ielts.ru}.
 Доля английского в твоей речи сейчас ≈ ${m.ratio}% (объяснения правил — по-русски, практика — по-английски). Подбирай сложность английского под уровень ${m.cefr}.
 ${personaLine()}
 ${studentStatus()}`;
@@ -674,18 +773,20 @@ async function loadLesson(body,id,prompt,label,validate,retry){
 
 /* words */
 async function lessonWords(body){
-  const m=curMonth();
+  const m=curMonth(),bk=todayBooks();
   const known=S.notebook.words.slice(-80).map(w=>w.en).join(", ");
   const prompt=`${teacherContext()}
 
-Задание: составь 8 новых слов или выражений на сегодня.
-Микс: 3 общих/для IELTS по теме «${m.vocab.ru}», 3 профессиональных (${m.pro.ru}), 2 полезных фразы для переговоров с руководителями.
+Задание: составь РОВНО ${bk.words} новых слов или выражений на сегодня.
+Микс: ${bk.awl?`${bk.words-8} по теме юнита «${bk.ct.t}» (${bk.ct.topics}), 4 из Academic Word List sublist ${bk.awl}`:`${bk.words-4} по теме юнита «${bk.ct.t}» (${bk.ct.topics})`}, 2 профессиональных (${m.pro.ru}), 2 полезных фразы для переговоров с руководителями.
 Уровень ${m.cefr}: слова должны быть посильными, но новыми. Не повторяй уже выученные: ${known||"(пока нет)"}.
 Пример — короткое естественное предложение из жизни пилота, дизайнера или SMM.
 Ответь только JSON: {"words":[{"en":"слово","ru":"перевод","ipa":"/транскрипция/","example":"English sentence","example_ru":"перевод примера"}]}`;
-  const data=await loadLesson(body,"words",prompt,"Учитель подбирает слова…",d=>Array.isArray(d?.words)&&d.words.length>=4&&d.words.every(w=>w.en&&w.ru));
+  const data=await loadLesson(body,"words",prompt,"Учитель подбирает слова…",d=>Array.isArray(d?.words)&&d.words.length>=6&&d.words.every(w=>w.en&&w.ru));
   if(!data)return;
-  const words=data.words.slice(0,8);
+  const words=data.words.slice(0,15);
+  const ago=n=>{const x=new Date();x.setDate(x.getDate()-n);return dkey(x)};const revDays=[1,3,7,14].map(ago);
+  const review=S.notebook.words.filter(w=>revDays.includes(w.date)&&!words.some(n=>n.en.toLowerCase()===w.en.toLowerCase())).slice(-10);
   let i=0,phase="cards",qi=0,score=0;const quiz=[];
   const draw=()=>{
     body.innerHTML="";
@@ -713,7 +814,7 @@ async function lessonWords(body){
       body.append(opts);
     }else{
       const added=addWords(words);const first=award("words",20);
-      body.append(h(`<div class="view"><h2>Слова дня выучены</h2><p>Результат проверки: <b class="mono">${score}/${quiz.length}</b>. В твой словарь добавлено слов: ${added}.${first?"":" (XP за эту миссию уже был получен сегодня.)"}</p><div class="row"><button class="btn primary" type="button" data-a="home">К миссиям</button><button class="btn" type="button" data-a="again">Пройти ещё раз</button></div></div>`));
+      body.append(h(`<div class="view"><h2>Слова дня выучены</h2><p>Результат проверки: <b class="mono">${score}/${quiz.length}</b> (новых слов ${words.length}, повтор старых ${quiz.length-words.length}). В твой словарь добавлено слов: ${added}.${first?"":" (XP за эту миссию уже был получен сегодня.)"}</p><div class="row"><button class="btn primary" type="button" data-a="home">К миссиям</button><button class="btn" type="button" data-a="again">Пройти ещё раз</button></div></div>`));
       body.querySelector('[data-a="home"]').onclick=()=>go("today");body.querySelector('[data-a="again"]').onclick=()=>{i=0;qi=0;score=0;phase="cards";draw()};
     }
   };
@@ -725,6 +826,9 @@ async function lessonWords(body){
       const opts=[w,...others].sort(()=>Math.random()-.5);
       quiz.push({prompt:dir?`Как переводится «${w.en}»?`:`Как сказать по-английски «${w.ru}»?`,options:opts.map(o=>dir?o.ru:o.en),answer:opts.indexOf(w),res:null});
     });
+    const pool=[...words,...S.notebook.words.slice(-60)];
+    review.forEach(w=>{const others=pool.filter(o=>o.en!==w.en&&o.ru!==w.ru).sort(()=>Math.random()-.5).slice(0,3);if(others.length<3)return;const opts=[w,...others].sort(()=>Math.random()-.5);
+      quiz.push({prompt:`Повтор: как переводится «${w.en}»?`,options:opts.map(o=>o.ru),answer:opts.indexOf(w),res:null})});
   }
   draw();
 }
@@ -735,10 +839,10 @@ function addMistakes(list){for(const x of list){if(!x||!x.wrong||!x.right)contin
 
 /* grammar (also reused for mistake review) */
 async function lessonGrammar(body,opts={}){
-  const m=curMonth();
+  const m=curMonth(),bk=todayBooks();
   const prompt=opts.prompt||`${teacherContext()}
 
-Задание: урок грамматики на сегодня (неделя ${weekInMonth()} месяца). Выбери ОДНУ конкретную тему из «${m.grammar.ru}», подходящую для недели ${weekInMonth()} (неделя 1 — первая тема списка, дальше по порядку, неделя 4 — смешанное повторение).
+Задание: урок грамматики строго по English Grammar in Use, Unit ${bk.mu} «${bk.mt}»${bk.review?" (повтор пройденного юнита)":""}. ${bk.muDay?"Сегодня второй день юнита: короткое напоминание правила и более сложные задания, смешанные с соседними юнитами.":"Сегодня первый день юнита: объясни правило с нуля."} Ученик параллельно делает этот юнит в книге — твои задания должны быть СВОИМИ (не копируй упражнения книги).
 Объяснение — по-русски, просто, как для уровня ${m.cefr}. Все примеры и предложения в заданиях — из жизни пилота, дизайнера, SMM и деловых переговоров.
 8 заданий: 5 типа "mc" (4 варианта) и 3 типа "gap" (одно-два слова, в скобках подсказка-глагол). В "gap" поле answer — массив всех допустимых ответов.
 Ответь только JSON: {"topic":"название темы","explain_ru":"3–6 предложений","pattern":"формула, например: I/You/We + have + V3","examples":[{"en":"","ru":""}],"items":[{"type":"mc","q":"вопрос","options":["","","",""],"answer":0,"why_ru":"почему"},{"type":"gap","q":"She ___ (fly) to Almaty yesterday.","answer":["flew"],"why_ru":""}]}`;
@@ -749,7 +853,7 @@ async function lessonGrammar(body,opts={}){
     body.innerHTML="";
     if(qi===-1){
       const ex=h(`<div class="view explain"><div><div class="eyebrow">Тема</div><h2 style="margin-top:2px"></h2></div><div class="expl"></div>${data.pattern?'<div class="pattern"></div>':""}<ul class="ex-list"></ul><div><button class="btn primary" type="button">Начать упражнения (${items.length})</button></div></div>`);
-      ex.querySelector("h2").textContent=data.topic||"Грамматика";ex.querySelector(".expl").innerHTML=md(data.explain_ru||"");
+      ex.querySelector("h2").textContent=opts.prompt?(data.topic||"Работа над ошибками"):`Unit ${bk.mu}: ${bk.mt}`;if(!opts.prompt)ex.querySelector(".eyebrow").textContent="English Grammar in Use · Murphy";ex.querySelector(".expl").innerHTML=md(data.explain_ru||"");
       if(data.pattern)ex.querySelector(".pattern").textContent=data.pattern;
       (data.examples||[]).slice(0,4).forEach(e=>{const li=h(`<li><span></span><small></small></li>`);li.querySelector("span").textContent=e.en;li.querySelector("small").textContent=e.ru;li.prepend(Object.assign(h(`<button class="mini" type="button" aria-label="Слушать">${I.speaker}</button>`),{onclick:()=>speak(e.en)}));ex.querySelector(".ex-list").append(li)});
       ex.querySelector(".btn").onclick=()=>{qi=0;draw()};body.append(ex);return;
@@ -785,20 +889,25 @@ const norm=s=>String(s??"").toLowerCase().replace(/[’`]/g,"'").replace(/[.!?,]
 
 /* listening */
 async function lessonListen(body){
-  const m=curMonth();
+  const m=curMonth(),bk=todayBooks(),reading=/Reading/.test(bk.ct.p);
   const words=monthIndex()<3?"70–100":monthIndex()<7?"120–170":"180–250";
-  const prompt=`${teacherContext()}
+  const prompt=reading?`${teacherContext()}
 
-Задание: аудирование. Напиши короткий текст (${words} слов, уровень ${m.cefr}) — монолог или диалог из мира авиации, дизайна/SMM или деловых переговоров, используя грамматику месяца. Если диалог — помечай реплики «A:» и «B:».
+Задание: чтение в формате IELTS (${bk.ct.p}). Напиши текст (${monthIndex()<3?"100–150":monthIndex()<7?"180–250":"280–380"} слов, уровень ${m.cefr}) по теме юнита «${bk.ct.t}» (${bk.ct.topics}), с грамматикой Unit ${bk.mu} «${bk.mt}» и словами дня.
+Затем 5 вопросов на английском: 3 типа TRUE/FALSE/NOT GIVEN (options ровно ["TRUE","FALSE","NOT GIVEN"]) и 2 с 4 вариантами ответа.
+Ответь только JSON: {"title":"","text":"","translation_ru":"","questions":[{"q":"","options":["TRUE","FALSE","NOT GIVEN"],"answer":0}]}`:`${teacherContext()}
+
+Задание: аудирование в формате IELTS${/Listening/.test(bk.ct.p)?` (${bk.ct.p})`:""}. Напиши короткий текст (${words} слов, уровень ${m.cefr}) по теме юнита «${bk.ct.t}» (${bk.ct.topics}) — монолог или диалог, можно с героями-пилотами, дизайнерами или на деловой встрече; используй грамматику Unit ${bk.mu} «${bk.mt}». Если диалог — помечай реплики «A:» и «B:».
 Затем 4 вопроса с 4 вариантами ответа (на английском), проверяющих понимание деталей, как в IELTS Listening.
 Ответь только JSON: {"title":"","text":"","translation_ru":"","questions":[{"q":"","options":["","","",""],"answer":0}]}`;
-  const data=await loadLesson(body,"listen",prompt,"Учитель записывает аудио…",d=>d&&d.text&&Array.isArray(d.questions)&&d.questions.length>=2);
+  const data=await loadLesson(body,"listen",prompt,reading?"Учитель готовит текст…":"Учитель записывает аудио…",d=>d&&d.text&&Array.isArray(d.questions)&&d.questions.length>=2);
   if(!data)return;
   body.innerHTML="";let score=0,answered=0;const qs=data.questions.slice(0,5);
   const top=h(`<div class="view"><div><div class="eyebrow">Аудио</div><h2 style="margin-top:2px"></h2></div><p class="muted" style="margin:0">Послушай 1–2 раза, не подглядывая в текст. Потом ответь на вопросы. В конце повтори текст вслух за диктором (shadowing).</p>
     <div class="row"><button class="btn primary" type="button" data-a="play">${I.speaker} Слушать</button><button class="btn" type="button" data-a="slow">Медленно</button><button class="btn ghost" type="button" data-a="stop">${I.stop} Стоп</button><button class="btn ghost" type="button" data-a="text">Показать текст</button></div>
     <div class="note" data-a="script" hidden><div class="t" style="white-space:pre-wrap"></div><hr style="border:0;border-top:1px solid var(--line);margin:10px 0"><small class="muted tr" style="white-space:pre-wrap"></small></div></div>`);
-  top.querySelector("h2").textContent=data.title||"Listening";top.querySelector(".t").textContent=data.text;top.querySelector(".tr").textContent=data.translation_ru||"";
+  top.querySelector("h2").textContent=data.title||(reading?"Reading":"Listening");
+  if(reading){top.querySelector(".eyebrow").textContent="Reading · "+bk.ct.p;top.querySelector("p.muted").textContent="Прочитай текст и ответь на вопросы. TRUE — так сказано в тексте, FALSE — в тексте сказано обратное, NOT GIVEN — об этом в тексте нет информации.";top.querySelector('[data-a="script"]').hidden=false;top.querySelector('[data-a="text"]').textContent="Скрыть текст"}top.querySelector(".t").textContent=data.text;top.querySelector(".tr").textContent=data.translation_ru||"";
   top.querySelector('[data-a="play"]').onclick=()=>speak(data.text);
   top.querySelector('[data-a="slow"]').onclick=()=>speak(data.text,0.75);
   top.querySelector('[data-a="stop"]').onclick=stopSpeak;
@@ -819,12 +928,13 @@ async function lessonListen(body){
 
 /* IELTS writing / speaking with band score */
 async function lessonIelts(body){
-  const m=curMonth(),i=monthIndex(),writing=isWritingDay();
-  const kind=writing?(i<3?"Mini writing (short paragraph)":i<5?"Writing: formal letter/email":i<8?"Writing Task 1":"Writing Task 2"):(i<3?"Speaking Part 1":i<7?"Speaking Part 2 (cue card)":"Speaking Part 2 + Part 3");
+  const m=curMonth(),i=monthIndex(),bk=todayBooks(),up=bk.ct.p||"";
+  const writing=/Writing/.test(up)?true:/Speaking/.test(up)?false:isWritingDay();
+  const kind=/Writing Task 1/.test(up)&&i>=3?"Writing Task 1":/Writing Task 2/.test(up)&&i>=3?"Writing Task 2":/Speaking/.test(up)&&i>=3?"Speaking Part 2 (cue card)":writing?(i<3?"Mini writing (short paragraph)":i<5?"Writing: formal letter/email":i<8?"Writing Task 1":"Writing Task 2"):(i<3?"Speaking Part 1":i<7?"Speaking Part 2 (cue card)":"Speaking Part 2 + Part 3");
   const len=writing?(i<3?"60–90":i<5?"120–150":i<8?"150+":"250+"):(i<3?"4–6 предложений на каждый вопрос":"1–2 минуты речи");
   const prompt=`${teacherContext()}
 
-Задание: дай одно IELTS-задание формата «${kind}». Тема должна быть реалистичной для IELTS, но по возможности близкой к интересам ученика (авиация, дизайн, соцсети, работа, переговоры, технологии, путешествия). Объём ответа: ${len}.
+Задание: дай одно IELTS-задание формата «${kind}» по теме юнита «${bk.ct.t}» (${bk.ct.topics}) из Cambridge Vocabulary for IELTS — так ученик применит слова юнита. Тема реалистичная для IELTS, можно с уклоном в интересы ученика (авиация, дизайн, соцсети, переговоры). Объём ответа: ${len}.
 Если это Task 1 — опиши данные графика/таблицы словами в самом задании (картинок нет). Если Speaking Part 2 — дай карточку с 4 пунктами «You should say».
 Ответь только JSON: {"kind":"${kind}","prompt":"текст задания на английском","prompt_ru":"перевод задания","tips_ru":["2–3 совета по выполнению"],"useful":["4–6 полезных фраз на английском"]}`;
   const task=await loadLesson(body,"ielts",prompt,"Учитель выбирает задание IELTS…",d=>d&&d.prompt);
@@ -889,7 +999,7 @@ function viewPlan(app){
     <div class="seg" role="group" aria-label="Язык плана"><button type="button" data-l="ru" aria-pressed="${L==="ru"}">RU</button><button type="button" data-l="en" aria-pressed="${L==="en"}">EN</button></div></div>
     <div class="row" style="margin-top:14px"><label for="monthSel" class="muted" style="font-size:13px">${t("Я сейчас на месяце","I'm currently in month")}</label><select id="monthSel" class="field" style="width:auto;padding:7px 10px">${MONTHS.map((m,i)=>`<option value="${i}" ${i===cur?"selected":""}>${i+1} · ${m.cefr}</option>`).join("")}</select><button class="btn ghost" type="button" data-a="auto">${t("По календарю","Follow the calendar")}</button></div></section>`);
   head.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{planLang=b.dataset.l;ls.set(LS_KEY+".planLang",planLang);render()});
-  head.querySelector("#monthSel").onchange=e=>{S.profile.monthOverride=Number(e.target.value);persist("profile");render()};
+  head.querySelector("#monthSel").onchange=e=>{const k=Number(e.target.value);const sd=new Date();sd.setDate(sd.getDate()-Math.ceil(k*30.5));S.profile.startDate=dkey(sd);S.profile.monthOverride=null;persist("profile");render()};
   head.querySelector('[data-a="auto"]').onclick=()=>{S.profile.monthOverride=null;persist("profile");render()};
   app.append(head);
   const list=h(`<section class="months"></section>`);
@@ -897,7 +1007,7 @@ function viewPlan(app){
     const d=h(`<details class="month ${i===cur?"now":i<cur?"past":""}" ${i===cur?"open":""}><summary><span class="fl">${m.fl}</span><span style="min-width:0"><b></b><br><span class="cefr"></span></span><span class="cefr">${i<cur?t("пройдено","done"):i===cur?t("сейчас","now"):""}</span></summary><div class="body"></div></details>`);
     d.querySelector("b").textContent=`${t("Месяц","Month")} ${i+1}: ${m.title[L]}`;
     d.querySelector(".cefr").textContent=`${m.cefr} · ${t("английский в уроках","English in lessons")} ${m.ratio}%`;
-    const rows=[[t("Грамматика","Grammar"),m.grammar[L]],[t("Слова","Vocabulary"),m.vocab[L]],[t("Профессия","Job English"),m.pro[L]],["IELTS",m.ielts[L]],[t("Контрольная точка","Checkpoint"),m.milestone[L]]];
+    const rows=[[t("По книгам","Books"),monthBooks(i)],[t("Грамматика","Grammar"),m.grammar[L]],[t("Слова","Vocabulary"),m.vocab[L]],[t("Профессия","Job English"),m.pro[L]],["IELTS",m.ielts[L]],[t("Контрольная точка","Checkpoint"),m.milestone[L]]];
     rows.forEach(([k,v])=>{const r=h(`<div><b></b><span></span></div>`);r.querySelector("b").textContent=k;r.querySelector("span").textContent=v;d.querySelector(".body").append(r)});
     list.append(d);
   });
@@ -906,6 +1016,7 @@ function viewPlan(app){
     <div class="card"><h3>${t("Год 2 (19–20 лет)","Year 2 (age 19–20)")}</h3><p class="muted" style="margin:8px 0 0">${t("Закрепить C1 и поднять IELTS до 7.5+. Авиационный английский ИКАО Level 5 (Extended). Переговоры и выступления только на английском. Читать книги и смотреть фильмы без субтитров.","Lock in C1 and push IELTS to 7.5+. ICAO aviation English Level 5 (Extended). Negotiations and presentations in English only. Books and films without subtitles.")}</p></div></section>`);
   ROUTINE.forEach(([tm,ru,en])=>{const r=h(`<div><span class="mono muted"></span><span></span></div>`);r.querySelector(".mono").textContent=tm;r.lastChild.textContent=L==="ru"?ru:en;day.querySelector(".routine").append(r)});
   app.append(day);
+  app.append(booksSection());
 }
 
 /* ---------- PROGRESS ---------- */
@@ -1045,7 +1156,7 @@ function viewToday(app){
   const doneN=list.filter(x=>d.done.includes(x.id)).length;
   const hour=new Date().getHours();const greet=hour<5?"Не спится?":hour<12?"Доброе утро":hour<18?"Привет":"Добрый вечер";
   const hero=h(`<section class="hero-card" style="--c:${c.color}">
-    <div><div class="eyebrow">Месяц ${i+1} из 12 · ${esc(m.cefr)} → C1</div><h1></h1><p class="gl"></p>
+    <div><div class="eyebrow">День ${dayIndex()+1} · месяц ${i+1} · ${esc(m.cefr)} → C1</div><h1></h1><p class="gl"></p>
       <div class="xpbar"><i style="width:${Math.min(100,d.xp/goal*100)}%"></i></div><div class="xplabel">${d.xp} / ${goal} XP сегодня · ${doneN}/${list.length} миссий</div></div>
     <div class="hero-char"><div class="speech"></div></div>
       <div class="row"><button class="btn white" type="button" data-a="call">${I.phone} Позвонить ${esc(c.short)}</button>${doneN<list.length?`<button class="btn ghost-white" type="button" data-a="next">Продолжить →</button>`:""}</div></section>`);
@@ -1055,20 +1166,22 @@ function viewToday(app){
   hero.querySelector('[data-a="call"]').onclick=()=>startCall();
   hero.querySelector('[data-a="next"]')?.addEventListener("click",()=>{const nx=list.find(x=>!d.done.includes(x.id));if(nx)openMission(nx.id)});
   app.append(hero);
+  app.append(bookCard());
   const card=h(`<section class="card"><div class="row" style="justify-content:space-between"><h2>Миссии на сегодня</h2><span class="eyebrow">${doneN}/${list.length}</span></div><div class="missions" style="margin-top:14px"></div></section>`);
   const box=card.querySelector(".missions");
   for(const ms of list){
     const done=d.done.includes(ms.id);
-    let sub=ms.en+" · "+ms.min;
+    let sub=ms.en+" · "+ms.min;const bk=todayBooks();
+    if(ms.id==="words")sub=`${bk.words} новых слов · «${bk.ct.t}»${bk.awl?" + AWL":""} · и повтор старых`;
+    if(ms.id==="grammar")sub=`Grammar in Use · Unit ${bk.mu}: ${bk.mt}`;
+    if(ms.id==="listen"&&/Reading/.test(bk.ct.p)){sub="Reading · True / False / Not Given · "+ms.min}
     if(ms.id==="talk"&&!done)sub=`Голосом или текстом · ${Math.min(d.talk||0,TALK_TARGET)}/${TALK_TARGET} фраз`;
-    if(ms.id==="ielts")sub=(isWritingDay()?"Writing":"Speaking")+" с оценкой band · "+ms.min;
+    if(ms.id==="ielts")sub=(/Writing|Speaking/.test(bk.ct.p)&&monthIndex()>=3?bk.ct.p:(isWritingDay()?"Writing":"Speaking"))+" с оценкой band · "+ms.min;
     const b=h(`<button class="mission ${done?"done":""}" type="button"><span class="ic ${MCOL[ms.id]}">${done?I.check:I[ms.icon]}</span><span><b>${ms.ru}</b><span class="sub"></span></span><span class="xp">${done?"готово":"+"+ms.xp+" XP"}</span></button>`);
     b.querySelector(".sub").textContent=sub;b.onclick=()=>openMission(ms.id);box.append(b);
   }
   app.append(card);
   const duo=h(`<section class="grid2"></section>`);duo.append(hwCard(),targetCard());app.append(duo);
-  app.append(h(`<section class="card focus"><div class="eyebrow">Фокус месяца</div><h2 style="margin-top:4px">${esc(m.title.ru)}</h2>
-    <dl><dt>Грамматика</dt><dd>${esc(m.grammar.ru)}</dd><dt>Слова</dt><dd>${esc(m.vocab.ru)}</dd><dt>Профессия</dt><dd>${esc(m.pro.ru)}</dd><dt>IELTS</dt><dd>${esc(m.ielts.ru)}</dd><dt>Финиш месяца</dt><dd><b>${esc(m.milestone.ru)}</b></dd></dl></section>`));
   maybeIncoming();
   if(!cap.sample)app.append(h(`<p class="note info">Учитель оживёт, когда страница откроется на claude.ai. При первом задании нажми «Разрешить», чтобы он мог отвечать.</p>`));
 }
@@ -1388,7 +1501,7 @@ async function assignHomework(btn,body){
   const last=S.profile.hw?.kind;
   const prompt=`${teacherContext()}
 
-Задай домашнюю работу на завтра (15–20 минут), которая закрепляет тему месяца${words?` и сегодняшние слова: ${words}`:""}.
+Задай письменную или устную домашнюю работу на завтра (15–20 минут), которая закрепляет English Grammar in Use, Unit ${todayBooks().mu} «${todayBooks().mt}» и тему юнита «${todayBooks().ct.t}»${words?` и сегодняшние слова: ${words}`:""}. Упражнения из самих книг ученик делает отдельно — ты даёшь своё творческое задание на эти правила и слова.
 Тип: ${last==="write"?'"speak"':last==="speak"?'"write"':'"write" или "speak"'} ("write" — написать текст; "speak" — наговорить ответ в микрофон, он распознается в текст).
 Сделай задание интересным и про жизнь ученика: полёты, дизайн, SMM, переговоры с важными людьми. Объём под уровень ${curMonth().cefr}.
 Ответь только JSON: {"kind":"write","title":"короткое название","task_ru":"задание по-русски, в твоём характере","task_en":"то же по-английски","min_words":60}`;
