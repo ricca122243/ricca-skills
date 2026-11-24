@@ -203,6 +203,34 @@ textarea.field{min-height:160px;resize:vertical;line-height:1.55}
 .word small{display:block;color:var(--muted)}
 .empty{color:var(--muted);font-size:14px;padding:12px;border:1px dashed var(--line);border-radius:10px;text-align:center}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;z-index:20;box-shadow:var(--shadow)}
+/* call, games, homework */
+.overlay{position:fixed;inset:0;z-index:30;background:color-mix(in srgb,#06101c 60%,transparent);display:grid;place-items:center;padding:16px}
+.ring{background:var(--surface);color:var(--ink);border-radius:22px;padding:30px 24px;text-align:center;width:min(360px,100%);display:grid;gap:10px;justify-items:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.avatar{width:104px;height:104px;border-radius:50%;position:relative;flex:none}
+.avatar svg{width:100%;height:100%;display:block}
+.avatar.pulse::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:3px solid var(--sky);animation:pulse 1.4s infinite ease-out}
+.avatar.talking::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:3px solid var(--accent);animation:pulse .9s infinite ease-out}
+@keyframes pulse{0%{transform:scale(.92);opacity:.9}100%{transform:scale(1.3);opacity:0}}
+.callbtns{display:flex;gap:32px;justify-content:center;align-items:flex-start;margin-top:8px}
+.callbtns label{display:grid;justify-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.round{width:66px;height:66px;border-radius:50%;border:0;display:grid;place-items:center;color:#fff}
+.round svg{width:28px;height:28px}
+.round.green{background:#2C8655}.round.red{background:#C2392D}.round.blue{background:var(--sky)}
+.round.live{background:#C2392D;box-shadow:0 0 0 6px color-mix(in srgb,#C2392D 30%,transparent)}
+.round:disabled{opacity:.45;cursor:default}
+.hang svg{transform:rotate(135deg)}
+.call{display:grid;justify-items:center;gap:12px;text-align:center;padding-block:20px}
+.call .caption{max-width:52ch;font-size:17px;min-height:3em;line-height:1.5}
+.call .heard{max-width:52ch;font-size:14px;color:var(--muted);min-height:1.5em;font-style:italic}
+.tilegrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tbtn{border:1px solid var(--line);background:var(--surface);padding:12px 10px;border-radius:10px;font-weight:500;min-height:54px;overflow-wrap:anywhere}
+.tbtn.sel{border-color:var(--sky);background:var(--sky-soft)}
+.tbtn.ok{opacity:.5;border-color:var(--ok);background:var(--ok-soft);cursor:default}
+.tbtn.bad{border-color:var(--bad);background:var(--bad-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:52px;padding:8px;border-radius:12px;border:1px dashed var(--line)}
+.chips.answer{background:var(--surface-2)}
+.wchip{border:1px solid var(--line);background:var(--surface);padding:7px 12px;border-radius:10px;font-weight:500}
+.persona{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -227,7 +255,14 @@ textarea.field{min-height:160px;resize:vertical;line-height:1.55}
 <script>
 "use strict";
 /* ---------- icons ---------- */
+const BIRD='<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="var(--sky)"/><path d="M6 23c5-1 9-5 14-5s8 2 14-1c-3 5-8 7-12 7l-2 5-3-5c-4 0-8 0-11-1z" fill="#fff"/><path d="M20 18c1-4 4-6 8-6-1 2-2 4-4 5" fill="#fff"/><circle cx="25.5" cy="14.5" r="1" fill="var(--sky)"/><path d="M28 12l3 1-3 1z" fill="var(--accent)"/></svg>';
 const I={
+ phone:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11 11 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11 11 0 0 0 .6 3.6 1 1 0 0 1-.25 1z"/></svg>',
+ games:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M15 12h.01M18 14h.01"/></svg>',
+ radio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M7 9l10-5M8 15h.01M14 13h4M14 17h4"/></svg>',
+ puzzle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h4a2 2 0 1 1 4 0h4v4a2 2 0 1 1 0 4v4H4z"/></svg>',
+ bug:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>',
+ bolt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>',
  today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>',
  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
  plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 16l20-8-6 12-3-5-5-1z"/></svg>',
@@ -362,7 +397,7 @@ const CHAT_MODES=[
 const LS_KEY="berkut.v1";
 const todayKey=()=>dkey(new Date());
 function dkey(d){const z=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())}
-function defaultState(){return{profile:{startDate:todayKey(),monthOverride:null,xp:0,streak:0,lastActive:"",days:{},bands:[]},notebook:{words:[],mistakes:[]}}}
+function defaultState(){return{profile:{startDate:todayKey(),monthOverride:null,xp:0,streak:0,lastActive:"",days:{},bands:[],persona:"savage",hw:null,games:{}},notebook:{words:[],mistakes:[]}}}
 let S=defaultState();
 let chatState={mode:"free",turns:[]};
 let planLang="ru";
@@ -418,7 +453,9 @@ function teacherContext(){
 Сферы ученика: пилот (авиационный английский, радиообмен ИКАО), дизайнер и SMM-специалист; часто переговоры с людьми высокого уровня (руководители, CEO, крупные клиенты).
 Годовой план, месяц ${i+1} из 12 «${m.title.ru}», неделя ${weekInMonth()}.
 Грамматика месяца: ${m.grammar.ru}. Лексика месяца: ${m.vocab.ru}. Профессиональный фокус: ${m.pro.ru}. IELTS-фокус: ${m.ielts.ru}.
-Доля английского в твоей речи сейчас ≈ ${m.ratio}% (объяснения правил — по-русски, практика — по-английски). Подбирай сложность английского под уровень ${m.cefr}.`;
+Доля английского в твоей речи сейчас ≈ ${m.ratio}% (объяснения правил — по-русски, практика — по-английски). Подбирай сложность английского под уровень ${m.cefr}.
+${personaLine()}
+${studentStatus()}`;
 }
 
 /* ---------- xp / streak ---------- */
@@ -457,40 +494,45 @@ async function ask(input,opts={}){if(!cap.sample)throw{code:"unavailable"};retur
 async function askJson(input,opts={}){if(!cap.sample)throw{code:"unavailable"};return cap.sample.json(input,opts)}
 
 /* ---------- speech ---------- */
-async function speak(text,rate){
+async function speak(text,rate,lang="en"){
   const r=rate??(monthIndex()<4?0.85:1);
-  if(cap.tts){try{await cap.tts.speak(String(text).slice(0,2000),{language:"en",rate:r});return}catch(e){if(e&&e.code==="not_granted")cap.tts=null;else return}}
-  try{const u=new SpeechSynthesisUtterance(text);u.lang="en-GB";u.rate=r;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){toast("Озвучка недоступна в этом браузере")}
+  const opts={rate:r};if(lang)opts.language=lang;
+  if(cap.tts){try{await cap.tts.speak(String(text).slice(0,2000),opts);return}catch(e){if(e&&e.code==="not_granted")cap.tts=null;else return}}
+  return new Promise(res=>{try{const u=new SpeechSynthesisUtterance(text);u.lang=lang==="en"?"en-GB":(/[а-яё]/i.test(text)?"ru-RU":"en-GB");u.rate=r;u.onend=u.onerror=()=>res();speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){toast("Озвучка недоступна в этом браузере");res()}});
 }
 function stopSpeak(){try{cap.tts?.stop()}catch(e){}try{speechSynthesis.cancel()}catch(e){}}
-let dictTarget=null,dictBtn=null;
+let dictSink=null,dictPartial=null,dictStateCb=null;
 function bindDictation(){
-  cap.dict.onFinal(({text})=>{if(!dictTarget)return;const v=dictTarget.value;dictTarget.value=(v?v:"")+(v?text:text.trimStart());dictTarget.dispatchEvent(new Event("input"))});
-  cap.dict.onState(({state})=>{if(dictBtn){dictBtn.classList.toggle("live",state!=="idle");dictBtn.setAttribute("aria-label",state==="idle"?"Говорить":"Остановить запись")}});
+  cap.dict.onFinal(({text})=>{dictSink&&dictSink(text)});
+  cap.dict.onPartial(({text})=>{dictPartial&&dictPartial(text)});
+  cap.dict.onState(e=>{dictStateCb&&dictStateCb(e)});
   document.querySelectorAll("[data-mic]").forEach(b=>b.hidden=false);
 }
 function micButton(target){
   const b=h(`<button class="iconbtn" type="button" data-mic aria-label="Говорить">${I.mic}</button>`);
   b.hidden=!cap.dict;
-  b.onclick=()=>{if(!cap.dict)return;if(cap.dict.active()&&dictBtn===b){cap.dict.stop();return}
-    dictTarget=target;dictBtn=b;cap.dict.start({language:"en"}).catch(e=>{if(e&&e.code==="not_granted"){toast("Микрофон не разрешён — можно печатать");b.hidden=true}})};
+  b.onclick=()=>{if(!cap.dict)return;if(cap.dict.active()&&b.classList.contains("live")){cap.dict.stop();return}
+    dictPartial=null;
+    dictSink=text=>{const v=target.value;target.value=v+(v?text:text.trimStart());target.dispatchEvent(new Event("input"))};
+    dictStateCb=({state})=>{b.classList.toggle("live",state!=="idle");b.setAttribute("aria-label",state==="idle"?"Говорить":"Остановить запись")};
+    cap.dict.start({language:"en"}).catch(e=>{if(e&&e.code==="not_granted"){toast("Микрофон не разрешён — можно печатать");b.hidden=true}})};
   return b;
 }
 
 /* ---------- router ---------- */
-const TABS=[{id:"today",ru:"Сегодня",icon:"today"},{id:"teacher",ru:"Учитель",icon:"chat"},{id:"plan",ru:"План",icon:"plan"},{id:"progress",ru:"Прогресс",icon:"stats"}];
+const TABS=[{id:"today",ru:"Сегодня",icon:"today"},{id:"teacher",ru:"Учитель",icon:"chat"},{id:"games",ru:"Игры",icon:"games"},{id:"plan",ru:"План",icon:"plan"},{id:"progress",ru:"Прогресс",icon:"stats"}];
 let route="today",lesson=null;
 function buildTabs(){for(const host of [$("#tabsTop"),$("#tabsBottom")]){host.innerHTML="";for(const t of TABS){const b=h(`<button class="tab" type="button">${I[t.icon]}<span>${t.ru}</span></button>`);b.dataset.tab=t.id;b.onclick=()=>go(t.id);host.append(b)}}}
-function go(id){stopSpeak();lesson=null;route=id;if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);render();window.scrollTo({top:0})}
+function go(id){if(route==="call"&&id!=="call")endCall();stopSpeak();lesson=null;route=id;if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);render();window.scrollTo({top:0})}
 function render(){
   document.querySelectorAll(".tab").forEach(b=>{if(b.dataset.tab===route)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
   updateStats();
   const app=$("#app");app.innerHTML="";
   if(lesson){app.append(lesson.el);return}
-  ({today:viewToday,teacher:viewTeacher,plan:viewPlan,progress:viewProgress}[route]||viewToday)(app);
+  ({today:viewToday,teacher:viewTeacher,games:viewGames,call:viewCall,plan:viewPlan,progress:viewProgress}[route]||viewToday)(app);
 }
 function rerenderIfAiView(){if(!lesson&&(route==="teacher"||route==="today"))render()}
-window.addEventListener("hashchange",()=>{const id=location.hash.slice(1);if(TABS.some(t=>t.id===id)&&id!==route)go(id)});
+window.addEventListener("hashchange",()=>{const id=location.hash.slice(1);if(TABS.some(t=>t.id===id)&&id!==route&&route!=="call")go(id)});
 
 /* ---------- TODAY ---------- */
 function viewToday(app){
@@ -523,6 +565,8 @@ function viewToday(app){
   app.append(list);
   app.append(h(`<section class="card focus"><div class="eyebrow">Фокус месяца · ${esc(m.fl)}</div><h2 style="margin-top:4px">${esc(m.title.ru)}</h2>
     <dl><dt>Грамматика</dt><dd>${esc(m.grammar.ru)}</dd><dt>Слова</dt><dd>${esc(m.vocab.ru)}</dd><dt>Профессия</dt><dd>${esc(m.pro.ru)}</dd><dt>IELTS</dt><dd>${esc(m.ielts.ru)}</dd><dt>Контрольная точка</dt><dd><b>${esc(m.milestone.ru)}</b></dd></dl></section>`));
+  const duo=h(`<section class="grid2"></section>`);duo.append(callCard(),hwCard());app.append(duo);
+  maybeIncoming();
   if(!cap.sample)app.append(h(`<p class="note info">ИИ-учитель включится, когда страница загрузится на claude.ai. Первое задание попросит разрешение «использовать Claude» — нажми «Разрешить».</p>`));
 }
 const isWritingDay=()=>new Date().getDate()%2===0;
@@ -540,12 +584,12 @@ function openMission(id){
   ({words:lessonWords,grammar:lessonGrammar,listen:lessonListen,ielts:lessonIelts}[id])(body);
 }
 function cacheKey(id){return LS_KEY+".lesson."+todayKey()+"."+id+"."+monthIndex()}
-async function loadLesson(body,id,prompt,label,validate){
+async function loadLesson(body,id,prompt,label,validate,retry){
   const k=cacheKey(id);const cached=ls.get(k);
   if(cached&&validate(cached))return cached;
   body.innerHTML=thinking(label);
-  try{const data=await askJson(prompt);if(!validate(data))throw{code:"invalid_json"};ls.set(k,data);return data}
-  catch(e){body.innerHTML="";const n=h(`<div class="view"><p class="note bad"></p><div><button class="btn primary" type="button">${I.refresh} Ещё раз</button></div></div>`);n.querySelector("p").textContent=errCopy(e);n.querySelector("button").onclick=()=>MISSIONS.some(x=>x.id===id)?openMission(id):reviewMistakes();body.append(n);return null}
+  try{const data=await askJson(prompt,{cache:false});if(!validate(data))throw{code:"invalid_json"};ls.set(k,data);return data}
+  catch(e){body.innerHTML="";const n=h(`<div class="view"><p class="note bad"></p><div><button class="btn primary" type="button">${I.refresh} Ещё раз</button></div></div>`);n.querySelector("p").textContent=errCopy(e);n.querySelector("button").onclick=()=>retry?retry():MISSIONS.some(x=>x.id===id)?openMission(id):reviewMistakes();body.append(n);return null}
 }
 
 /* words */
@@ -782,9 +826,11 @@ function parseReply(text){
   return{fixes,body};
 }
 function viewTeacher(app){
-  const head=h(`<section class="card"><div class="row" style="justify-content:space-between"><div><div class="eyebrow">Твой учитель · RU / EN</div><h2 style="margin-top:2px">Беркут на связи</h2></div><button class="btn ghost" type="button" data-a="new">${I.refresh} Новый разговор</button></div><div class="modes" role="group" aria-label="Режим" style="margin-top:12px"></div></section>`);
+  const head=h(`<section class="card"><div class="row" style="justify-content:space-between"><div><div class="eyebrow">Твой учитель · RU / EN</div><h2 style="margin-top:2px">Беркут на связи</h2></div><div class="row"><button class="btn primary" type="button" data-a="call">${I.phone} Позвонить</button><button class="btn ghost" type="button" data-a="new">${I.refresh} Новый разговор</button></div></div><div class="modes" role="group" aria-label="Режим" style="margin-top:12px"></div></section>`);
+  head.append(personaRow());
   const modes=head.querySelector(".modes");
   CHAT_MODES.forEach(md=>{const b=h(`<button class="chip" type="button"></button>`);b.textContent=md.ru;b.setAttribute("aria-pressed",String(md.id===chatState.mode));b.onclick=()=>{if(chatState.mode===md.id)return;chatState={mode:md.id,turns:[]};saveChat();render()};modes.append(b)});
+  head.querySelector('[data-a="call"]').onclick=()=>startCall();
   head.querySelector('[data-a="new"]').onclick=()=>{chatCtl?.abort();chatState.turns=[];saveChat();render()};
   app.append(head);
   const chat=h(`<section class="chat" aria-live="polite"></section>`);app.append(chat);
@@ -921,6 +967,366 @@ ${list}
 Составь урок «работа над ошибками»: найди 1–2 главные закономерности в этих ошибках, объясни их по-русски и дай 8 НОВЫХ заданий на те же правила (не копируй предложения ученика). 5 заданий "mc" (4 варианта) и 3 "gap" (answer — массив допустимых ответов).
 Ответь только JSON: {"topic":"","explain_ru":"","pattern":"","examples":[{"en":"","ru":""}],"items":[{"type":"mc","q":"","options":["","","",""],"answer":0,"why_ru":""},{"type":"gap","q":"","answer":[""],"why_ru":""}]}`;
   lessonGrammar(body,{prompt,key:"review."+S.notebook.mistakes.length,label:"Беркут разбирает твои ошибки…",mission:false,noSave:true});
+}
+
+/* ---------- persona ---------- */
+const PERSONAS={
+ kind:{ru:"Добрый",brief:"Добрый и терпеливый наставник. Хвалишь за успехи, мягко исправляешь, шутишь по-доброму."},
+ strict:{ru:"Строгий",brief:"Строгий лётный инструктор: коротко, по делу, требуешь точности, похвала — редко и только заслуженная. Юмор сухой. Без мата."},
+ savage:{ru:"Жёсткий 18+",brief:"Жёсткий тренер в стиле старого армейского лётного инструктора. Ученик совершеннолетний и сам попросил такой стиль: можно материться и крепко ругаться по-русски (иногда по-английски), особенно когда он ленится, пропускает занятия, не сдаёт домашку или повторяет одну и ту же ошибку. Чем дольше он не может что-то выучить, тем жёстче. Ругай за ошибки и лень, но никогда не оскорбляй его личность, внешность, семью, национальность или ум в целом — мат для эмоций, юмора и мотивации. Когда реально заслужил — хвали от души (тоже можно с матом). Цель одна: чтобы он выучил английский."},
+};
+function personaLine(){const p=PERSONAS[S.profile.persona]||PERSONAS.savage;return "Характер учителя: "+p.brief+" Говори живо и свободно, как реальный человек, а не учебник: можно сленг, шутки, эмоции."}
+function daysBetween(a,b){return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/864e5)}
+function studentStatus(){
+  const counts={};S.notebook.mistakes.forEach(m=>{const k=norm(m.right);if(k)counts[k]=(counts[k]||0)+1});
+  const rep=Object.entries(counts).filter(([,c])=>c>1).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,c])=>`«${k}» ×${c}`);
+  const hw=S.profile.hw;const overdue=hw&&hw.status==="open"?Math.max(0,daysBetween(hw.assigned,todayKey())-1):0;
+  const d=S.profile.days[todayKey()];
+  return `Состояние ученика: серия ${liveStreak()} дн. подряд; сегодня выполнено миссий ${d?d.done.length:0} из 5; ${rep.length?"повторяет одни и те же ошибки: "+rep.join(", "):"повторяющихся ошибок пока нет"}; ${overdue?"домашка ПРОСРОЧЕНА на "+overdue+" дн.":hw&&hw.status==="open"?"домашка задана, срок не прошёл":"долгов по домашке нет"}.`;
+}
+function personaRow(){
+  const row=h(`<div class="persona"><span class="eyebrow">Характер учителя</span><div class="seg" role="group" aria-label="Характер учителя"></div></div>`);
+  Object.entries(PERSONAS).forEach(([id,p])=>{const b=h(`<button type="button"></button>`);b.textContent=p.ru;b.setAttribute("aria-pressed",String((S.profile.persona||"savage")===id));
+    b.onclick=()=>{S.profile.persona=id;persist("profile");row.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));toast(id==="savage"?"Ну держись. Жёсткий режим.":id==="strict"?"Режим инструктора":"Добрый режим")};
+    row.querySelector(".seg").append(b)});
+  return row;
+}
+const DECLINE={
+  kind:"Ничего, позвоню позже. Но разговорную практику сегодня всё равно сделай.",
+  strict:"Сбросил звонок инструктора. Разговорная практика сама себя не сделает. Жду.",
+  savage:"Ты чё, сбросил меня?! Охренеть. Так ты C1 не увидишь даже в бинокль. Позвони сам, когда созреешь.",
+};
+
+/* ---------- call ---------- */
+let call=null,incomingTimer=null,incomingShownThisLoad=false;
+function callCard(){
+  const d=dayRec();
+  const c=h(`<div class="card"><div class="eyebrow">Звонок учителю</div><h3 style="margin-top:2px">Голосовой урок с Беркутом</h3><p class="muted" style="margin:6px 0 12px;font-size:14px"></p><button class="btn primary" type="button">${I.phone} Позвонить сейчас</button></div>`);
+  c.querySelector("p").textContent=d.callDeclined&&!d.done.includes("talk")?DECLINE[S.profile.persona||"savage"]:"Разговор голосом: ты говоришь в микрофон, Беркут отвечает вслух и поправляет ошибки. Каждая твоя реплика идёт в миссию «Разговор».";
+  c.querySelector("button").onclick=()=>startCall();
+  return c;
+}
+function maybeIncoming(){
+  const d=dayRec();
+  if(incomingShownThisLoad||d.callShown||d.done.includes("talk")||!cap.sample)return;
+  clearTimeout(incomingTimer);
+  incomingTimer=setTimeout(()=>{if(route!=="today"||lesson||document.querySelector(".overlay"))return;showIncoming()},2500);
+}
+function ringTone(){
+  try{const AC=window.AudioContext||window.webkitAudioContext;const ac=new AC();let t=ac.currentTime;
+    for(let k=0;k<4;k++){for(const f of [480,620]){const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.06,t+.05);g.gain.setValueAtTime(.06,t+.8);g.gain.linearRampToValueAtTime(0,t+.9);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.95)}t+=2.2}
+    return ()=>{try{ac.close()}catch(e){}}}catch(e){return ()=>{}}
+}
+function showIncoming(){
+  incomingShownThisLoad=true;const d=dayRec();d.callShown=true;persist("profile");
+  const ov=h(`<div class="overlay" role="dialog" aria-modal="true" aria-label="Входящий звонок"><div class="ring"><div class="avatar pulse">${BIRD}</div><div class="eyebrow">Входящий звонок</div><h2>Беркут звонит…</h2><p class="muted" style="margin:0;font-size:14px">Урок разговорного английского · 10–15 мин</p>
+    <div class="callbtns"><label><button class="round red hang" type="button" data-a="no" aria-label="Сбросить">${I.phone}</button>Сбросить</label><label><button class="round green" type="button" data-a="yes" aria-label="Принять">${I.phone}</button>Принять</label></div></div></div>`);
+  const stopRing=ringTone();
+  const close=()=>{stopRing();ov.remove()};
+  ov.querySelector('[data-a="yes"]').onclick=()=>{close();startCall()};
+  ov.querySelector('[data-a="no"]').onclick=()=>{close();d.callDeclined=true;persist("profile");toast("Звонок сброшен");if(route==="today"&&!lesson)render()};
+  document.body.append(ov);ov.querySelector('[data-a="yes"]').focus();
+}
+function startCall(){
+  if(!cap.sample){toast("Звонок работает, когда страница открыта на claude.ai");return}
+  stopSpeak();lesson=null;route="call";call={turns:[],t0:Date.now(),timer:null,busy:false,listening:false,buf:"",ctl:null,lang:monthIndex()<3?"ru":"en",said:0};
+  render();
+}
+function callRules(){
+  return `${teacherContext()}
+
+Сейчас это ТЕЛЕФОННЫЙ ЗВОНОК голосом. Правила:
+- Говори как живой человек по телефону: 1–3 коротких предложения за раз, без списков, без форматирования, без эмодзи, без блока [[FIX]].
+- Если ученик ошибся по-английски — исправь голосом одной фразой (например: «Не "I go yesterday", а "I went yesterday". Повтори!») и продолжай разговор.
+- Задавай один вопрос за раз. Сначала коротко спроси, как дела с уроками и домашкой (учти состояние ученика), потом практикуй разговор по теме месяца и его профессии (пилот, дизайн, SMM, переговоры).
+- Речь ученика распознаётся автоматически — странные слова из-за распознавания не считай ошибками.
+- Если ученик говорит по-русски — помоги сказать это по-английски и попроси повторить.`;
+}
+function viewCall(app){
+  if(!call){go("today");return}
+  if(call.el){app.append(call.el);return}
+  const el=h(`<section class="call card">
+    <div class="avatar">${BIRD}</div>
+    <div><h2>Беркут</h2><div class="mono muted ctime">00:00</div></div>
+    <div class="eyebrow cstate">Соединение…</div>
+    <div class="caption"></div>
+    <div class="heard"></div>
+    <form class="row cfall" style="width:100%;max-width:520px" hidden><input class="field" id="callText" autocomplete="off" placeholder="Микрофон недоступен — напиши ответ" style="flex:1;min-width:0"><button class="btn primary" type="submit">Сказать</button></form>
+    <div class="callbtns">
+      <label><button class="round red hang" type="button" data-a="hang" aria-label="Завершить звонок">${I.phone}</button>Завершить</label>
+      <label><button class="round blue" type="button" data-a="talk" aria-label="Говорить" disabled>${I.mic}</button><span class="tlabel">Говорить</span></label>
+      <label><button class="round blue" type="button" data-a="repeat" aria-label="Повторить последнюю фразу" style="background:var(--surface-2);color:var(--ink);border:1px solid var(--line)">${I.speaker}</button>Повтор</label>
+    </div>
+    <div class="row" style="justify-content:center"><span class="muted" style="font-size:13px">Я говорю на</span><div class="seg" role="group" aria-label="Язык микрофона"><button type="button" data-lang="en">English</button><button type="button" data-lang="ru">Русском</button></div></div>
+    <p class="muted" style="font-size:12px;margin:0;max-width:46ch">Нажми синюю кнопку и говори. Закончил — нажми ещё раз, Беркут ответит голосом.</p>
+  </section>`);
+  app.append(el);call.el=el;
+  const $c=s=>el.querySelector(s);
+  const setState=t=>{$c(".cstate").textContent=t};
+  const talk=$c('[data-a="talk"]'),av=$c(".avatar");
+  const syncLang=()=>el.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===call.lang)));
+  el.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{call.lang=b.dataset.lang;syncLang()});syncLang();
+  call.timer=setInterval(()=>{if(!call)return;const s=Math.floor((Date.now()-call.t0)/1000);const t=el.querySelector(".ctime");if(t)t.textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")},1000);
+  if(!cap.dict)$c(".cfall").hidden=false;
+  $c(".cfall").onsubmit=e=>{e.preventDefault();const v=$c("#callText").value.trim();if(!v||call.busy)return;$c("#callText").value="";callTurn(v)};
+  $c('[data-a="hang"]').onclick=()=>go("today");
+  $c('[data-a="repeat"]').onclick=()=>{const last=[...call.turns].reverse().find(t=>t.role==="assistant");if(last&&!call.busy)speakCall(last.content)};
+  talk.onclick=()=>{
+    if(!call||call.busy||!cap.dict)return;
+    if(!call.listening){
+      stopSpeak();call.listening=true;call.buf="";$c(".heard").textContent="";
+      dictSink=t=>{call.buf+=(call.buf?t:t.trimStart());$c(".heard").textContent=call.buf};
+      dictPartial=t=>{if(t)$c(".heard").textContent=(call.buf?call.buf+" ":"")+t};
+      dictStateCb=()=>{};
+      talk.classList.add("live");talk.setAttribute("aria-label","Закончить фразу");$c(".tlabel").textContent="Готово";setState("Слушаю… нажми, когда закончишь");
+      cap.dict.start({language:call.lang}).catch(e=>{if(!call)return;call.listening=false;talk.classList.remove("live");$c(".tlabel").textContent="Говорить";
+        if(e&&e.code==="not_granted"){$c(".cfall").hidden=false;setState("Микрофон не разрешён — пиши текстом")}else if(e&&e.code!=="stopped")setState("Микрофон не включился. Нажми ещё раз")});
+    }else{
+      call.listening=false;talk.classList.remove("live");talk.setAttribute("aria-label","Говорить");$c(".tlabel").textContent="Говорить";
+      cap.dict.stop().then(()=>{const t=call&&call.buf.trim();if(!call)return;if(t)callTurn(t);else setState("Не расслышал. Нажми и говори ещё раз")});
+    }
+  };
+  async function speakCall(text){if(!call)return;av.classList.add("talking");setState("Беркут говорит…");await speak(text,monthIndex()<4?0.92:1,null);if(!call)return;av.classList.remove("talking");setState(cap.dict?"Твоя очередь — нажми и говори":"Твоя очередь — напиши ответ")}
+  async function callTurn(userText){
+    call.busy=true;talk.disabled=true;
+    if(userText){call.turns.push({role:"user",content:userText});call.said++;const d=dayRec();d.talk=(d.talk||0)+1;if(d.talk>=TALK_TARGET&&!d.done.includes("talk"))award("talk",25);else persist("profile")}
+    else call.turns.push({role:"user",content:"(Ученик взял трубку. Начни разговор первым.)"});
+    setState("Беркут думает…");
+    const turns=call.turns.slice(-14);while(turns.length&&turns[0].role!=="user")turns.shift();
+    call.ctl=new AbortController();
+    try{
+      const {text}=await ask([{role:"user",content:callRules()},{role:"assistant",content:"Понял, звоню."},...turns],{cache:false,signal:call.ctl.signal,modelTier:"quick"});
+      if(!call)return;
+      const clean=text.replace(/\[\[\/?FIX\]\]/g,"").replace(/\*\*/g,"").trim();
+      call.turns.push({role:"assistant",content:clean});
+      $c(".caption").textContent=clean;$c(".heard").textContent="";
+      call.busy=false;talk.disabled=false;
+      await speakCall(clean);
+    }catch(e){
+      if(!call)return;call.turns.pop();
+      call.busy=false;talk.disabled=false;
+      if(e&&e.code==="cancelled")return;
+      $c(".caption").textContent=errCopy(e);setState("Связь прервалась");
+    }
+  }
+  callTurn(null);
+}
+function endCall(){
+  if(!call)return;
+  const secs=Math.floor((Date.now()-call.t0)/1000);
+  clearInterval(call.timer);try{call.ctl?.abort()}catch(e){}
+  if(call.listening&&cap.dict)cap.dict.stop().catch(()=>{});
+  dictSink=dictPartial=dictStateCb=null;
+  const said=call.said;call=null;stopSpeak();
+  toast(`Звонок завершён · ${Math.floor(secs/60)}:${String(secs%60).padStart(2,"0")} · твоих фраз: ${said}`);
+}
+
+/* ---------- homework ---------- */
+function hwCard(){
+  const hw=S.profile.hw,t=todayKey(),d=dayRec();
+  const c=h(`<div class="card"><div class="eyebrow">Домашняя работа</div><h3 style="margin-top:2px"></h3><div class="view hwbody" style="gap:10px;margin-top:8px"></div></div>`);
+  const title=c.querySelector("h3"),body=c.querySelector(".hwbody");
+  if(hw&&hw.status==="open"){
+    const late=daysBetween(hw.assigned,t)-1;
+    title.textContent=late>0?`Просрочено на ${late} дн.!`:hw.assigned===t?"Задано на завтра (можно сделать сразу)":"Сдай сегодня";
+    const task=h(`<div><b></b><p style="margin:4px 0 0"></p><p class="muted" style="margin:4px 0 0;font-size:13px"></p></div>`);
+    task.querySelector("b").textContent=hw.title||"Задание";task.querySelector("p").textContent=hw.task_ru;task.querySelector(".muted").textContent=hw.task_en||"";
+    body.append(task);
+    const row=h(`<div class="row" style="flex-wrap:nowrap;align-items:flex-end"><textarea class="field" id="hwAnswer" style="min-height:120px" placeholder="${hw.kind==="speak"?"Нажми микрофон и говори по-английски…":"Write in English…"}"></textarea></div>`);
+    const ta=row.querySelector("textarea");ta.value=ls.get(LS_KEY+".hwdraft")||"";ta.oninput=()=>ls.set(LS_KEY+".hwdraft",ta.value);
+    row.append(micButton(ta));body.append(row);
+    const go2=h(`<div class="row" style="justify-content:space-between"><span class="mono muted" style="font-size:12px">минимум ${Number(hw.min_words)||50} слов</span><button class="btn accent" type="button">Сдать на проверку</button></div>`);
+    const out=h(`<div></div>`);body.append(go2,out);
+    go2.querySelector("button").onclick=async e=>{const btn=e.currentTarget;
+      const ans=ta.value.trim();const n=(ans.match(/\S+/g)||[]).length;
+      if(n<Math.min(20,Number(hw.min_words)||20)){toast("Слишком мало. Минимум "+Math.min(20,Number(hw.min_words)||20)+" слов");return}
+      btn.disabled=true;out.innerHTML=thinking("Беркут проверяет домашку…");
+      const prompt=`${teacherContext()}
+
+Проверь домашнюю работу ученика.
+Задание: ${hw.task_ru} / ${hw.task_en||""}. Требовалось минимум ${hw.min_words||50} слов, написано ${n}.
+Сдано ${late>0?`С ОПОЗДАНИЕМ на ${late} дн.`:"вовремя"}.
+Ответ ученика:
+"""${ans}"""
+Оцени по 10-балльной шкале, честно. Комментарий — в твоём характере (2–4 предложения, по-русски с вкраплениями английского).
+Ответь только JSON: {"score":7,"comment":"","fixes":[{"wrong":"","right":"","why_ru":""}]}  (fixes — до 6 главных ошибок)`;
+      try{
+        const r=await askJson(prompt);
+        hw.status="done";hw.doneDate=t;hw.score=Math.max(0,Math.min(10,Number(r.score)||0));hw.comment=String(r.comment||"");hw.fixes=(r.fixes||[]).slice(0,6);
+        addMistakes(hw.fixes);ls.del(LS_KEY+".hwdraft");
+        if(!award(null,late>0?15:30))persist("profile");
+        if(route==="today"&&!lesson)render();
+      }catch(err){out.innerHTML="";const p=h(`<p class="note bad"></p>`);p.textContent=errCopy(err);out.append(p);btn.disabled=false}
+    };
+    return c;
+  }
+  if(hw&&hw.status==="done"&&hw.doneDate===t){
+    title.textContent=`Домашка сдана: ${hw.score}/10`;
+    const cm=h(`<p style="margin:0"></p>`);cm.textContent=hw.comment;body.append(cm);
+    (hw.fixes||[]).forEach(f=>body.append(fixEl(f.wrong,f.right,f.why_ru)));
+  }else title.textContent="Пока не задано";
+  if(!hw||hw.assigned!==t){
+    if(d.done.length>=3){
+      const b=h(`<button class="btn accent" type="button">Получить домашку на завтра</button>`);b.onclick=()=>assignHomework(b,body);body.append(b);
+    }else body.append(h(`<p class="muted" style="margin:0;font-size:14px">Выполни 3 миссии — Беркут задаст домашку на завтра. Не сдашь вовремя — получишь по полной.</p>`));
+  }
+  return c;
+}
+async function assignHomework(btn,body){
+  btn.disabled=true;const th=h(`<div>${thinking("Беркут придумывает домашку…")}</div>`);body.append(th);
+  const words=S.notebook.words.filter(w=>w.date===todayKey()).map(w=>w.en).join(", ");
+  const last=S.profile.hw?.kind;
+  const prompt=`${teacherContext()}
+
+Задай домашнюю работу на завтра (15–20 минут), которая закрепляет тему месяца${words?` и сегодняшние слова: ${words}`:""}.
+Тип: ${last==="write"?'"speak"':last==="speak"?'"write"':'"write" или "speak"'} ("write" — написать текст; "speak" — наговорить ответ в микрофон, он распознается в текст).
+Сделай задание интересным и про жизнь ученика: полёты, дизайн, SMM, переговоры с важными людьми. Объём под уровень ${curMonth().cefr}.
+Ответь только JSON: {"kind":"write","title":"короткое название","task_ru":"задание по-русски, в твоём характере","task_en":"то же по-английски","min_words":60}`;
+  try{
+    const r=await askJson(prompt);if(!r||!r.task_ru)throw{code:"invalid_json"};
+    S.profile.hw={assigned:todayKey(),status:"open",kind:r.kind==="speak"?"speak":"write",title:String(r.title||"Домашка"),task_ru:String(r.task_ru),task_en:String(r.task_en||""),min_words:Math.max(20,Math.min(300,Number(r.min_words)||60))};
+    persist("profile");render();
+  }catch(e){th.remove();btn.disabled=false;const p=h(`<p class="note bad"></p>`);p.textContent=errCopy(e);body.append(p)}
+}
+
+/* ---------- games ---------- */
+const GAMES=[
+ {id:"match",icon:"bolt",ru:"Пары на скорость",en:"Speed match · слова из твоего словаря",ai:false},
+ {id:"radio",icon:"radio",ru:"Позывной в эфире",en:"Callsign radio · алфавит NATO на слух",ai:false},
+ {id:"build",icon:"puzzle",ru:"Собери фразу",en:"Sentence builder · грамматика месяца",ai:true},
+ {id:"spot",icon:"bug",ru:"Найди ошибку",en:"Spot the error · как на экзамене",ai:true},
+];
+const STARTER=[["runway","взлётная полоса"],["clearance","разрешение диспетчера"],["altitude","высота"],["fuel","топливо"],["delay","задержка"],["deadline","крайний срок"],["budget","бюджет"],["brief","бриф, задание"],["audience","аудитория"],["reach","охват"],["offer","предложение"],["agreement","соглашение"],["meeting","встреча"],["improve","улучшать"],["schedule","расписание"],["weather","погода"]];
+const FALLBACK_SENT=[{en:"I am a student pilot.",ru:"Я студент-пилот."},{en:"We need the design by Friday.",ru:"Нам нужен дизайн к пятнице."},{en:"The weather is good for flying today.",ru:"Сегодня хорошая погода для полёта."},{en:"Can you send me the brief?",ru:"Можешь прислать мне бриф?"},{en:"Our reach grew last month.",ru:"Наш охват вырос в прошлом месяце."},{en:"I would like to discuss the price.",ru:"Я хотел бы обсудить цену."}];
+const NATO={A:"Alpha",B:"Bravo",C:"Charlie",D:"Delta",E:"Echo",F:"Foxtrot",G:"Golf",H:"Hotel",I:"India",J:"Juliett",K:"Kilo",L:"Lima",M:"Mike",N:"November",O:"Oscar",P:"Papa",Q:"Quebec",R:"Romeo",S:"Sierra",T:"Tango",U:"Uniform",V:"Victor",W:"Whiskey",X:"X-ray",Y:"Yankee",Z:"Zulu"};
+const ICAO_DIG=["Zero","One","Two","Tree","Four","Fife","Six","Seven","Eight","Niner"];
+const shuffle=a=>{const r=a.slice();for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}return r};
+function gameXp(){const d=dayRec();d.games=(d.games||0)+1;if(d.games<=3)return award(null,10);persist("profile");return false}
+function viewGames(app){
+  const d=dayRec();
+  app.append(h(`<section class="card"><div class="eyebrow">Игры · ${Math.min(d.games||0,3)}/3 с опытом сегодня</div><h2 style="margin-top:4px">Поиграй — и выучи</h2><p class="muted" style="margin:6px 0 0">Каждая сыгранная игра даёт +10 XP (до 3 игр в день). Слова из игр берутся из твоего словаря и темы месяца.</p></section>`));
+  const list=h(`<section class="missions"></section>`);
+  GAMES.forEach(g=>{
+    let sub=g.en;if(g.id==="match"&&S.profile.games?.matchBest)sub+=` · рекорд ${S.profile.games.matchBest} c`;if(g.id==="radio"&&S.profile.games?.radioBest!=null)sub+=` · рекорд ${S.profile.games.radioBest}/5`;
+    const b=h(`<button class="mission" type="button"><span class="ic">${I[g.icon]}</span><span><b></b><span class="sub"></span></span><span class="xp">+10 XP</span></button>`);
+    b.querySelector("b").textContent=g.ru;b.querySelector(".sub").textContent=sub;b.onclick=()=>openGame(g.id);list.append(b)});
+  app.append(list);
+}
+function openGame(id){
+  stopSpeak();const g=GAMES.find(x=>x.id===id);
+  const el=h(`<section class="view"></section>`);lesson={id:"game-"+id,el};
+  const head=h(`<div class="lesson-head"><button class="btn ghost" type="button">${I.back} Назад</button><div><div class="eyebrow"></div><h2 style="font-size:20px"></h2></div></div>`);
+  head.querySelector(".eyebrow").textContent=g.en;head.querySelector("h2").textContent=g.ru;head.querySelector("button").onclick=()=>go("games");
+  const body=h(`<div class="card"></div>`);el.append(head,body);render();window.scrollTo({top:0});
+  ({match:gameMatch,radio:gameRadio,build:gameBuild,spot:gameSpot})[id](body);
+}
+function gameEnd(body,html,again){
+  const first=gameXp();
+  const v=h(`<div class="view" style="margin-top:14px"><div class="note ok">${html}${first?"":" <span class='muted'>(лимит XP за игры на сегодня исчерпан)</span>"}</div><div class="row"><button class="btn primary" type="button" data-a="again">Ещё раз</button><button class="btn" type="button" data-a="list">Другие игры</button></div></div>`);
+  v.querySelector('[data-a="again"]').onclick=again;v.querySelector('[data-a="list"]').onclick=()=>go("games");body.append(v);
+}
+function gameMatch(body){
+  body.innerHTML="";
+  const pool=S.notebook.words.length>=6?shuffle(S.notebook.words.slice(-40)).map(w=>[w.en,w.ru]):shuffle(STARTER);
+  const pairs=pool.slice(0,6);let sel=null,left=pairs.length,t0=0,miss=0;
+  body.append(h(`<p class="muted" style="margin:0 0 12px">Нажми английское слово, потом его перевод. Быстрее и без ошибок!</p>`));
+  const grid=h(`<div class="tilegrid"></div>`);
+  const tiles=[...shuffle(pairs.map((p,i)=>({t:p[0],k:i,side:"en"}))),...shuffle(pairs.map((p,i)=>({t:p[1],k:i,side:"ru"})))];
+  const colEn=tiles.filter(x=>x.side==="en"),colRu=tiles.filter(x=>x.side==="ru");
+  const order=[];for(let i=0;i<colEn.length;i++){order.push(colEn[i],colRu[i])}
+  order.forEach(x=>{const b=h(`<button class="tbtn" type="button"></button>`);b.textContent=x.t;x.el=b;
+    b.onclick=()=>{if(b.classList.contains("ok"))return;if(!t0)t0=Date.now();
+      if(x.side==="en")speak(x.t);
+      if(!sel||sel.side===x.side){if(sel)sel.el.classList.remove("sel");sel=x;b.classList.add("sel");return}
+      if(sel.k===x.k){sel.el.classList.remove("sel");sel.el.classList.add("ok");b.classList.add("ok");sel.el.disabled=b.disabled=true;sel=null;left--;
+        if(!left){const sec=Math.round((Date.now()-t0)/100)/10;const g=S.profile.games||(S.profile.games={});const rec=!g.matchBest||sec<g.matchBest;if(rec)g.matchBest=sec;persist("profile");
+          gameEnd(body,`<b>${sec} c</b>, ошибок: ${miss}. ${rec?"Новый рекорд!":"Рекорд: "+g.matchBest+" c."}`,()=>gameMatch(body))}}
+      else{miss++;const a=sel.el;a.classList.remove("sel");a.classList.add("bad");b.classList.add("bad");setTimeout(()=>{a.classList.remove("bad");b.classList.remove("bad")},450);sel=null}};
+    grid.append(b)});
+  body.append(grid);
+}
+function gameRadio(body){
+  body.innerHTML="";const ROUNDS=5;let r=0,score=0;
+  const mk=()=>{const L="ABCDEFGHIJKLMNOPQRSTUVWXYZ";let s="";for(let i=0;i<3;i++)s+=L[Math.floor(Math.random()*26)];const n=2+Math.floor(Math.random()*2);for(let i=0;i<n;i++)s+=Math.floor(Math.random()*10);return s};
+  const say=cs=>[...cs].map(c=>/\d/.test(c)?ICAO_DIG[+c]:NATO[c]).join(", ");
+  const intro=h(`<div class="view"><p style="margin:0">Диспетчер передаёт позывной по алфавиту NATO (цифры как в эфире: <span class="mono">Tree, Fife, Niner</span>). Запиши его буквами и цифрами, например <span class="mono">KAT35</span>.</p><details class="note"><summary style="cursor:pointer;font-weight:600">Шпаргалка: алфавит NATO</summary><p class="mono" style="font-size:13px;margin:8px 0 0"></p></details><div><button class="btn primary" type="button">Начать (${ROUNDS} раундов)</button></div></div>`);
+  intro.querySelector("details p").textContent=Object.entries(NATO).map(([k,v])=>k+" "+v).join(" · ")+" · 3 Tree · 5 Fife · 9 Niner";
+  intro.querySelector("button").onclick=()=>round();body.append(intro);
+  function round(){
+    body.innerHTML="";const cs=mk(),spoken=say(cs);
+    body.append(h(`<div class="eyebrow">Раунд ${r+1} из ${ROUNDS} · счёт ${score}</div>`));
+    const ctr=h(`<div class="row" style="margin:12px 0"><button class="btn primary" type="button">${I.speaker} Слушать эфир</button></div>`);
+    const rate=monthIndex()<4?0.85:monthIndex()<8?1:1.15;
+    ctr.querySelector("button").onclick=()=>speak(spoken,rate);
+    const f=h(`<form class="row"><input class="field" id="radioIn" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Позывной" style="flex:1;min-width:0;text-transform:uppercase;font-family:var(--f-mono)"><button class="btn primary" type="submit">Проверить</button></form>`);
+    f.onsubmit=e=>{e.preventDefault();const v=f.querySelector("input").value.toUpperCase().replace(/[^A-Z0-9]/g,"");if(!v)return;f.querySelectorAll("input,button").forEach(x=>x.disabled=true);
+      const ok=v===cs;if(ok)score++;
+      const n=h(`<div class="note ${ok?"ok":"bad"}" style="margin-top:12px"><b></b><div class="mono" style="font-size:13px"></div></div>`);n.querySelector("b").textContent=ok?"Roger! Верно.":"Неверно. Было: "+cs;n.querySelector(".mono").textContent=spoken;body.append(n);
+      const nx=h(`<div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" type="button">${r<ROUNDS-1?"Следующий":"Итог"}</button></div>`);
+      nx.querySelector("button").onclick=()=>{r++;if(r<ROUNDS)round();else{body.innerHTML="";const g=S.profile.games||(S.profile.games={});if(g.radioBest==null||score>g.radioBest)g.radioBest=score;persist("profile");gameEnd(body,`<b>${score}/${ROUNDS}</b> позывных принято. ${score===ROUNDS?"Чистый эфир, капитан!":"Тренируй алфавит — в кабине это обязательно."}`,()=>{r=0;score=0;gameRadio(body)})}};
+      body.append(nx);nx.querySelector("button").focus()};
+    body.append(ctr,f);speak(spoken,rate);f.querySelector("input").focus();
+  }
+}
+async function gameBuild(body){
+  let data=null;
+  if(cap.sample){
+    const m=curMonth();
+    const prompt=`${teacherContext()}
+
+Игра «Собери фразу»: дай 6 английских предложений (5–11 слов) уровня ${m.cefr} на грамматику месяца (${m.grammar.ru}), из жизни пилота, дизайнера, SMM и переговоров. Без кавычек внутри, без тире. И перевод каждого на русский.
+Ответь только JSON: {"sentences":[{"en":"","ru":""}]}`;
+    data=await loadLesson(body,"game.build",prompt,"Беркут готовит фразы…",d=>Array.isArray(d?.sentences)&&d.sentences.length>=3&&d.sentences.every(x=>x.en&&x.ru),()=>openGame("build"));
+    if(!data)return;
+  }
+  const list=(data?data.sentences:FALLBACK_SENT).slice(0,6);let i=0,score=0;
+  const draw=()=>{
+    body.innerHTML="";const s=list[i];const words=String(s.en).trim().split(/\s+/);
+    let pool=shuffle(words.map((w,k)=>({w,k})));if(words.length>1&&pool.every((x,k)=>x.k===k))pool=pool.reverse();
+    const ans=[];
+    body.append(h(`<div class="eyebrow">Фраза ${i+1} из ${list.length} · счёт ${score}</div>`));
+    const q=h(`<p class="q" style="margin-top:12px"></p>`);q.textContent=s.ru;body.append(q);
+    const A=h(`<div class="chips answer" aria-label="Твой ответ"></div>`),P=h(`<div class="chips" aria-label="Слова" style="margin-top:10px"></div>`);
+    body.append(A,P);
+    const redraw=()=>{A.innerHTML="";P.innerHTML="";
+      ans.forEach((x,k)=>{const b=h(`<button class="wchip" type="button"></button>`);b.textContent=x.w;b.onclick=()=>{ans.splice(k,1);pool.push(x);redraw()};A.append(b)});
+      pool.forEach((x,k)=>{const b=h(`<button class="wchip" type="button"></button>`);b.textContent=x.w;b.onclick=()=>{pool.splice(k,1);ans.push(x);redraw();if(!pool.length)check()};P.append(b)})};
+    const check=()=>{const ok=norm(ans.map(x=>x.w).join(" "))===norm(s.en);if(ok)score++;
+      A.querySelectorAll("button").forEach(b=>b.disabled=true);
+      const n=h(`<div class="note ${ok?"ok":"bad"}" style="margin-top:12px"><b></b></div>`);n.querySelector("b").textContent=ok?"Верно!":"Правильно: "+s.en;body.append(n);speak(s.en);
+      const nx=h(`<div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" type="button">${i<list.length-1?"Дальше":"Итог"}</button></div>`);
+      nx.querySelector("button").onclick=()=>{i++;if(i<list.length)draw();else{body.innerHTML="";gameEnd(body,`<b>${score}/${list.length}</b> фраз собрано верно.`,()=>{ls.del(cacheKey("game.build"));openGame("build")})}};body.append(nx)};
+    redraw();
+  };
+  draw();
+}
+async function gameSpot(body){
+  const m=curMonth();
+  const prompt=`${teacherContext()}
+
+Игра «Найди ошибку»: 8 английских предложений уровня ${m.cefr} из жизни пилота, дизайнера, SMM и переговоров. Примерно в половине — одна типичная ошибка русскоговорящих (времена, артикли, предлоги, порядок слов, грамматика месяца: ${m.grammar.ru}). Остальные полностью правильные.
+Ответь только JSON: {"items":[{"s":"предложение","ok":false,"fix":"исправленное предложение (для правильных — то же)","why_ru":"короткое пояснение"}]}`;
+  const data=await loadLesson(body,"game.spot",prompt,"Беркут прячет ошибки…",d=>Array.isArray(d?.items)&&d.items.length>=4,()=>openGame("spot"));
+  if(!data)return;
+  const items=data.items.slice(0,8);let i=0,score=0;const missed=[];
+  const draw=()=>{
+    body.innerHTML="";const it=items[i];
+    body.append(h(`<div class="eyebrow">Предложение ${i+1} из ${items.length} · счёт ${score}</div>`));
+    const q=h(`<p class="q" style="margin-top:12px;font-size:19px"></p>`);q.textContent=it.s;body.append(q);
+    const bt=h(`<div class="tilegrid"><button class="tbtn" type="button" data-v="1">Всё верно</button><button class="tbtn" type="button" data-v="0">Есть ошибка</button></div>`);
+    bt.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+      const said=b.dataset.v==="1",ok=said===!!it.ok;if(ok)score++;else if(!it.ok)missed.push({wrong:it.s,right:it.fix,why_ru:it.why_ru});
+      bt.querySelectorAll("button").forEach(x=>x.disabled=true);b.classList.add(ok?"ok":"bad");
+      const n=h(`<div class="note ${ok?"ok":"bad"}" style="margin-top:12px"><b></b><div></div><div class="muted" style="font-size:13px"></div></div>`);
+      n.querySelector("b").textContent=(ok?"Да! ":"Мимо. ")+(it.ok?"Предложение правильное.":"Ошибка есть.");
+      if(!it.ok){n.querySelector("div").textContent="Правильно: "+it.fix;n.querySelector(".muted").textContent=it.why_ru||""}
+      body.append(n);
+      const nx=h(`<div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" type="button">${i<items.length-1?"Дальше":"Итог"}</button></div>`);
+      nx.querySelector("button").onclick=()=>{i++;if(i<items.length)draw();else{body.innerHTML="";if(missed.length)addMistakes(missed);gameEnd(body,`<b>${score}/${items.length}</b>. ${score>=items.length-1?"Глаз-алмаз.":"Пропущенные ошибки добавлены в тетрадь."}`,()=>{ls.del(cacheKey("game.spot"));openGame("spot")})}};
+      body.append(nx);nx.querySelector("button").focus()});
+    body.append(bt);
+  };
+  draw();
 }
 
 /* ---------- boot ---------- */
