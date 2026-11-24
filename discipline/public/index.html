@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Истикама</title>
 <meta name="description" content="Дисциплина каждый день: дела, еда, вода, деньги, книга, отчёт и награды">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#f6f6f3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -135,6 +135,81 @@ nav.tabs button.on{color:var(--text)}
 .switch:after{content:"";position:absolute;top:2px;left:2px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.2s}
 .switch.on{background:var(--green)} .switch.on:after{left:22px}
 .note{background:#eff6ff;color:#1e3a8a;border-radius:14px;padding:13px 14px;font-size:14px;margin-bottom:12px}
+/* ---- v3: карточки, неделя, кольца ---- */
+:root{--bg:#f6f6f3;--card:#ffffff;--shadow:0 1px 2px rgba(17,17,20,.04),0 4px 14px rgba(17,17,20,.05)}
+html,body{background:var(--bg)}
+.box,.list{background:var(--card);box-shadow:var(--shadow);border:1px solid #efeee9}
+.box .box,.sheet .box,.sheet .list{box-shadow:none;background:var(--soft);border:0}
+input,textarea,select{background:#f1f1f3}
+.head{display:flex;align-items:center;gap:12px;margin:2px 0 14px}
+.ava{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-weight:800;font-size:20px;color:#fff;flex:none;background:linear-gradient(160deg,#4ade80,#16a34a)}
+.head .lv{font-weight:800;font-size:18px}
+.xp{height:7px;border-radius:9px;background:#e6e6ea;overflow:hidden;margin:5px 0 3px;max-width:180px}
+.xp i{display:block;height:100%;background:#2f6fde;border-radius:9px}
+.chips{display:grid;gap:6px;margin-left:auto}
+.chip{display:flex;align-items:center;gap:6px;background:var(--card);box-shadow:var(--shadow);border-radius:12px;padding:5px 10px;font-weight:700;font-size:14px;white-space:nowrap}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:2px 0 18px}
+.wd{display:grid;justify-items:center;gap:4px;padding:6px 0 8px;border-radius:16px;border:1.5px solid transparent}
+.wd.sel{border-color:#2f6fde;background:#eef3fd}
+.wd .wn{font-size:12px;color:var(--muted);font-weight:600}
+.wd.sel .wn{color:#2f6fde}
+.wd .rg{position:relative;width:40px;height:40px}
+.wd .rg b{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;font-weight:700}
+.wd:disabled{opacity:.35}
+.sec{display:flex;justify-content:space-between;align-items:center;margin:18px 2px 10px}
+.sec h2{margin:0;font-size:21px}
+.hcard{position:relative;display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;padding:12px 12px 12px 12px;margin-bottom:9px;box-shadow:var(--shadow);border:1px solid #efeee9;overflow:hidden;flex-wrap:wrap}
+.hcard .hfill{position:absolute;left:0;top:0;bottom:0;background:var(--t);transition:width .35s;pointer-events:none}
+.hcard > *{position:relative}
+.hmain{display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-align:left}
+.tile{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:22px;flex:none;background:var(--t2)}
+.hmain .t{font-weight:700;font-size:16px}
+.hmain .s{font-size:13px;color:var(--muted);margin-top:1px}
+.hbtn{width:40px;height:40px;display:grid;place-items:center;flex:none;position:relative}
+.hbtn svg{position:absolute;inset:0}
+.hbtn .mk{position:relative;font-size:17px;font-weight:800;color:var(--c)}
+.hbtn.done .disc{position:absolute;inset:3px;border-radius:50%;background:var(--c)}
+.hbtn.done .mk{color:#fff}
+.hcard.fin{opacity:.62}
+.hcard .pills{flex-basis:100%;margin:2px 0 0 56px}
+.hcard .pill.on{background:var(--c);border-color:var(--c)}
+.donehead{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;font-weight:600;margin:18px 2px 10px}
+.donehead:after{content:"";flex:1;height:1px;background:var(--line)}
+nav.tabs{background:transparent;border:0;backdrop-filter:none;-webkit-backdrop-filter:none;padding:0 14px calc(var(--safe-b) + 10px)}
+nav.tabs .in{background:rgba(255,255,255,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:24px;box-shadow:0 6px 24px rgba(17,17,20,.12);padding:6px;border:1px solid #ecebe6}
+nav.tabs button{border-radius:18px;padding:7px 0}
+nav.tabs button.on{background:#eef3fd;color:#2f6fde}
+.prof{display:flex;gap:14px;align-items:center}
+.prof .ava{width:64px;height:64px;font-size:26px;border-radius:20px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
+.kpi small{font-size:14px;font-weight:600;color:var(--muted);margin-left:3px}
+.heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:3px}
+.heat i{display:block;aspect-ratio:1;border-radius:3px;background:#ececef}
+.heatwrap{display:grid;grid-template-columns:20px 1fr;gap:6px;align-items:start}
+.heatwrap .dl{display:grid;grid-template-rows:repeat(7,1fr);gap:3px;font-size:9.5px;color:var(--dim);height:100%}
+.heatm{display:grid;font-size:10.5px;color:var(--dim);margin:0 0 4px 26px}
+.rcal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px 4px}
+.rcal .wd2{font-size:11.5px;color:var(--dim);text-align:center;font-weight:600}
+.rcal .dc{position:relative;width:100%;aspect-ratio:1;display:grid;place-items:center;font-size:13px;font-weight:700}
+.rcal .dc svg{position:absolute;inset:6%;width:88%;height:88%}
+.rcal .dc.fut{color:var(--dim)}
+.rcal .dc.today b{background:#111114;color:#fff;border-radius:50%;width:62%;height:62%;display:grid;place-items:center}
+.wtable{display:grid;gap:6px 4px;align-items:center;font-size:13px}
+.wtable .sq{aspect-ratio:1;border-radius:6px;background:#ececef;width:100%;max-width:30px;justify-self:center}
+.big4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;margin-top:14px}
+.big4 b{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em}
+.big4 span{font-size:11.5px;color:var(--muted)}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.bdg{background:var(--card);box-shadow:var(--shadow);border:1px solid #efeee9;border-radius:18px;padding:12px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bdg .em{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:26px;background:#fdf3e2;border:2px solid #f2c96b}
+.bdg.lock .em{background:#f1f1f3;border-color:#e2e2e6;filter:grayscale(1);opacity:.6}
+.bdg b{font-size:12.5px;line-height:1.2}
+.bdg .rw{font-size:12px;color:var(--amber);font-weight:700}
+.bdg .btn{padding:6px 10px;font-size:13px;border-radius:9px;width:100%;margin-top:2px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.swatches button{width:32px;height:32px;border-radius:10px;border:3px solid #fff;box-shadow:0 0 0 1px var(--line)}
+.swatches button.on{box-shadow:0 0 0 2px var(--text)}
 </style>
 </head>
 <body>
@@ -179,18 +254,18 @@ const CATS = {
   work: { name: 'Работа и деньги', color: 'var(--work)' },
 };
 const DEF_HABITS = [
-  { id: 'namaz', cat: 'iman', icon: '🕌', name: '5 намазов', type: 'multi', labels: ['Фаджр','Зухр','Аср','Магриб','Иша'], xp: 50 },
-  { id: 'quran', cat: 'iman', icon: '📖', name: 'Коран', type: 'count', target: 2, unit: 'стр', xp: 15 },
-  { id: 'azkar', cat: 'iman', icon: '📿', name: 'Азкары', type: 'multi', labels: ['Утро','Вечер'], xp: 10 },
-  { id: 'sadaqa', cat: 'iman', icon: '🤲', name: 'Садака / доброе дело', type: 'check', xp: 10 },
-  { id: 'food', cat: 'body', icon: '🥗', name: 'Правильное питание', type: 'food', xp: 25 },
-  { id: 'water', cat: 'body', icon: '💧', name: 'Вода', type: 'count', target: 8, unit: 'стак.', xp: 10 },
-  { id: 'sport', cat: 'body', icon: '🏃', name: 'Спорт / прогулка 30 мин', type: 'check', xp: 20 },
-  { id: 'sleep', cat: 'body', icon: '🌙', name: 'Сон до 23:00', type: 'check', xp: 10 },
-  { id: 'read', cat: 'mind', icon: '📚', name: 'Чтение книги', type: 'count', target: 20, unit: 'стр', xp: 20, book: true },
-  { id: 'phone', cat: 'mind', icon: '📵', name: 'Без лишних соцсетей', type: 'check', xp: 10 },
-  { id: 'work', cat: 'work', icon: '💼', name: 'Работа на 100%', type: 'check', xp: 25 },
-  { id: 'moneylog', cat: 'work', icon: '🧾', name: 'Записал траты', type: 'auto', xp: 5 },
+  { id: 'namaz', color: '#3ba776', cat: 'iman', icon: '🕌', name: '5 намазов', type: 'multi', labels: ['Фаджр','Зухр','Аср','Магриб','Иша'], xp: 50 },
+  { id: 'quran', color: '#2a9d8f', cat: 'iman', icon: '📖', name: 'Коран', type: 'count', target: 2, unit: 'стр', xp: 15 },
+  { id: 'azkar', color: '#7c6bd6', cat: 'iman', icon: '📿', name: 'Азкары', type: 'multi', labels: ['Утро','Вечер'], xp: 10 },
+  { id: 'sadaqa', color: '#e5a83b', cat: 'iman', icon: '🤲', name: 'Садака / доброе дело', type: 'check', xp: 10 },
+  { id: 'food', color: '#f28c38', cat: 'body', icon: '🥗', name: 'Правильное питание', type: 'food', xp: 25 },
+  { id: 'water', color: '#3aa0e0', cat: 'body', icon: '💧', name: 'Вода', type: 'count', target: 8, unit: 'стак.', xp: 10 },
+  { id: 'sport', color: '#e2574c', cat: 'body', icon: '🏃', name: 'Спорт / прогулка 30 мин', type: 'check', xp: 20 },
+  { id: 'sleep', color: '#5b6bd6', cat: 'body', icon: '🌙', name: 'Сон до 23:00', type: 'check', xp: 10 },
+  { id: 'read', color: '#b07d5a', cat: 'mind', icon: '📚', name: 'Чтение книги', type: 'count', target: 20, unit: 'стр', xp: 20, book: true },
+  { id: 'phone', color: '#8e8e99', cat: 'mind', icon: '📵', name: 'Без лишних соцсетей', type: 'check', xp: 10 },
+  { id: 'work', color: '#2f6fde', cat: 'work', icon: '💼', name: 'Работа на 100%', type: 'check', xp: 25 },
+  { id: 'moneylog', color: '#e5a83b', cat: 'work', icon: '🧾', name: 'Записал траты', type: 'auto', xp: 5 },
 ];
 const DEF_REWARDS = [
   { id: 'rw-coffee', icon: '☕', name: 'Любимый кофе или десерт', cost: 300 },
@@ -280,7 +355,7 @@ let ui = { tab: 'today', day: today(), month: ymOf(today()), moneyMonth: ymOf(to
 const lsGet = k => { try { return localStorage.getItem(k); } catch { return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 function load() { try { const s = JSON.parse(lsGet(LS)); return s && s.v === 1 ? normalize(s) : null; } catch { return null; } }
-function normalize(s) { for (const k of ['habits','money','rewards','purchases','reminders','books','meals']) s[k] = s[k] || []; s.days = s.days || {}; s.body = s.body || { u: 0, sex: 'm', goal: 'keep', activity: 1.375 }; return s; }
+function normalize(s) { for (const k of ['habits','money','rewards','purchases','reminders','books','meals','claims']) s[k] = s[k] || []; s.days = s.days || {}; s.body = s.body || { u: 0, sex: 'm', goal: 'keep', activity: 1.375 }; return s; }
 function persist() { lsSet(LS, JSON.stringify(S)); }
 function save() { S.updatedAt = now(); persist(); queueSync(); }
 function randKey(n = 24) { const a = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; const r = crypto.getRandomValues(new Uint8Array(n)); return [...r].map(x => a[x % a.length]).join(''); }
@@ -308,7 +383,7 @@ function mergeState(a, b) {
   if (!a) return b; if (!b) return a;
   const out = { v: 1 };
   for (const k of ['profile','goals','settings','body','insight']) { const v = ((a[k]?.u || 0) >= (b[k]?.u || 0)) ? a[k] : b[k]; if (v !== undefined) out[k] = v; }
-  for (const k of ['habits','money','rewards','purchases','reminders','books','meals']) {
+  for (const k of ['habits','money','rewards','purchases','reminders','books','meals','claims']) {
     const m = new Map();
     for (const it of [...(a[k] || []), ...(b[k] || [])]) { const c = m.get(it.id); if (!c || (it.u || 0) > (c.u || 0)) m.set(it.id, it); }
     out[k] = [...m.values()];
@@ -406,9 +481,9 @@ function totalXP() {
   for (let d = startDate(); d <= today(); d = addDays(d, 1)) xp += dayXP(d);
   return (_xp = xp + booksDone().length * 300);
 }
-const coins = () => totalXP() - sum(S.purchases.filter(p => !p.del), p => p.cost);
+const coins = () => totalXP() + sum(S.claims.filter(c => !c.del), c => c.coins) - sum(S.purchases.filter(p => !p.del), p => p.cost);
 const lvlNeed = L => 125 * (L - 1) * L;
-function level(xp = totalXP()) { let L = 1; while (xp >= lvlNeed(L + 1)) L++; return { L }; }
+function level(xp = totalXP()) { let L = 1; while (xp >= lvlNeed(L + 1)) L++; return { L, cur: xp - lvlNeed(L), need: lvlNeed(L + 1) - lvlNeed(L) }; }
 const rank = L => RANKS.filter(r => L >= r[0]).pop()[1];
 function streak() {
   let d = today(), n = 0;
@@ -463,13 +538,22 @@ function grandGoal(ym) {
 }
 function achievements() {
   const L = level().L, st = bestStreak(startDate(), today());
-  let run = 0, best = 0; const nh = S.habits.find(x => x.id === 'namaz');
-  if (nh) for (let d = startDate(); d <= today(); d = addDays(d, 1)) { if (frac(nh, d) === 1) best = Math.max(best, ++run); else run = 0; }
-  const closed = Object.values(S.days).filter(x => x?.r?.closed).length;
+  let run = 0, best = 0, perfect = 0; const nh = S.habits.find(x => x.id === 'namaz');
+  for (let d = startDate(); d <= today(); d = addDays(d, 1)) { if (nh && frac(nh, d) === 1) best = Math.max(best, ++run); else run = 0; if (dayScore(d) >= 100) perfect++; }
+  const closed = Object.values(S.days).filter(x => x?.r?.closed).length, meals = S.meals.filter(m => !m.del).length;
   return [
-    ['📝', 'Первый отчёт', closed >= 1], ['🔥', 'Серия 7 дней', st >= 7], ['⚔️', 'Серия 30 дней', st >= 30],
-    ['🕌', '7 дней все намазы', best >= 7], ['🌙', '30 дней все намазы', best >= 30], ['📗', 'Первая книга', booksDone().length >= 1],
-    ['🥗', '30 записей еды', S.meals.filter(m => !m.del).length >= 30], ['🏝️', 'Фонд отдыха собран', S.goals.fundTarget > 0 && fundTotal() >= S.goals.fundTarget], ['⭐', 'Уровень 10', L >= 10],
+    { id: 'a-report', e: '📝', t: 'Первый отчёт', d: 'Закрой день', on: closed >= 1, reward: 50 },
+    { id: 'a-perfect', e: '💯', t: 'Идеальный день', d: 'Все дела за день', on: perfect >= 1, reward: 100 },
+    { id: 'a-s7', e: '🔥', t: 'Неделя огня', d: 'Серия 7 дней', on: st >= 7, reward: 200 },
+    { id: 'a-n7', e: '🕌', t: 'Хранитель намаза', d: '7 дней все 5', on: best >= 7, reward: 250 },
+    { id: 'a-food', e: '🥗', t: 'Слежу за едой', d: '30 записей еды', on: meals >= 30, reward: 150 },
+    { id: 'a-book', e: '📗', t: 'Читатель', d: 'Первая книга', on: booksDone().length >= 1, reward: 300 },
+    { id: 'a-r30', e: '🗓️', t: 'Честный месяц', d: '30 отчётов', on: closed >= 30, reward: 400 },
+    { id: 'a-s30', e: '⚔️', t: 'Стальная воля', d: 'Серия 30 дней', on: st >= 30, reward: 800 },
+    { id: 'a-n30', e: '🌙', t: 'Месяц намаза', d: '30 дней все 5', on: best >= 30, reward: 800 },
+    { id: 'a-p10', e: '⭐', t: '10 идеальных', d: '10 дней на 100%', on: perfect >= 10, reward: 500 },
+    { id: 'a-fund', e: '🏝️', t: 'Заслужил отдых', d: 'Фонд собран', on: S.goals.fundTarget > 0 && fundTotal() >= S.goals.fundTarget, reward: 500 },
+    { id: 'a-l10', e: '👑', t: 'Уровень 10', d: `сейчас ${L}`, on: L >= 10, reward: 1000 },
   ];
 }
 
@@ -494,6 +578,35 @@ const dayNav = d => `<div class="daynav"><button data-act="day-prev" ${d <= star
 const titleFor = d => d === today() ? 'Сегодня' : d === addDays(today(), -1) ? 'Вчера' : dayTitle(d);
 
 /* ============ СЕГОДНЯ ============ */
+const CAT_HEX = { iman: '#3ba776', body: '#f28c38', mind: '#7c6bd6', work: '#2f6fde' };
+const PALETTE = ['#3ba776', '#2a9d8f', '#3aa0e0', '#2f6fde', '#5b6bd6', '#7c6bd6', '#e05fa0', '#e2574c', '#f28c38', '#e5a83b', '#b07d5a', '#8e8e99'];
+const hcol = h => h.color || CAT_HEX[h.cat] || '#3ba776';
+const tint = (hex, a) => hex + Math.round(a * 255).toString(16).padStart(2, '0');
+function ringSvg(p, color, size = 40, sw = 3.5, track = '#e7e7eb') {
+  const r = (size - sw) / 2, c = 2 * Math.PI * r;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${track}" stroke-width="${sw}"/>${p > 0 ? `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${(c * (1 - clamp(p, 0, 1))).toFixed(2)}"/>` : ''}</svg>`;
+}
+function habitStreak(h) {
+  let d = today(), n = 0;
+  if (frac(h, d) < 1) d = addDays(d, -1);
+  while (d >= startDate() && habitsOn(d).includes(h) && frac(h, d) >= 1) { n++; d = addDays(d, -1); }
+  return n;
+}
+function habitBest(h) { let b = 0, c = 0; for (let d = startDate(); d <= today(); d = addDays(d, 1)) { if (habitsOn(d).includes(h) && frac(h, d) >= 1) b = Math.max(b, ++c); else c = 0; } return b; }
+function habitTotal(h) { let n = 0; for (let d = startDate(); d <= today(); d = addDays(d, 1)) if (habitsOn(d).includes(h) && frac(h, d) >= 1) n++; return n; }
+const mondayOf = d => addDays(d, -((parse(d).getDay() + 6) % 7));
+function weekStrip(d) {
+  const m = mondayOf(d);
+  return `<div class="week">${Array.from({ length: 7 }, (_, i) => {
+    const x = addDays(m, i), s = dayScore(x), fut = x > today() || x < startDate();
+    return `<button class="wd ${x === d ? 'sel' : ''}" data-act="pick-day" data-d="${x}" ${fut ? 'disabled' : ''}><span class="wn">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i]}</span><span class="rg">${ringSvg((s ?? 0) / 100, scoreHex(s ?? 0), 40, 3.5)}<b>${parse(x).getDate()}</b></span></button>`;
+  }).join('')}</div>`;
+}
+function headerBlock() {
+  const lv = level(), init = esc((S.profile.name || '?').trim()[0]?.toUpperCase() || '?');
+  return `<div class="head"><div class="ava">${init}</div><div style="min-width:0"><div class="lv">Уровень ${lv.L}</div><div class="xp"><i style="width:${lv.cur / lv.need * 100}%"></i></div><div class="sub tiny">${num(lv.cur)} / ${num(lv.need)} XP · ${rank(lv.L)}<span class="sync"></span></div></div>
+    <div class="chips"><span class="chip">🪙 ${num(coins())}</span><span class="chip">🔥 ${streak()}</span></div></div>`;
+}
 function questions(d) {
   const h = d === today() ? hourNow() : 24, q = [], ms = mealsOn(d);
   for (const [t, [name, icon, at]] of Object.entries(MEALS)) if (at < 99 && h >= at + 1 && !ms.some(m => m.meal === t)) q.push({ icon, t: `Что ты ел на ${name.toLowerCase()}?`, s: 'Дома или на улице, сколько стоило', act: 'food-add', arg: t });
@@ -505,35 +618,38 @@ function questions(d) {
   return q;
 }
 function viewToday() {
-  const d = ui.day, sc = dayScore(d) ?? 0, lv = level(), q = questions(d);
+  const d = ui.day, q = questions(d), hs = habitsOn(d);
+  const open = hs.filter(x => frac(x, d) < 1), done = hs.filter(x => frac(x, d) >= 1);
   const quote = QUOTES[Math.floor(parse(d) / 864e5) % QUOTES.length];
-  let h = `<div class="top"><div><div class="sub">${WD[parse(d).getDay()]}, ${dayTitle(d)}</div><h1>${titleFor(d)}</h1></div>${dayNav(d)}</div>
-  <div class="stats-line"><span>День <b style="color:${scoreText(sc)}">${sc}%</b></span><span>Серия <b>${streak()} дн.</b></span><span>Ур. <b>${lv.L}</b> · ${rank(lv.L)}</span><span>Монеты <b>${num(coins())}</b><span class="sync"></span></span></div>
-  <div class="bar" style="margin:-6px 0 18px;height:6px"><i style="width:${sc}%;background:${scoreHex(sc)}"></i></div>`;
-  if (q.length) h += `<h3 style="margin-top:6px">Ответь на вопросы</h3>` + q.slice(0, 4).map(x => `<button class="q" data-act="${x.act}" data-arg="${x.arg || ''}"><span class="qi">${x.icon}</span><span><div class="qt">${x.t}</div><div class="sub tiny">${x.s}</div></span><span class="arrow">›</span></button>`).join('');
-  for (const [cid, c] of Object.entries(CATS)) {
-    const hs = habitsOn(d).filter(x => x.cat === cid); if (!hs.length) continue;
-    h += `<h3><span><span class="dot" style="background:${c.color};margin-right:6px"></span>${c.name}</span><span>${dayScore(d, cid) ?? 0}%</span></h3><div class="list">${hs.map(x => habitRow(x, d)).join('')}</div>`;
-  }
+  const dt = parse(d);
+  let h = headerBlock() + `<div class="row between" style="margin-bottom:6px"><div><b style="font-size:17px;text-transform:capitalize">${MONTHS[dt.getMonth()]}</b> <span class="sub">${d === today() ? 'сегодня' : titleFor(d).toLowerCase() === 'вчера' ? 'вчера' : WD[dt.getDay()]}</span></div>${d !== today() ? '<button class="btn sm line" data-act="pick-day" data-d="' + today() + '">К сегодня</button>' : ''}</div>` + weekStrip(d);
+  if (q.length) h += q.slice(0, 3).map(x => `<button class="q" data-act="${x.act}" data-arg="${x.arg || ''}"><span class="qi">${x.icon}</span><span><div class="qt">${x.t}</div><div class="sub tiny">${x.s}</div></span><span class="arrow">›</span></button>`).join('');
+  h += `<div class="sec"><h2>Задания</h2><span class="sub">${done.length} из ${hs.length} выполнено</span></div>`;
+  h += open.map(x => habitCard(x, d)).join('') || '<div class="box" style="text-align:center"><b>Всё выполнено! 💯</b><div class="sub small">Машаллах. Не забудь отчёт дня.</div></div>';
+  if (done.length) h += `<div class="donehead">Выполнено</div>` + done.map(x => habitCard(x, d, true)).join('');
   const rep = dayObj(d).r;
   h += rep?.closed
-    ? `<div class="box" style="margin-top:20px"><div class="row between"><div><div class="b">✓ День закрыт</div><div class="sub">Оценка ${rep.rate}/10 ${rep.mood || ''}</div></div><button class="btn sm line" data-act="report">Открыть</button></div></div>`
-    : `<button class="btn dark block" style="margin-top:20px" data-act="report">Дать отчёт дня</button>`;
-  return h + `<p class="sub tiny" style="text-align:center;margin:22px 10px 0">«${esc(quote[0])}» — ${esc(quote[1])}</p>`;
+    ? `<div class="box" style="margin-top:16px"><div class="row between"><div><div class="b">✓ День закрыт</div><div class="sub">Оценка ${rep.rate}/10 ${rep.mood || ''}</div></div><button class="btn sm line" data-act="report">Открыть</button></div></div>`
+    : `<button class="btn dark block" style="margin-top:16px" data-act="report">Дать отчёт дня</button>`;
+  return h + `<p class="sub tiny" style="text-align:center;margin:20px 10px 0">«${esc(quote[0])}» — ${esc(quote[1])}</p>`;
 }
-function habitRow(x, d) {
-  const f = frac(x, d), v = dayObj(d).h?.[x.id];
-  const chk = `<span class="chk ${f >= 1 ? 'on' : f > 0 ? 'half' : ''}" style="--p:${Math.round(f * 100)}%">${f >= 1 ? '✓' : ''}</span>`;
-  if (x.type === 'check') return `<button class="item" data-act="tog" data-id="${x.id}"><span class="ic">${x.icon}</span><span class="grow"><div class="t">${esc(x.name)}</div></span>${chk}</button>`;
-  if (x.type === 'auto') { const ms = moneyOn(d); return `<button class="item" data-act="spend-ask"><span class="ic">${x.icon}</span><span class="grow"><div class="t">${esc(x.name)}</div><div class="s">${ms.length ? `${ms.length} зап. · −${money(sum(ms.filter(m => m.type === 'out'), m => m.amount))}` : dayObj(d).noSpend ? 'без трат' : 'нажми, чтобы записать'}</div></span>${chk}</button>`; }
-  if (x.type === 'food') { const ms = mealsOn(d); return `<button class="item" data-act="go-food"><span class="ic">${x.icon}</span><span class="grow"><div class="t">${esc(x.name)}</div><div class="s">${ms.length ? `${ms.length} приём. пищи · ${num(sum(ms, m => m.kcal))} из ${num(kcalNorm())} ккал` : 'запиши, что ел'}</div></span>${chk}</button>`; }
-  if (x.type === 'count') {
-    const sub = x.id === 'water' ? `${liters(v)} л из ${liters(x.target)} л` : `${+v || 0} из ${x.target} ${esc(x.unit || '')}`;
-    return `<div class="item"><span class="ic">${x.icon}</span><span class="grow"><div class="t">${esc(x.name)}</div><div class="s">${sub}</div></span><div class="cnt"><button data-act="dec" data-id="${x.id}" aria-label="Меньше">−</button><button data-act="inc" data-id="${x.id}" aria-label="Больше">+</button></div>${chk}</div>`;
-  }
-  const arr = Array.isArray(v) ? v : [];
-  return `<div class="item" style="flex-wrap:wrap"><span class="ic">${x.icon}</span><span class="grow"><div class="t">${esc(x.name)}</div></span>${chk}
-    <div class="pills" style="flex-basis:100%;padding-left:40px;margin-top:2px">${x.labels.map((l, i) => `<button class="pill ${arr[i] ? 'on' : ''}" data-act="multi" data-id="${x.id}" data-i="${i}">${esc(l)}</button>`).join('')}</div></div>`;
+function habitCard(x, d, fin) {
+  const f = frac(x, d), v = dayObj(d).h?.[x.id], c = hcol(x), st = habitStreak(x);
+  const fire = st ? ` · 🔥 ${st}` : '';
+  let sub = '', act = 'tog', mk = '';
+  if (x.type === 'check') sub = x.hint || 'Ежедневно';
+  if (x.type === 'count') { sub = x.id === 'water' ? `${liters(v)} из ${liters(x.target)} л` : `${+v || 0} из ${x.target} ${esc(x.unit || '')}`; act = 'inc'; mk = '+'; }
+  if (x.type === 'multi') { const n = Array.isArray(v) ? v.filter(Boolean).length : 0; sub = `${n} из ${x.labels.length}`; act = 'multi-next'; mk = n ? '' : ''; }
+  if (x.type === 'food') { const ms = mealsOn(d); sub = ms.length ? `${ms.length} приём. · ${num(sum(ms, m => m.kcal))} ккал` : 'Запиши, что ел'; act = 'food-add'; mk = '+'; }
+  if (x.type === 'auto') { const ms = moneyOn(d); sub = ms.length ? `${ms.length} зап. · −${money(sum(ms.filter(m => m.type === 'out'), m => m.amount))}` : dayObj(d).noSpend ? 'Без трат' : 'Запиши траты'; act = 'spend-ask'; mk = '+'; }
+  if (fin) sub = `+${x.xp} XP${fire}`; else sub += fire;
+  const done = f >= 1;
+  const pills = x.type === 'multi' && !fin ? `<div class="pills">${x.labels.map((l, i) => `<button class="pill ${(Array.isArray(v) && v[i]) ? 'on' : ''}" data-act="multi" data-id="${x.id}" data-i="${i}">${esc(l)}</button>`).join('')}</div>` : '';
+  return `<div class="hcard ${fin ? 'fin' : ''}" style="--c:${c};--t:${tint(c, .13)};--t2:${tint(c, .18)}">
+    ${!fin && f > 0 ? `<div class="hfill" style="width:${Math.round(f * 100)}%"></div>` : ''}
+    <button class="hmain" data-act="habit-open" data-id="${x.id}"><span class="tile">${x.icon}</span><span class="grow"><div class="t">${esc(x.name)}</div><div class="s">${sub}</div></span></button>
+    <button class="hbtn ${done ? 'done' : ''}" data-act="${done && x.type === 'multi' ? 'habit-open' : act}" data-id="${x.id}" aria-label="Отметить">${done ? '<span class="disc"></span>' : ringSvg(f, c, 40, 3)}<span class="mk">${done ? '✓' : mk}</span></button>
+    ${pills}</div>`;
 }
 function setVal(id, val, d = ui.day) {
   const before = dayScore(d);
@@ -546,6 +662,55 @@ function setVal(id, val, d = ui.day) {
   render();
 }
 const vibrate = () => { try { navigator.vibrate?.(10); } catch {} };
+
+/* страница одного дела */
+function heatGrid(fn, weeks, color) {
+  const end = today(), start = addDays(mondayOf(end), -(weeks - 1) * 7);
+  let cells = '', months = [], last = -1;
+  for (let w = 0; w < weeks; w++) {
+    const mon = addDays(start, w * 7), mo = parse(mon).getMonth();
+    months.push(mo !== last && parse(mon).getDate() <= 7 ? MONTHS[mo].slice(0, 3) : ''); last = mo;
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(mon, i), v = d > end || d < startDate() ? null : fn(d);
+      cells += `<i style="${v ? `background:${color};opacity:${(.25 + .75 * v).toFixed(2)}` : ''}${d === end ? ';outline:1.5px solid #111114;outline-offset:1px' : ''}"></i>`;
+    }
+  }
+  return `<div class="heatm" style="grid-template-columns:repeat(${weeks},1fr)">${months.map(m => `<span>${m}</span>`).join('')}</div>
+    <div class="heatwrap"><div class="dl"><span>Пн</span><span></span><span>Ср</span><span></span><span>Пт</span><span></span><span>Вс</span></div><div class="heat" style="grid-template-columns:repeat(${weeks},1fr)">${cells}</div></div>`;
+}
+function ringCalendar(ym, fn, colorFn) {
+  const off = (parse(ym + '-01').getDay() + 6) % 7, n = daysIn(ym);
+  let h = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(x => `<div class="wd2">${x}</div>`).join('') + '<div></div>'.repeat(off);
+  for (let i = 1; i <= n; i++) {
+    const d = `${ym}-${pad(i)}`, fut = d > today() || d < startDate(), v = fut ? null : fn(d);
+    h += `<button class="dc ${fut ? 'fut' : ''} ${d === today() ? 'today' : ''}" ${fut ? 'disabled' : `data-act="open-day" data-d="${d}"`}>${!fut ? ringSvg((v ?? 0), colorFn(v), 40, 3.5) : ''}<b>${i}</b></button>`;
+  }
+  return `<div class="rcal">${h}</div>`;
+}
+function habitDayControls(x, d) {
+  const v = dayObj(d).h?.[x.id];
+  if (x.type === 'multi') return `<div class="pills" style="margin:0">${x.labels.map((l, i) => `<button class="pill ${(Array.isArray(v) && v[i]) ? 'on' : ''}" style="${(Array.isArray(v) && v[i]) ? `background:${hcol(x)};border-color:${hcol(x)}` : ''}" data-hm="${i}">${esc(l)}</button>`).join('')}</div>`;
+  if (x.type === 'count') return `<div class="row"><button class="btn sm" data-hc="-1">−</button><b style="min-width:70px;text-align:center">${x.id === 'water' ? liters(v) + ' л' : (+v || 0) + ' ' + esc(x.unit || '')}</b><button class="btn sm" data-hc="1">+</button><span class="sub tiny">цель ${x.id === 'water' ? liters(x.target) + ' л' : x.target}</span></div>`;
+  if (x.type === 'check') return `<button class="btn sm ${v ? 'green' : 'line'}" data-ht="1">${v ? '✓ Сделано' : 'Отметить сделанным'}</button>`;
+  return '';
+}
+function openHabit(id, keep) {
+  const x = S.habits.find(h => h.id === id); if (!x) return;
+  const c = hcol(x), ym = ymOf(today()), d = ui.day, ctl = habitDayControls(x, d);
+  (keep ? refreshSheet : openSheet)(`<div class="row" style="margin-bottom:14px"><span class="tile" style="--t2:${tint(c, .18)};width:48px;height:48px">${x.icon}</span><div class="grow"><h2 style="margin:0">${esc(x.name)}</h2><div class="sub small">Ежедневно · ${x.xp} XP</div></div><button class="btn sm" id="hd-edit">Изменить</button></div>
+    ${ctl ? `<div class="box" style="background:#fff;border:1px solid var(--line)"><div class="sub tiny" style="margin-bottom:8px">${d === today() ? 'Сегодня' : dayTitle(d)}</div>${ctl}</div>` : ''}
+    <div class="box" style="background:#fff;border:1px solid var(--line)">${heatGrid(dd => frac(x, dd), 17, c)}</div>
+    <div class="duo" style="margin-bottom:10px"><div class="box" style="background:#fff;border:1px solid var(--line);margin:0"><div class="sub tiny">🔥 Текущая серия</div><div class="kpi">${habitStreak(x)}<small>дн.</small></div></div>
+    <div class="box" style="background:#fff;border:1px solid var(--line);margin:0"><div class="row between"><span class="sub tiny">Лучшая серия</span><b>${habitBest(x)}</b></div><div class="row between" style="margin-top:8px"><span class="sub tiny">Выполнений</span><b>${habitTotal(x)}</b></div><div class="row between" style="margin-top:8px"><span class="sub tiny">За месяц</span><b>${habitMonthPct(x, ym) ?? 0}%</b></div></div></div>
+    <div class="box" style="background:#fff;border:1px solid var(--line)"><b style="text-transform:capitalize">${monthName(ym)}</b><div style="margin-top:10px">${ringCalendar(ym, dd => frac(x, dd), () => c)}</div></div>`, root => {
+    const upd = val => { setVal(x.id, val, d); openHabit(id, true); };
+    root.querySelectorAll('[data-hm]').forEach(b => b.onclick = () => { const a = Array.isArray(dayObj(d).h?.[x.id]) ? [...dayObj(d).h[x.id]] : []; a[+b.dataset.hm] = !a[+b.dataset.hm]; upd(a); });
+    root.querySelectorAll('[data-hc]').forEach(b => b.onclick = () => upd(Math.max(0, (+dayObj(d).h?.[x.id] || 0) + +b.dataset.hc * (x.target >= 20 ? 5 : 1))));
+    root.querySelector('[data-ht]')?.addEventListener('click', () => upd(!dayObj(d).h?.[x.id]));
+    root.querySelector('#hd-edit').onclick = () => { closeSheet(); setTimeout(() => openHabitEdit(id), 260); };
+    root.querySelectorAll('[data-act="open-day"]').forEach(b => b.onclick = () => { closeSheet(); ui.day = b.dataset.d; ui.tab = 'today'; render(); scrollTo(0, 0); });
+  });
+}
 
 /* ============ быстрые вопросы ============ */
 function openWaterAsk(d = ui.day) {
@@ -772,7 +937,14 @@ function openMoneyAdd(type, date = today()) {
 
 /* ============ ИТОГИ ============ */
 function viewStats() {
-  return `<h1>Итоги</h1><div class="seg" style="margin-top:12px">${[['month', 'Месяц'], ['analysis', 'Анализ'], ['rewards', 'Награды']].map(([k, n]) => `<button data-act="seg" data-v="${k}" class="${ui.statsSeg === k ? 'on' : ''}">${n}</button>`).join('')}</div>`
+  const lv = level(), init = esc((S.profile.name || '?').trim()[0]?.toUpperCase() || '?');
+  let perfect = 0, total = 0;
+  for (let d = startDate(); d <= today(); d = addDays(d, 1)) { if (dayScore(d) >= 100) perfect++; total += habitsOn(d).filter(h => frac(h, d) >= 1).length; }
+  return `<h1>Статистика</h1>
+    <div class="box" style="margin-top:12px"><div class="prof"><div class="ava">${init}</div><div class="grow"><div class="sub tiny">${esc(S.profile.name)} · ${rank(lv.L)}</div><div class="kpi" style="font-size:26px">Уровень ${lv.L}</div><div class="xp" style="max-width:none"><i style="width:${lv.cur / lv.need * 100}%"></i></div><div class="row between sub tiny"><span>${num(lv.cur)} / ${num(lv.need)} XP</span><span>${num(lv.need - lv.cur)} до уровня ${lv.L + 1}</span></div></div></div></div>
+    <div class="duo" style="margin-bottom:10px"><div class="box" style="margin:0"><div class="sub tiny">🔥 Лучшая серия</div><div class="kpi">${bestStreak(startDate(), today())}<small>дн.</small></div><div class="sub tiny" style="margin-top:4px">сейчас ${streak()} дн.</div></div>
+      <div class="box" style="margin:0"><div class="kpi" style="font-size:22px">${num(total)}<small>выполнений</small></div><div style="height:1px;background:var(--line);margin:9px 0"></div><div class="kpi" style="font-size:22px">${perfect}<small>идеальных дней</small></div></div></div>
+    <div class="seg">${[['month', 'Месяц'], ['analysis', 'Анализ'], ['rewards', 'Награды']].map(([k, n]) => `<button data-act="seg" data-v="${k}" class="${ui.statsSeg === k ? 'on' : ''}">${n}</button>`).join('')}</div>`
     + ({ month: viewMonth, analysis: viewAnalysis, rewards: viewRewards })[ui.statsSeg]();
 }
 function deltaTxt(a, b) {
@@ -780,23 +952,30 @@ function deltaTxt(a, b) {
   const d = a - b; if (!d) return '<span class="dim tiny">=</span>';
   return `<span class="${d > 0 ? 'up' : 'down'} tiny">${d > 0 ? '▲ +' : '▼ '}${d}</span>`;
 }
+function weekTable() {
+  const m = mondayOf(today()), days = Array.from({ length: 7 }, (_, i) => addDays(m, i)), hs = habits();
+  let h = `<div class="wtable" style="grid-template-columns:minmax(0,2.6fr) repeat(7,1fr)"><span></span>${days.map((d, i) => `<span class="sub tiny" style="text-align:center">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i]}</span>`).join('')}`;
+  for (const x of hs) {
+    h += `<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${x.icon} ${esc(x.name)}</span>` + days.map(d => { const f = d > today() || d < startDate() ? 0 : frac(x, d); return `<i class="sq" style="${f ? `background:${hcol(x)};opacity:${(.3 + .7 * f).toFixed(2)}` : ''}"></i>`; }).join('');
+  }
+  let met = 0, n = 0, done = 0, best = ['—', -1];
+  days.forEach((d, i) => { const s = dayScore(d); if (s == null) return; n++; met += s; done += habitsOn(d).filter(x => frac(x, d) >= 1).length; if (s > best[1]) best = [['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i], s]; });
+  return h + `</div><div class="big4"><div><b style="color:${scoreText(n ? met / n : 0)}">${n ? Math.round(met / n) : 0}%</b><span>выполнено</span></div><div><b>${best[0]}</b><span>лучший день</span></div><div><b>${done}</b><span>всего отметок</span></div><div><b>${bestStreak(m, today() < addDays(m, 6) ? today() : addDays(m, 6))}</b><span>серия недели</span></div></div>`;
+}
 function viewMonth() {
   const ym = ui.month, prev = addMonth(ym, -1), ms = monthStats(ym), pm = monthStats(prev), delta = ms && pm ? ms.avg - pm.avg : null;
-  let h = `<div class="row between" style="margin-bottom:10px"><b style="font-size:18px;text-transform:capitalize">${monthName(ym)}</b><div class="daynav"><button data-act="m-prev" ${ym <= ymOf(startDate()) ? 'disabled' : ''}>‹</button><button data-act="m-next" ${ym >= ymOf(today()) ? 'disabled' : ''}>›</button></div></div>
-    <div class="box"><div class="row between"><div><div class="sub">Средний балл</div><div class="big">${ms ? ms.avg + '%' : '—'}</div></div><div style="text-align:right">${delta == null ? '<span class="sub small">сравнение появится<br>в следующем месяце</span>' : delta > 0 ? `<span class="tag good" style="font-size:14px">▲ Прогресс +${delta}%</span>` : delta < 0 ? `<span class="tag bad" style="font-size:14px">▼ Регресс ${delta}%</span>` : '<span class="tag">без изменений</span>'}${pm ? `<div class="sub tiny" style="margin-top:4px">прошлый месяц ${pm.avg}%</div>` : ''}</div></div>
-    <div class="grid3" style="margin-top:14px"><div><div class="sub tiny">Хороших дней</div><b>${ms?.good ?? 0} из ${ms?.n ?? 0}</b></div><div><div class="sub tiny">Лучшая серия</div><b>${ms?.best ?? 0} дн.</b></div><div><div class="sub tiny">Отчётов</div><b>${ms?.closed ?? 0}</b></div></div></div>`;
-  const off = (parse(ym + '-01').getDay() + 6) % 7, n = daysIn(ym);
-  let cal = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(x => `<div class="wd">${x}</div>`).join('') + '<div></div>'.repeat(off);
-  for (let i = 1; i <= n; i++) {
-    const d = `${ym}-${pad(i)}`, s = dayScore(d), fut = d > today() || d < startDate(), fg = s == null ? '' : s >= 50 && s < 70 ? '#713f12' : '#fff';
-    cal += `<button class="c ${fut ? 'fut' : ''} ${d === today() ? 'today' : ''}" ${fut ? 'disabled' : `data-act="open-day" data-d="${d}"`} style="${s != null ? `background:${scoreColor(s)};color:${fg}` : ''}">${i}${dayObj(d).r?.closed ? '<span class="r"></span>' : ''}</button>`;
-  }
-  h += `<div class="box"><div class="cal">${cal}</div><div class="legend"><span><i style="background:var(--s1)"></i>до 30%</span><span><i style="background:var(--s2)"></i>30–49</span><span><i style="background:var(--s3)"></i>50–69</span><span><i style="background:var(--s4)"></i>70–89</span><span><i style="background:var(--s5)"></i>90+</span><span>• отчёт</span></div></div>
+  let h = `<div class="box"><div class="row between" style="margin-bottom:12px"><b style="font-size:17px;text-transform:capitalize">${monthName(ym)}</b><div class="daynav"><button data-act="m-prev" ${ym <= ymOf(startDate()) ? 'disabled' : ''}>‹</button><button data-act="m-next" ${ym >= ymOf(today()) ? 'disabled' : ''}>›</button></div></div>
+    <div class="row between"><div><div class="sub tiny">Средний балл</div><div class="kpi">${ms ? ms.avg + '%' : '—'}</div></div><div style="text-align:right">${delta == null ? '<span class="sub tiny">сравнение появится<br>в следующем месяце</span>' : delta > 0 ? `<span class="tag good" style="font-size:14px">▲ Прогресс +${delta}%</span>` : delta < 0 ? `<span class="tag bad" style="font-size:14px">▼ Регресс ${delta}%</span>` : '<span class="tag">без изменений</span>'}${pm ? `<div class="sub tiny" style="margin-top:4px">прошлый месяц ${pm.avg}%</div>` : ''}</div></div>
+    <div style="margin-top:14px">${ringCalendar(ym, d => (dayScore(d) ?? 0) / 100, v => scoreHex((v ?? 0) * 100))}</div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>до 30%</span><span><i style="background:var(--s2)"></i>30–49</span><span><i style="background:var(--s3)"></i>50–69</span><span><i style="background:var(--s4)"></i>70–89</span><span><i style="background:var(--s5)"></i>90+</span></div>
+    <div class="grid3" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)"><div><div class="sub tiny">Хороших дней</div><b>${ms?.good ?? 0} из ${ms?.n ?? 0}</b></div><div><div class="sub tiny">Лучшая серия</div><b>${ms?.best ?? 0} дн.</b></div><div><div class="sub tiny">Отчётов</div><b>${ms?.closed ?? 0}</b></div></div></div>
+    <h3>Эта неделя</h3><div class="box">${weekTable()}</div>
+    <h3>Сетка активности <span class="tiny" style="text-transform:none">26 недель</span></h3><div class="box">${heatGrid(d => (dayScore(d) ?? 0) / 100, 26, '#16a34a')}<div class="sub tiny" style="margin-top:8px">Чем темнее клетка, тем лучше прошёл день</div></div>
     <h3>По дням <span class="tiny" style="text-transform:none">— этот, ┄ прошлый</span></h3><div class="box">${lineChart(ym, prev)}</div>
     <h3>Сферы жизни <span class="tiny" style="text-transform:none">к прошлому месяцу</span></h3><div class="box">`;
-  for (const [cid, c] of Object.entries(CATS)) { const a = monthStats(ym, cid)?.avg, b = monthStats(prev, cid)?.avg; h += `<div class="hrow"><span class="dot" style="background:${c.color}"></span><div><div class="nm"><span>${c.name}</span><span>${a ?? '—'}%</span></div><div class="bar" style="height:6px"><i style="width:${a || 0}%;background:${scoreColor(a)}"></i></div></div>${deltaTxt(a, b)}</div>`; }
+  for (const [cid, c] of Object.entries(CATS)) { const a = monthStats(ym, cid)?.avg, b = monthStats(prev, cid)?.avg; h += `<div class="hrow"><span class="dot" style="background:${CAT_HEX[cid]}"></span><div><div class="nm"><span>${c.name}</span><span>${a ?? '—'}%</span></div><div class="bar" style="height:6px"><i style="width:${a || 0}%;background:${scoreColor(a)}"></i></div></div>${deltaTxt(a, b)}</div>`; }
   h += `</div><h3>Каждое дело</h3><div class="box">`;
-  for (const x of habits()) { const a = habitMonthPct(x, ym), b = habitMonthPct(x, prev); h += `<div class="hrow"><span>${x.icon}</span><div><div class="nm"><span>${esc(x.name)}</span><span>${a ?? '—'}%</span></div><div class="bar" style="height:6px"><i style="width:${a || 0}%;background:${scoreColor(a)}"></i></div></div>${deltaTxt(a, b)}</div>`; }
+  for (const x of habits()) { const a = habitMonthPct(x, ym), b = habitMonthPct(x, prev); h += `<button class="hrow" style="width:100%;text-align:left" data-act="habit-open" data-id="${x.id}"><span>${x.icon}</span><div><div class="nm"><span>${esc(x.name)}</span><span>${a ?? '—'}%</span></div><div class="bar" style="height:6px"><i style="width:${a || 0}%;background:${hcol(x)}"></i></div></div>${deltaTxt(a, b)}</button>`; }
   h += `</div>`;
   const reps = Object.entries(S.days).filter(([d, o]) => d.startsWith(ym) && o?.r?.closed).sort((a, b) => a[0] < b[0] ? 1 : -1);
   return h + `<h3>Отчёты</h3>${reps.length ? `<div class="list">${reps.map(([d, o]) => `<button class="item" data-act="open-report" data-d="${d}"><span class="ic">${o.r.mood || '📝'}</span><span class="grow"><div class="t">${dayTitle(d)} · ${o.r.rate}/10</div><div class="s" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(o.r.wins || o.r.fix || '—')}</div></span><span class="dot" style="width:10px;height:10px;background:${scoreColor(dayScore(d))}"></span></button>`).join('')}</div>` : '<div class="empty">Закрывай каждый день отчётом — здесь будет история.</div>'}`;
@@ -810,7 +989,7 @@ function lineChart(ym, prev) {
   let g = '';
   for (const v of [0, 50, 100]) g += `<line x1="${P}" x2="${W - P}" y1="${y(v)}" y2="${y(v)}" stroke="#e4e4e9"/><text x="${W - P}" y="${y(v) - 3}" fill="#a3a3ad" font-size="9" text-anchor="end">${v}%</text>`;
   if (pv.length > 1) g += `<path d="${path(pv)}" fill="none" stroke="#c9c9d1" stroke-width="1.5" stroke-dasharray="4 4"/>`;
-  if (cur.length > 1) g += `<path d="${path(cur)}" fill="none" stroke="#111114" stroke-width="2" stroke-linejoin="round"/>`;
+  if (cur.length > 1) g += `<path d="${path(cur)}" fill="none" stroke="#2f6fde" stroke-width="2" stroke-linejoin="round"/>`;
   g += cur.map(p => `<circle cx="${x(p[0])}" cy="${y(p[1])}" r="3.2" fill="${scoreHex(p[1])}" stroke="#fff" stroke-width="1.2"/>`).join('');
   for (const i of [1, 10, 20, n]) g += `<text x="${x(i)}" y="${H - 2}" fill="#a3a3ad" font-size="9" text-anchor="middle">${i}</text>`;
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="font-family:inherit">${g}</svg>`;
@@ -882,17 +1061,22 @@ async function runReview() {
 
 /* ============ НАГРАДЫ ============ */
 function viewRewards() {
-  const c = coins(), gg = grandGoal(ymOf(today()));
-  let h = `<div class="box"><div class="sub">Монеты</div><div class="big">${num(c)}</div><div class="sub tiny">Зарабатываешь за дела: 1 XP = 1 монета</div></div>
-    <h3>Главная награда месяца</h3><div class="box"><div class="row between"><b style="font-size:18px">${esc(S.goals.tripName)}</b><span class="tag ${gg.done ? 'good' : ''}">${gg.n}/4</span></div>
+  const c = coins(), gg = grandGoal(ymOf(today())), ach = achievements();
+  const got = ach.filter(a => a.on).length;
+  let h = `<div class="box"><div class="row between"><div><div class="sub">Монеты</div><div class="kpi">🪙 ${num(c)}</div></div><div class="sub tiny" style="text-align:right">1 XP = 1 монета<br>+ бонусы за достижения</div></div></div>
+    <h3>Достижения <span class="tiny" style="text-transform:none">${got} из ${ach.length}</span></h3><div class="badges">${ach.map(a => {
+      const cl = S.claims.some(x => x.id === a.id && !x.del);
+      return `<div class="bdg ${a.on ? '' : 'lock'}"><div class="em">${a.e}</div><b>${a.t}</b><span class="sub tiny">${a.d}</span><span class="rw">🪙 +${a.reward}</span>${a.on ? (cl ? '<span class="tag good">получено</span>' : `<button class="btn dark" data-act="claim" data-id="${a.id}">Забрать</button>`) : ''}</div>`;
+    }).join('')}</div>
+    <h3>Главная награда месяца</h3><div class="box"><div class="row between"><b style="font-size:18px">✈️ ${esc(S.goals.tripName)}</b><span class="tag ${gg.done ? 'good' : ''}">${gg.n}/4</span></div>
     <div style="margin-top:8px">${gg.conds.map(x => `<div class="row" style="padding:8px 0;border-top:1px solid var(--line)"><span class="chk ${x.met ? 'on' : ''}" style="width:22px;height:22px;font-size:12px">${x.met ? '✓' : ''}</span><span class="grow small">${esc(x.t)}</span><span class="small b">${esc(x.v)}</span></div>`).join('')}</div>
     <div class="sub small" style="margin-top:8px">${gg.done ? '✓ Все условия выполнены — отдых заслужен!' : 'Выполни все 4 условия в этом месяце — и отдых заслужен.'}</div></div>
-    <h3>Награды <button class="btn sm" data-act="rw-add">+ Своя</button></h3><div class="list">`;
+    <h3>Магазин наград <button class="btn sm" data-act="rw-add">+ Своя</button></h3><div class="list">`;
   for (const r of S.rewards.filter(x => !x.del).sort((a, b) => a.cost - b.cost)) {
     const can = c >= r.cost;
-    h += `<div class="item"><span class="ic">${r.icon}</span><span class="grow"><div class="t">${esc(r.name)}</div><div class="s">${num(r.cost)} монет${can ? '' : ` · ещё ${num(r.cost - c)}`}</div></span>${can ? `<button class="btn sm green" data-act="buy" data-id="${r.id}">Взять</button>` : ''}<button class="dim" data-act="rw-edit" data-id="${r.id}" style="padding:4px" aria-label="Изменить">✎</button></div>`;
+    h += `<div class="item"><span class="ic">${r.icon}</span><span class="grow"><div class="t">${esc(r.name)}</div><div class="bar" style="height:5px;margin:6px 0 3px;max-width:200px"><i style="width:${clamp(c / r.cost * 100, 0, 100)}%;background:var(--amber)"></i></div><div class="s">🪙 ${num(r.cost)}${can ? '' : ` · ещё ${num(r.cost - c)}`}</div></span>${can ? `<button class="btn sm green" data-act="buy" data-id="${r.id}">Взять</button>` : ''}<button class="dim" data-act="rw-edit" data-id="${r.id}" style="padding:4px" aria-label="Изменить">✎</button></div>`;
   }
-  h += `</div><h3>Достижения</h3><div class="list">${achievements().map(([e, t, on]) => `<div class="item" style="${on ? '' : 'opacity:.45'}"><span class="ic">${e}</span><span class="grow t">${t}</span>${on ? '<span class="tag good">есть</span>' : ''}</div>`).join('')}</div>`;
+  h += `</div>`;
   const ps = S.purchases.filter(p => !p.del).sort((a, b) => b.u - a.u).slice(0, 10);
   if (ps.length) h += `<h3>История</h3><div class="list">${ps.map(p => `<div class="item"><span class="ic">${p.icon}</span><span class="grow"><div class="t">${esc(p.name)}</div><div class="s">${dayTitle(p.date)} · −${num(p.cost)}</div></span><button class="dim small" data-act="unbuy" data-id="${p.id}">отменить</button></div>`).join('')}</div>`;
   return h;
@@ -957,14 +1141,17 @@ function openHabitEdit(id) {
     ${fixed ? '' : `<div class="field"><label>Как отмечать</label><select id="h-t"><option value="check" ${x.type === 'check' ? 'selected' : ''}>Галочка — сделал или нет</option><option value="count" ${x.type === 'count' ? 'selected' : ''}>Число — страницы, стаканы, минуты</option><option value="multi" ${x.type === 'multi' ? 'selected' : ''}>Несколько отметок — утро, вечер…</option></select></div>
     <div class="grid2" id="h-cnt"><div class="field"><label>Цель в день</label><input id="h-tg" type="number" value="${x.target || 10}"></div><div class="field"><label>Единица</label><input id="h-u" value="${esc(x.unit || '')}" placeholder="стр, мин"></div></div>
     <div class="field" id="h-mul"><label>Отметки через запятую</label><input id="h-l" value="${esc((x.labels || []).join(', '))}" placeholder="Утро, Обед, Вечер"></div>`}
+    <div class="field"><label>Цвет</label><div class="swatches" id="h-col">${PALETTE.map(c => `<button data-c="${c}" class="${hcol(x) === c ? 'on' : ''}" style="background:${c}" aria-label="цвет"></button>`).join('')}</div></div>
     <div class="field"><label>Важность <small>— сколько XP даёт</small></label><input id="h-x" type="number" inputmode="numeric" value="${x.xp}"></div>
     <button class="btn dark block" id="h-s">Сохранить</button>${id ? '<button class="btn red block" id="h-d" style="margin-top:8px">Удалить</button>' : ''}`, root => {
+    let color = hcol(x);
+    root.querySelector('#h-col').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; color = b.dataset.c; root.querySelectorAll('#h-col button').forEach(y => y.classList.toggle('on', y === b)); };
     const tSel = root.querySelector('#h-t');
     const upd = () => { if (!tSel) return; root.querySelector('#h-cnt').style.display = tSel.value === 'count' ? '' : 'none'; root.querySelector('#h-mul').style.display = tSel.value === 'multi' ? '' : 'none'; };
     if (tSel) tSel.onchange = upd; upd();
     root.querySelector('#h-s').onclick = () => {
       const name = root.querySelector('#h-n').value.trim(); if (!name) return toast('Название?');
-      const o = { name, icon: root.querySelector('#h-i').value.trim() || '⭐', cat: root.querySelector('#h-c').value, xp: Math.max(1, Math.round(+root.querySelector('#h-x').value || 10)), u: now() };
+      const o = { name, color, icon: root.querySelector('#h-i').value.trim() || '⭐', cat: root.querySelector('#h-c').value, xp: Math.max(1, Math.round(+root.querySelector('#h-x').value || 10)), u: now() };
       if (tSel) {
         o.type = tSel.value;
         if (o.type === 'count') { o.target = Math.max(1, +root.querySelector('#h-tg').value || 1); o.unit = root.querySelector('#h-u').value.trim(); }
@@ -1050,6 +1237,10 @@ $('#app').addEventListener('click', async e => {
     case 'inc': vibrate(); setVal(id, (+cur || 0) + (hb.target >= 20 ? 5 : 1)); break;
     case 'dec': setVal(id, Math.max(0, (+cur || 0) - (hb.target >= 20 ? 5 : 1))); break;
     case 'multi': { const arr = Array.isArray(cur) ? [...cur] : []; arr[+el.dataset.i] = !arr[+el.dataset.i]; if (arr[+el.dataset.i]) vibrate(); setVal(id, arr); break; }
+    case 'pick-day': ui.day = el.dataset.d; render(); break;
+    case 'habit-open': openHabit(id); break;
+    case 'multi-next': { const arr = Array.isArray(cur) ? [...cur] : []; const i = hb.labels.findIndex((_, k) => !arr[k]); if (i < 0) return openHabit(id); arr[i] = true; vibrate(); toast(`${hb.labels[i]} ✓`); setVal(id, arr); break; }
+    case 'claim': { const a = achievements().find(x => x.id === id); if (!a?.on || S.claims.some(x => x.id === id && !x.del)) return; S.claims.push({ id, u: now(), coins: a.reward }); save(); render(); toast(`${a.e} +${a.reward} монет!`); break; }
     case 'day-prev': ui.day = addDays(d, -1); render(); break;
     case 'day-next': ui.day = addDays(d, 1); render(); break;
     case 'report': openReport(d); break;
@@ -1131,6 +1322,10 @@ function openSheet(html, mount) {
   root.querySelector('.bg').onclick = closeSheet;
   requestAnimationFrame(() => requestAnimationFrame(() => { if (gen === sheetGen) root.classList.add('show'); }));
   mount && mount(root.querySelector('.sheet'));
+}
+function refreshSheet(html, mount) {
+  const sh = $('#sheet-root .sheet'); if (!sh) return openSheet(html, mount);
+  const top = sh.scrollTop; sh.innerHTML = `<div class="grab"></div>${html}`; sh.scrollTop = top; mount && mount(sh);
 }
 function closeSheet() {
   const root = $('#sheet-root'), gen = ++sheetGen; root.classList.remove('show');
