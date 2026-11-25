@@ -367,8 +367,11 @@ h2{font-size:21px;font-weight:700}
 .banner{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);z-index:30;background:rgba(18,21,29,.96);border:1px solid #E0B32E;border-radius:18px;padding:16px 22px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.6);animation:fade .25s;min-width:220px;max-width:84%}
 .banner h3{font-size:22px;color:#E0B32E}
 .banner p{margin:4px 0 0;font-weight:700;color:#C9CEDA}
-.phrases{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:12px 8px}
-.phrases button{background:#fff;color:#111;font-weight:800;font-size:13.5px;padding:10px 6px;border-radius:22px;line-height:1.2;position:relative;min-height:56px}
+.phrases{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 5px}
+.phrases button{overflow-wrap:anywhere;hyphens:auto}
+.loc.closed{background:#0E1016;height:96px}.loc.closed::after{display:none}
+.code-box{display:flex;align-items:center;gap:12px;background:var(--surface-2);border-radius:16px;padding:12px 14px}.code-box b{font:800 26px var(--f-display);letter-spacing:.12em;flex:1}
+.phrases button{background:#fff;color:#111;font-weight:800;font-size:11.5px;padding:8px 2px;border-radius:22px;line-height:1.2;position:relative;min-height:56px}
 .phrases button::after{content:"";position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border:6px solid transparent;border-bottom:0;border-top-color:#fff}
 .hist{display:flex;flex-direction:column;gap:4px;font-size:13.5px;font-weight:600;color:#C9CEDA}
 .hist div{padding:6px 10px;border-radius:10px;background:var(--surface-2)}
@@ -664,6 +667,7 @@ function vHome(){ensureOffer();const need=xpNeed(S.level),pct=Math.max(2,Math.ro
  </section>
  <section class="sec"><h2>Играть сейчас</h2><div class="sub" style="margin-top:-6px">Присоединяйтесь к любой доступной игре</div>
   ${STAKES.map(locCard).join("")}
+  ${(()=>{const n=3+Math.floor(seeded(Math.floor(Date.now()/45000))()*7);return `<button class="loc closed" data-act="closed"><div class="c"><div class="t"><h3>Закрытые комнаты</h3><span class="stake" style="font-size:14px;color:var(--muted)">по коду</span></div><div class="pl num">${dotsAv(77)}${n} ${plural(n,"игрок","игрока","игроков")}</div></div></button>`})()}
  </section>
  <div class="fab"><button class="btn btn-play" data-act="quick">${PLAY}Играть сейчас</button></div>
  <p class="age">18+ · Игра на виртуальные фишки. Фишки и золото нельзя вывести или обменять на деньги.</p>`}
@@ -675,6 +679,17 @@ function makeRooms(st){const r=seeded(st.ante+Math.floor(Date.now()/90000));cons
 function vRooms(){const st=STAKES.find(s=>s.id===viewArg);const rooms=roomsCache[st.id]=makeRooms(st);
  return `${rooms.map((rm,i)=>`<button class="room" data-act="join" data-i="${i}"><b>Комната #${rm.no}</b><span class="r2 num">${dotsAv(rm.no)}${rm.n} из ${rm.max} ${plural(rm.max,"игрока","игроков","игроков")}</span></button>`).join("")}
  <div class="fab"><button class="btn btn-play" style="font-size:20px" data-act="create"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#3B1F8F" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Создать игру</button></div>`}
+function slider5(n,act,attrs){return `<div class="slider5"><div class="trk"><div class="fill" style="width:${(n-2)/4*100}%"></div><div class="stops">${[2,3,4,5,6].map(k=>`<button data-act="${act}" data-n="${k}" ${attrs} aria-pressed="${k===n}" aria-label="${k}"><i></i></button>`).join("")}</div></div><div class="lbls num">${[2,3,4,5,6].map(k=>`<span>${k}</span>`).join("")}</div></div>`}
+function closedSheet(st=0,n=6,code){code=code||String(ri(1000,9999));const at=`data-st="${st}" data-code="${code}"`;
+ openModal(`${sheetHead("Закрытая комната","Играйте своей компанией по коду")}
+ <div class="eyebrow" style="font-size:12px">Ставка стола</div>
+ <div class="seg" style="margin:0;grid-template-columns:repeat(5,1fr)">${STAKES.map((x,i)=>`<button data-act="cr" data-st="${i}" data-n="${n}" data-code="${code}" aria-selected="${i===st}" ${S.coins<x.min?'disabled style="opacity:.35"':""}>${fmt(x.ante)}</button>`).join("")}</div>
+ <div class="eyebrow" style="font-size:12px">Максимальное количество игроков</div>
+ ${slider5(n,"crn",at)}
+ <div class="code-box"><span class="sub">Код комнаты</span><b class="num">${code}</b><button class="btn-buy" data-act="copy-code" data-code="${code}">Скопировать</button></div>
+ <button class="btn btn-play btn-block" style="font-size:19px" data-act="cr-go" data-st="${st}" data-n="${n}" data-code="${code}">Создать с ${n} игроками</button>
+ <div class="field"><label for="jc" class="eyebrow" style="font-size:12px">Войти по коду</label><div style="display:flex;gap:8px"><input id="jc" inputmode="numeric" maxlength="4" placeholder="0000" style="flex:1;min-width:0"><button class="btn-buy" data-act="cr-join">Войти</button></div></div>
+ <p class="note">Пока нет сервера, свободные места занимают боты. Когда подключим онлайн, друзья зайдут по этому коду.</p>`)}
 function createSheet(n=6){openModal(`<h2 style="font-family:var(--f-body);font-size:22px;font-weight:800">Максимальное количество игроков</h2>
  <div class="slider5"><div class="trk"><div class="fill" style="width:${(n-2)/4*100}%"></div><div class="stops">${[2,3,4,5,6].map(k=>`<button data-act="cs" data-n="${k}" aria-pressed="${k===n}" aria-label="${k}"><i></i></button>`).join("")}</div></div><div class="lbls num">${[2,3,4,5,6].map(k=>`<span>${k}</span>`).join("")}</div></div>
  <button class="btn btn-play btn-block" style="font-size:19px" data-act="create-go" data-n="${n}">Создать с ${n} игроками</button>`)}
@@ -766,7 +781,7 @@ function levelsSheet(){const need=xpNeed(S.level);
  <div class="lv-table num">${LV_NAMES.map(([l,n],i)=>{const to=LV_NAMES[i+1]?LV_NAMES[i+1][0]-1:"∞";const cur=lvName(S.level)===n;return `<div class="${cur?"cur":""}"><span>${n}</span><span style="color:var(--muted)">уровни ${l}–${to}</span></div>`}).join("")}</div>
  <div class="lv-table num"><div><span>Награда за уровень ${S.level+1}</span><span>${sz(COIN,16)} ${fmt(1000*(S.level+1))} · ${sz(GOLD,16)} ${5+Math.floor((S.level+1)/5)*5}</span></div></div>`)}
 function rulesSheet(){openModal(`${sheetHead("Правила Ази")}<div class="prose">
- <h4>Колода и раздача</h4><p>27 карт: три масти (♠ ♥ ♣), от шестёрки до туза (Т). За столом 2–6 игроков. Каждый вносит ставку стола в банк и получает 3 карты рубашкой вверх. Следующая карта открывается — её масть козырная.</p>
+ <h4>Колода и раздача</h4><p>27 карт: три масти (♠ ♥ ♣), от шестёрки до туза (A). За столом 2–6 игроков. Каждый вносит ставку стола в банк и получает 3 карты рубашкой вверх. Следующая карта открывается — её масть козырная.</p>
  <h4>Шоха на трассе</h4><p>Если открытый козырь — туз, шестёрка козырной масти становится самой старшей картой в игре.</p>
  <h4>Торговля</h4><p>Первым говорит игрок слева от сдающего: бросить или поднять. Дальше — бросить, уравнять или поднять. Повышение — минимум вдвое от текущей ставки, вверх до ва-банка. Кто поднял последним, тот ходит первым. Если все бросили — оставшийся забирает банк.</p>
  <h4>В тёмную</h4><p>Пока вы не открыли свои карты, ставки за вас вдвое дешевле: ставка «не глядя» считается двойной. Перед розыгрышем карты открываются сами.</p>
@@ -832,7 +847,7 @@ function bumpTour(net){tourRollover();if(net>0){S.tour.score+=net;save()}}
 /* ================= cards ================= */
 const PIPS={"6":[[18,20],[42,20],[18,42],[42,42],[18,64],[42,64]],"7":[[18,20],[42,20],[30,31],[18,42],[42,42],[18,64],[42,64]],"8":[[18,20],[42,20],[30,31],[18,42],[42,42],[30,53],[18,64],[42,64]],
  "9":[[18,18],[42,18],[18,34],[42,34],[30,42],[18,50],[42,50],[18,66],[42,66]],"10":[[18,18],[42,18],[30,26],[18,34],[42,34],[18,50],[42,50],[30,58],[18,66],[42,66]]};
-const RL=r=>({J:"В",Q:"Д",K:"К",A:"Т"}[r]||r);
+const RL=r=>r;
 function cardSVG(c){const red=c.s==="h"||c.s==="d";const col=red?"#C8262C":"#15181F";const lab=RL(c.r);
  const pip=(x,y,s,flip)=>`<use href="#su-${c.s}" x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}"${flip?` transform="rotate(180 ${x} ${y})"`:""}/>`;
  let mid="";
@@ -1227,6 +1242,11 @@ document.addEventListener("click",e=>{
   case "stake":{const st=STAKES.find(s=>s.id===a.dataset.id);if(S.coins<st.min){toast(`Для «${st.name}» нужно от ${full(st.min)} фишек`);break}go("rooms",st.id);break}
   case "join":{const st=STAKES.find(s=>s.id===viewArg);const rm=roomsCache[st.id][+a.dataset.i];if(rm.n>=rm.max){toast("Комната заполнена — выберите другую");break}startTable(st,rm.max,rm.n,rm.no);break}
   case "create":createSheet();break;
+  case "closed":closedSheet();break;
+  case "cr":case "crn":closedSheet(+a.dataset.st,+a.dataset.n,a.dataset.code);break;
+  case "cr-go":{const st=STAKES[+a.dataset.st];if(S.coins<st.min){toast(`Для ставки ${fmt(st.ante)} нужно от ${full(st.min)} фишек`);break}const n=+a.dataset.n;startTable(st,n,n-1,a.dataset.code);break}
+  case "cr-join":{const v=($("#jc")||{}).value||"";if(!/^\d{4}$/.test(v)){toast("Введите код из 4 цифр");break}const st=[...STAKES].reverse().find(x=>S.coins>=x.min)||STAKES[0];if(S.coins<st.min){toast("Не хватает фишек, заберите бонус в уведомлениях");break}startTable(st,6,ri(2,5),v);break}
+  case "copy-code":{const c=a.dataset.code;try{navigator.clipboard.writeText(c).then(()=>toast("Код скопирован"),()=>toast(`Код комнаты: ${c}`))}catch(e){toast(`Код комнаты: ${c}`)}break}
   case "cs":createSheet(+a.dataset.n);break;
   case "create-go":{const st=STAKES.find(s=>s.id===viewArg);closeModal(true);const n=+a.dataset.n;startTable(st,n,n-1,ri(4100,4999));break}
   case "buy-chips":{const p=CHIP_PACKS[+a.dataset.i];const amt=Math.round(p.c*(1+p.b/100));demoPay(`${fmt(amt)} фишек · ₸${p.p}`,()=>{S.coins+=amt;note(`Покупка: +${fmt(amt)} фишек`,"buy");save();renderWallet();sfx("win");toast(`+${fmt(amt)} фишек`)});break}
