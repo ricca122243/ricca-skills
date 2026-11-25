@@ -1562,7 +1562,8 @@ function viewToday(app){
   hero.querySelector("h1").textContent=greet+"!";hero.querySelector(".gl").textContent=greetLine(doneN,list.length);
   hero.querySelector(".speech").textContent=c.line;
   {const ms=mascotEl(S.profile.char,"",true);talkTap(ms);hero.querySelector(".hero-char").prepend(ms);mascotMood(curMascot,doneN>=list.length?"wow":doneN===0&&hour>=17?(curPersona()==="kind"?"sad":"angry"):doneN>0?"happy":"calm")}
-  hero.querySelector('[data-a="call"]').onclick=()=>startCall();
+  if(!isKid()){const b=hero.querySelector('[data-a="call"]');const a=h(`<a class="btn white" target="_blank" rel="noopener" style="text-decoration:none">${I.phone} Живой звонок</a>`);a.href=LIVE_AGENT_URL;b.replaceWith(a)}
+  else hero.querySelector('[data-a="call"]').onclick=()=>startCall();
   hero.querySelector('[data-a="next"]')?.addEventListener("click",()=>{const nx=list.find(x=>!d.done.includes(x.id));if(nx)openMission(nx.id)});
   if(!S.profile.placement)app.append(placementBanner());
   app.append(hero);
@@ -1625,6 +1626,16 @@ function showIncoming(){
   document.body.append(ov);ov.querySelector('[data-a="yes"]').focus();
 }
 function startCall(){S.profile.charChosen=true;talkPicker=false;chatState.turns=[];chatState.mood="calm";talkT0=0;autoStart=true;saveChat();go("teacher")}
+
+/* ---------- LIVE VOICE CALL (ElevenLabs agent) ---------- */
+const LIVE_AGENT_URL="https://elevenlabs.io/app/talk-to?agent_id=agent_5301m88ysjknerdvejnwv283j2xd";
+function liveCallCard(){
+  const c=h(`<section class="hero-card" style="--c:#16162B;grid-template-columns:1fr 104px"><div><div class="eyebrow">Живой звонок · голос ElevenLabs</div><h2 style="margin-top:6px">Позвони Капитану Беркуту</h2><p>Говоришь голосом — он слышит, отвечает, подкалывает и гоняет блицем «как будет…?». До 10 минут за звонок.</p></div><div class="hero-char mw"></div><div class="row"><a class="btn white" target="_blank" rel="noopener" style="text-decoration:none">${I.phone} Позвонить голосом</a></div><p class="muted" style="grid-column:1/-1;margin:0;font-size:12px;color:rgba(255,255,255,.7)!important">Откроется страница ElevenLabs: нажми кнопку звонка и разреши микрофон.</p></section>`);
+  c.querySelector("a").href=LIVE_AGENT_URL;
+  c.querySelector(".mw").append(mascotEl("berkut",""));
+  c.querySelector("a").addEventListener("click",()=>{const d=dayRec();d.live=(d.live||0)+1;persist("profile")});
+  return c;
+}
 
 /* ---------- TALK ---------- */
 let talkT0=0;
@@ -1721,6 +1732,7 @@ function viewTalk(app){
       cap.dict.stop().then(()=>{const t=talkBuf.trim();if(t)sendTalk(t,false);else{setStatus("idle");toast("Не расслышал. Нажми и скажи ещё раз")}});
     }
   };
+  if(!isKid())app.append(liveCallCard());
   app.append(top,modes,stage);
   if(!chatState.turns.length&&!autoStart){
     const st=h(`<div class="row" style="justify-content:center"><button class="btn primary big" type="button" style="max-width:420px"></button></div>`);
