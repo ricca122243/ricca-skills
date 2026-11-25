@@ -366,6 +366,7 @@ textarea.field{min-height:160px;resize:vertical;line-height:1.55}
 .node.done{background:var(--green);box-shadow:0 6px 0 #178048}
 .node.cur{background:var(--coral);box-shadow:0 6px 0 var(--coral-d),0 0 0 8px var(--coral-soft);animation:nodepulse 1.6s ease-in-out infinite}
 .node.lock{color:#A4A8BA}
+.node.skip{background:#BFE8D0;box-shadow:0 6px 0 #9BD4B3;color:#fff}
 .node.chest{border-radius:18px;background:var(--yellow);box-shadow:0 6px 0 #C98C12}.node.chest.future{background:var(--line);box-shadow:0 6px 0 color-mix(in srgb,var(--ink) 18%,transparent);color:#A4A8BA}.node.chest.done{background:var(--green);box-shadow:0 6px 0 #178048}
 @keyframes nodepulse{50%{box-shadow:0 6px 0 var(--coral-d),0 0 0 14px var(--coral-soft)}}
 .stars{display:flex;gap:2px;font-size:15px;color:var(--line);margin-top:4px}.stars i{font-style:normal}.stars i.on{color:var(--yellow)}
@@ -684,10 +685,14 @@ const BOOKS=[
  {id:"awl",name:"Academic Word List",by:"Averil Coxhead · 570 академических слов",role:"Самые частые слова академических текстов. С 4-го месяца — 4–5 слов из списка каждый день."},
 ];
 function dayIndex(){const start=new Date(S.profile.startDate+"T00:00:00");return Math.max(0,Math.floor((Date.now()-start)/864e5))}
-function booksFor(dI){
-  const raw=Math.floor(dI/2)+1,review=raw>145,mu=review?((raw-146)*11%145)+1:raw;
+const START_UNIT={A1:1,A2:1,B1:19,B2:53,C1:92};
+function shiftDays(){if(S.profile.shiftDays!=null)return S.profile.shiftDays;const lv=(S.profile.ob||{}).level;return lv?Math.ceil(((isKid()?LV_MONTH_KID:LV_MONTH)[lv]||0)*30.5):0}
+function startUnit(){return START_UNIT[(S.profile.ob||{}).level]||1}
+function booksFor(dI0){
+  const dI=Math.max(0,dI0-shiftDays());
+  const raw=Math.floor(dI/2)+startUnit(),review=raw>145,mu=review?((raw-146)*11%145)+1:raw;
   const ci=Math.min(CULLEN_ORDER.length-1,Math.floor(dI/CULLEN_DAYS)),cu=CULLEN_ORDER[ci],cuDay=ci===CULLEN_ORDER.length-1&&dI>=CULLEN_DAYS*ci?Math.min(CULLEN_DAYS-1,dI-CULLEN_DAYS*ci):dI%CULLEN_DAYS;
-  return{mu,review,muDay:dI%2,mt:MURPHY[mu-1],cu,cuDay,ct:CULLEN[cu-1],awl:dI>=90?Math.min(10,1+Math.floor((dI-90)/30)):null};
+  return{mu,review,muDay:dI%2,mt:MURPHY[mu-1],cu,cuDay,ct:CULLEN[cu-1],awl:dI0>=90?Math.min(10,1+Math.floor((dI0-90)/30)):null};
 }
 function todayBooks(){
   if(isKid()){const m=curMonth(),mn=+((S.profile.ob||{}).minutes||30);return{kid:true,dI:dayIndex(),words:mn<=15?8:10,awl:null,ct:{t:m.title.ru,topics:m.vocab.ru,p:m.ielts.ru},mu:0,mt:m.grammar.ru,muDay:0,test:null}}
@@ -1214,18 +1219,19 @@ function viewMap(app){
   const items=[];const add=x=>items.push(x);
   let n=0;
   for(let mi=0;mi<12;mi++){
-    const m=M[mi],w0=Math.ceil(mi*30.4/7),w1=Math.ceil((mi+1)*30.4/7)-1;
-    const state=curW>w1?"past":curW>=w0?"now":"future";
+    const m=M[mi],wm=w=>Math.min(11,Math.floor((w*7+6)/30.4));let w0=0;while(wm(w0)<mi)w0++;let w1=w0;while(w1<60&&wm(w1+1)===mi)w1++;
+    const cm=monthIndex(),state=mi<cm?"past":mi===cm?"now":"future";
     const hd=h(`<div class="map-head ${state}"><div><div class="eyebrow"></div><h3></h3></div><span class="pill"></span></div>`);
     hd.querySelector(".eyebrow").textContent=`${isKid()?"Месяц":"Раздел"} ${mi+1} · ${m.cefr}`;hd.querySelector("h3").textContent=m.title.ru;hd.querySelector(".pill").textContent=state==="past"?"пройдено":state==="now"?"ты здесь":"скоро";
     hd.onclick=()=>document.getElementById("plan-"+mi)?.scrollIntoView({behavior:"smooth",block:"center"});
     add(hd);
     for(let w=w0;w<=w1;w++){
-      const st=w<curW?"done":w===curW?"cur":"lock";const ws=weekStars(w);
+      const skipW=Math.floor(shiftDays()/7);const st=w<skipW?"skip":w<curW?"done":w===curW?"cur":"lock";const ws=weekStars(w);
       const x=Math.round(Math.sin(n*0.9)*22);n++;
-      const node=h(`<div class="map-row" style="--x:${x}%"><button class="node ${st}" type="button" aria-label="Неделя ${w+1}"><span class="ico">${st==="done"?I.check:st==="cur"?I.bolt:I.lockI}</span></button><div class="stars">${[0,1,2].map(k=>`<i class="${st!=="lock"&&k<ws.stars?"on":""}">★</i>`).join("")}</div></div>`);
+      const node=h(`<div class="map-row" style="--x:${x}%"><button class="node ${st}" type="button" aria-label="Неделя ${w+1}"><span class="ico">${st==="done"||st==="skip"?I.check:st==="cur"?I.bolt:I.lockI}</span></button><div class="stars">${[0,1,2].map(k=>`<i class="${st!=="lock"&&k<ws.stars?"on":""}">★</i>`).join("")}</div></div>`);
       if(st==="cur"){const mw=h(`<div class="map-char"></div>`);mw.append(mascotEl(S.profile.char,"",false));node.append(mw)}
       node.querySelector(".node").onclick=()=>{
+        if(st==="skip"){toast("Пропущено: по тесту ты начал с уровня выше");return}
         if(st==="cur"){go("today");return}
         if(st==="done"){toast(`Неделя ${w+1}: полная норма ${ws.full} из 7 дней`+(ws.stars===3?" — идеально!":""));return}
         toast(`Откроется через ${Math.max(1,w*7-dI)} дн.`)};
@@ -2038,7 +2044,7 @@ function runPlacement(host,onDone,opts={}){
   };
   intro();
 }
-function applyLevel(level){const sd=new Date();sd.setDate(sd.getDate()-Math.ceil(((isKid()?LV_MONTH_KID:LV_MONTH)[level]||0)*30.5));S.profile.startDate=dkey(sd);S.profile.monthOverride=null}
+function applyLevel(level){const sh=Math.ceil(((isKid()?LV_MONTH_KID:LV_MONTH)[level]||0)*30.5);const sd=new Date();sd.setDate(sd.getDate()-sh);S.profile.startDate=dkey(sd);S.profile.monthOverride=null;S.profile.shiftDays=sh}
 function openPlacement(){
   stopSpeak();const el=h(`<section class="view"></section>`);lesson={id:"placement",el};
   const head=h(`<div class="lesson-head"><button class="btn ghost" type="button">${I.back} Назад</button></div>`);head.querySelector("button").onclick=()=>go("today");
@@ -2124,7 +2130,7 @@ function viewOnboarding(app){
     const why={pilot:"Пилот",design:"Дизайн",smm:"SMM",nego:"Переговоры",study:"Учёба"};
     const rows=isKid()?[["Уровень сейчас",(ob.level||"A2")+(ob.levelFrom==="test"?" · по тесту":"")],["Цель","пятёрки, A2 → B1, экзамен A2 Key"],["В день",(ob.minutes||30)+" мин · "+todayMissions().length+" миссии"],["Учитель",c.name],["Старт плана","Месяц "+(lvMonth+1)+": "+MS()[lvMonth].title.ru]]:[["Уровень сейчас",(ob.level||"A2")+(ob.levelFrom==="test"?" · по тесту":"")],["Цель","C1 · IELTS "+(ob.band||"7.0")],["Экзамен","через ~"+(ob.when||12)+" мес."],["В день",(ob.minutes||60)+" мин · "+todayMissions().length+" миссии"],["Английский для",(ob.why||[]).map(x=>why[x]).join(", ")||"жизни"],["Учитель",c.name],["Старт плана","Месяц "+(lvMonth+1)+": "+MS()[lvMonth].title.ru]];
     rows.forEach(([k,val])=>{const r=h(`<div><span></span><span></span></div>`);r.children[0].textContent=k;r.children[1].textContent=val;v.querySelector(".summary").append(r)});
-    v.querySelector(".btn.primary").onclick=()=>{const sd=new Date();sd.setDate(sd.getDate()-Math.ceil(lvMonth*30.5));S.profile.startDate=dkey(sd);S.profile.monthOverride=null;S.profile.onboarded=true;S.profile.charChosen=true;persist("profile");obStep=0;document.body.classList.remove("ob-on");go("today")};
+    v.querySelector(".btn.primary").onclick=()=>{const sd=new Date();sd.setDate(sd.getDate()-Math.ceil(lvMonth*30.5));S.profile.startDate=dkey(sd);S.profile.shiftDays=Math.ceil(lvMonth*30.5);S.profile.monthOverride=null;S.profile.onboarded=true;S.profile.charChosen=true;persist("profile");obStep=0;document.body.classList.remove("ob-on");go("today")};
     v.querySelector('[data-a="redo"]').onclick=()=>{obStep=0;render()};
     box.append(v);
   }
