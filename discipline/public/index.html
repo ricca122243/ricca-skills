@@ -293,7 +293,7 @@ const DEF_HABITS = [
   { id: 'namaz', color: '#3ba776', cat: 'iman', icon: '🕌', name: '5 намазов', type: 'multi', labels: ['Фаджр','Зухр','Аср','Магриб','Иша'], xp: 50 },
   { id: 'quran', color: '#2a9d8f', cat: 'iman', icon: '📖', name: 'Коран', type: 'count', target: 2, unit: 'стр', xp: 15 },
   { id: 'azkar', color: '#7c6bd6', cat: 'iman', icon: '📿', name: 'Азкары', type: 'multi', labels: ['Утро','Вечер'], xp: 10 },
-  { id: 'sadaqa', color: '#e5a83b', cat: 'iman', icon: '🤲', name: 'Садака / доброе дело', type: 'check', xp: 10 },
+  { id: 'sadaqa', color: '#e5a83b', cat: 'iman', icon: '🤲', name: 'Садака', type: 'check', xp: 20, freq: { type: 'week', n: 1 }, hint: 'лучше в пятницу' },
   { id: 'food', color: '#f28c38', cat: 'body', icon: '🥗', name: 'Правильное питание', type: 'food', xp: 25 },
   { id: 'water', color: '#3aa0e0', cat: 'body', icon: '💧', name: 'Вода', type: 'count', target: 8, unit: 'стак.', xp: 10 },
   { id: 'sport', color: '#e2574c', cat: 'body', icon: '🏃', name: 'Спорт / прогулка 30 мин', type: 'check', xp: 20 },
@@ -391,7 +391,13 @@ let ui = { tab: 'today', day: today(), month: ymOf(today()), moneyMonth: ymOf(to
 const lsGet = k => { try { return localStorage.getItem(k); } catch { return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 function load() { try { const s = JSON.parse(lsGet(LS)); return s && s.v === 1 ? normalize(s) : null; } catch { return null; } }
-function normalize(s) { for (const k of ['habits','money','rewards','purchases','reminders','books','meals','claims','builds','harvests']) s[k] = s[k] || []; s.days = s.days || {}; s.body = s.body || { u: 0, sex: 'm', goal: 'keep', activity: 1.375 }; return s; }
+function migrate(s) {
+  // садака: раз в неделю вместо каждого дня
+  const sq = s.habits?.find(h => h.id === 'sadaqa');
+  if (sq && !sq.freq) Object.assign(sq, { freq: { type: 'week', n: 1 }, name: sq.name === 'Садака / доброе дело' ? 'Садака' : sq.name, hint: 'лучше в пятницу', xp: Math.max(sq.xp || 10, 20), u: Date.now() });
+  return s;
+}
+function normalize(s) { migrate(s); for (const k of ['habits','money','rewards','purchases','reminders','books','meals','claims','builds','harvests']) s[k] = s[k] || []; s.days = s.days || {}; s.body = s.body || { u: 0, sex: 'm', goal: 'keep', activity: 1.375 }; return s; }
 function persist() { lsSet(LS, JSON.stringify(S)); }
 function save() { memoReset(); S.updatedAt = now(); persist(); queueSync(); }
 function randKey(n = 24) { const a = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; const r = crypto.getRandomValues(new Uint8Array(n)); return [...r].map(x => a[x % a.length]).join(''); }
@@ -477,7 +483,16 @@ const habits = () => S.habits.filter(h => !h.del).sort((a, b) => (a.o ?? 0) - (b
 let _hon = new Map(), _ds = new Map();
 const memoReset = () => { _hon = new Map(); _ds = new Map(); _xp = null; };
 const habitsOn = d => { let r = _hon.get(d); if (!r) { r = habitsOn0(d); _hon.set(d, r); } return r; };
-const habitsOn0 = d => S.habits.filter(h => (!h.from || h.from <= d) && (!h.del || (h.delAt && h.delAt > d))).sort((a, b) => (a.o ?? 0) - (b.o ?? 0));
+// как часто: каждый день / по дням недели / N раз в неделю
+const isWeekly = h => h.freq?.type === 'week';
+const onWeekday = (h, d) => h.freq?.type !== 'days' || !h.freq.days?.length || h.freq.days.includes(parse(d).getDay());
+function weekDone(h, d) { const m = addDays(d, -((parse(d).getDay() + 6) % 7)); let n = 0; for (let x = m; x <= addDays(m, 6) && x <= today(); x = addDays(x, 1)) if (frac(h, x) >= 1) n++; return n; }
+const weekMet = (h, d) => isWeekly(h) && weekDone(h, d) >= (h.freq.n || 1);
+const freqText = h => h.freq?.type === 'week' ? `${h.freq.n || 1} раз в неделю` : h.freq?.type === 'days' && h.freq.days?.length ? h.freq.days.slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map(i => WD_SHORT[i]).join(', ') : 'Ежедневно';
+const WD_SHORT = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+// в балл дня входит дело «раз в неделю», только если его сделали в этот день — пропуск не наказывает
+const scoredOn = d => habitsOn(d).filter(h => !isWeekly(h) || frac(h, d) > 0);
+const habitsOn0 = d => S.habits.filter(h => (!h.from || h.from <= d) && (!h.del || (h.delAt && h.delAt > d)) && onWeekday(h, d)).sort((a, b) => (a.o ?? 0) - (b.o ?? 0));
 const dayObj = d => S.days[d] || { h: {} };
 const mealsOn = d => S.meals.filter(m => !m.del && m.date === d).sort((a, b) => (a.time || '') < (b.time || '') ? -1 : 1);
 const moneyOn = d => S.money.filter(m => !m.del && m.date === d);
@@ -503,7 +518,7 @@ const startDate = () => S.profile.start || today();
 function dayScore(d, cat) { const k = d + (cat || ''); if (_ds.has(k)) return _ds.get(k); const v = dayScore0(d, cat); _ds.set(k, v); return v; }
 function dayScore0(d, cat) {
   if (d > today() || d < startDate()) return null;
-  const hs = habitsOn(d).filter(h => !cat || h.cat === cat);
+  const hs = scoredOn(d).filter(h => !cat || h.cat === cat);
   const tot = sum(hs, h => h.xp);
   return tot ? Math.round(sum(hs, h => (+h.xp || 0) * frac(h, d)) / tot * 100) : null;
 }
@@ -544,6 +559,7 @@ function rangeStats(from, to, cat) {
 }
 const monthStats = (ym, cat) => { const r = monthRange(ym); return r.ok ? rangeStats(r.from, r.to, cat) : null; };
 function habitPct(h, from, to) {
+  if (isWeekly(h)) { let done = 0, days = 0; for (let d = from; d <= to; d = addDays(d, 1)) { if (d < startDate() || d > today() || !habitsOn(d).includes(h)) continue; days++; if (frac(h, d) >= 1) done++; } return days ? Math.min(100, Math.round(done / ((h.freq.n || 1) * Math.max(1, days / 7)) * 100)) : null; }
   let s = 0, n = 0;
   for (let d = from; d <= to; d = addDays(d, 1)) { if (d < startDate() || d > today() || !habitsOn(d).includes(h)) continue; s += frac(h, d); n++; }
   return n ? Math.round(s / n * 100) : null;
@@ -863,7 +879,7 @@ function questions(d) {
 }
 function viewToday() {
   const d = ui.day, q = questions(d), hs = habitsOn(d);
-  const open = hs.filter(x => frac(x, d) < 1), done = hs.filter(x => frac(x, d) >= 1);
+  const fin = x => frac(x, d) >= 1 || weekMet(x, d), open = hs.filter(x => !fin(x)), done = hs.filter(fin);
   const quote = QUOTES[Math.floor(parse(d) / 864e5) % QUOTES.length];
   const dt = parse(d);
   let h = headerBlock() + `<div class="row between" style="margin-bottom:6px"><div><b style="font-size:17px;text-transform:capitalize">${MONTHS[dt.getMonth()]}</b> <span class="sub">${d === today() ? 'сегодня' : titleFor(d).toLowerCase() === 'вчера' ? 'вчера' : WD[dt.getDay()]}</span></div>${d !== today() ? '<button class="btn sm line" data-act="pick-day" data-d="' + today() + '">К сегодня</button>' : ''}</div>` + weekStrip(d);
@@ -882,13 +898,14 @@ function habitCard(x, d, fin) {
   const f = frac(x, d), v = dayObj(d).h?.[x.id], c = hcol(x), st = habitStreak(x);
   const fire = st ? ` · 🔥 ${st}` : '';
   let sub = '', act = 'tog', mk = '';
-  if (x.type === 'check') sub = x.hint || 'Ежедневно';
+  if (x.type === 'check') sub = x.hint || freqText(x);
+  if (isWeekly(x)) sub = `${weekDone(x, d)} из ${x.freq.n || 1} на этой неделе${x.hint ? ' · ' + x.hint : ''}`;
   if (x.type === 'count') { sub = x.id === 'water' ? `${liters(v)} из ${liters(x.target)} л` : `${+v || 0} из ${x.target} ${esc(x.unit || '')}`; act = 'inc'; mk = '+'; }
   if (x.type === 'multi') { const n = Array.isArray(v) ? v.filter(Boolean).length : 0; sub = `${n} из ${x.labels.length}`; act = 'multi-next'; mk = '';
     if (x.id === 'namaz' && d === today()) { const nx = nextPrayer(); if (nx && !nx.tomorrow) sub += ` · ${nx.name} в ${nx.time}, через ${leftTxt(nx.left)}`; } }
   if (x.type === 'food') { const ms = mealsOn(d); sub = ms.length ? `${ms.length} приём. · ${num(sum(ms, m => m.kcal))} ккал` : 'Запиши, что ел'; act = 'food-add'; mk = '+'; }
   if (x.type === 'auto') { const ms = moneyOn(d); sub = ms.length ? `${ms.length} зап. · −${money(sum(ms.filter(m => m.type === 'out'), m => m.amount))}` : dayObj(d).noSpend ? 'Без трат' : 'Запиши траты'; act = 'spend-ask'; mk = '+'; }
-  if (fin) sub = `+${x.xp} XP${fire}`; else sub += fire;
+  if (fin) sub = isWeekly(x) && f < 1 ? `на этой неделе сделано ✓` : `+${x.xp} XP${isWeekly(x) ? '' : fire}`; else if (!isWeekly(x)) sub += fire;
   const done = f >= 1;
   const pday = x.id === 'namaz' && x.labels.length === 5 && S.prayer?.lat ? prayerDay(d) : null;
   const pills = x.type === 'multi' && !fin ? `<div class="pills">${x.labels.map((l, i) => `<button class="pill ${(Array.isArray(v) && v[i]) ? 'on' : ''}" data-act="multi" data-id="${x.id}" data-i="${i}">${esc(l)}${pday ? ` <span style="font-weight:500;opacity:.75">${pday[PR_KEYS[i]]}</span>` : ''}</button>`).join('')}</div>` : '';
@@ -944,7 +961,7 @@ function habitDayControls(x, d) {
 function openHabit(id, keep) {
   const x = S.habits.find(h => h.id === id); if (!x) return;
   const c = hcol(x), ym = ymOf(today()), d = ui.day, ctl = habitDayControls(x, d);
-  (keep ? refreshSheet : openSheet)(`<div class="row" style="margin-bottom:14px"><span class="tile" style="--t2:${tint(c, .18)};width:48px;height:48px">${x.icon}</span><div class="grow"><h2 style="margin:0">${esc(x.name)}</h2><div class="sub small">Ежедневно · ${x.xp} XP</div></div><button class="btn sm" id="hd-edit">Изменить</button></div>
+  (keep ? refreshSheet : openSheet)(`<div class="row" style="margin-bottom:14px"><span class="tile" style="--t2:${tint(c, .18)};width:48px;height:48px">${x.icon}</span><div class="grow"><h2 style="margin:0">${esc(x.name)}</h2><div class="sub small">${freqText(x)} · ${x.xp} XP</div></div><button class="btn sm" id="hd-edit">Изменить</button></div>
     ${ctl ? `<div class="box" style="background:#fff;border:1px solid var(--line)"><div class="sub tiny" style="margin-bottom:8px">${d === today() ? 'Сегодня' : dayTitle(d)}</div>${ctl}</div>` : ''}
     <div class="box" style="background:#fff;border:1px solid var(--line)">${heatGrid(dd => frac(x, dd), 17, c)}</div>
     <div class="duo" style="margin-bottom:10px"><div class="box" style="background:#fff;border:1px solid var(--line);margin:0"><div class="sub tiny">🔥 Текущая серия</div><div class="kpi">${habitStreak(x)}<small>дн.</small></div></div>
@@ -1366,7 +1383,7 @@ function viewMore() {
     <h3>Мои дела <button class="btn sm" data-act="hab-add">+ Дело</button></h3>`;
   for (const [cid, c] of Object.entries(CATS)) {
     const hs = habits().filter(x => x.cat === cid); if (!hs.length) continue;
-    h += `<div class="sub tiny" style="margin:10px 4px 6px;font-weight:650;color:${c.color}">${c.name}</div><div class="list">${hs.map(x => `<button class="item" data-act="hab-edit" data-id="${x.id}"><span class="ic">${x.icon}</span><span class="grow"><div class="t small">${esc(x.name)}</div><div class="s">${{ check: 'галочка', count: `цель ${x.target} ${esc(x.unit || '')}`, multi: (x.labels || []).join(' · '), auto: 'отмечается само', food: 'по записям еды' }[x.type]} · ${x.xp} XP</div></span><span class="dim">›</span></button>`).join('')}</div>`;
+    h += `<div class="sub tiny" style="margin:10px 4px 6px;font-weight:650;color:${c.color}">${c.name}</div><div class="list">${hs.map(x => `<button class="item" data-act="hab-edit" data-id="${x.id}"><span class="ic">${x.icon}</span><span class="grow"><div class="t small">${esc(x.name)}</div><div class="s">${{ check: 'галочка', count: `цель ${x.target} ${esc(x.unit || '')}`, multi: (x.labels || []).join(' · '), auto: 'отмечается само', food: 'по записям еды' }[x.type]} · ${freqText(x)} · ${x.xp} XP</div></span><span class="dim">›</span></button>`).join('')}</div>`;
   }
   const g = S.goals;
   return h + `<h3>Цели</h3><div class="box">
@@ -1389,17 +1406,35 @@ function openHabitEdit(id) {
     ${fixed ? '' : `<div class="field"><label>Как отмечать</label><select id="h-t"><option value="check" ${x.type === 'check' ? 'selected' : ''}>Галочка — сделал или нет</option><option value="count" ${x.type === 'count' ? 'selected' : ''}>Число — страницы, стаканы, минуты</option><option value="multi" ${x.type === 'multi' ? 'selected' : ''}>Несколько отметок — утро, вечер…</option></select></div>
     <div class="grid2" id="h-cnt"><div class="field"><label>Цель в день</label><input id="h-tg" type="number" value="${x.target || 10}"></div><div class="field"><label>Единица</label><input id="h-u" value="${esc(x.unit || '')}" placeholder="стр, мин"></div></div>
     <div class="field" id="h-mul"><label>Отметки через запятую</label><input id="h-l" value="${esc((x.labels || []).join(', '))}" placeholder="Утро, Обед, Вечер"></div>`}
+    <div class="field"><label>Как часто</label><div class="seg" id="h-fq" style="margin-bottom:8px"><button data-v="daily">Каждый день</button><button data-v="days">По дням</button><button data-v="week">Раз в неделю</button></div>
+      <div class="pills" id="h-days" style="margin:0">${[1, 2, 3, 4, 5, 6, 0].map(i => `<button class="pill" data-d="${i}">${WD_SHORT[i]}</button>`).join('')}</div>
+      <div class="opts" id="h-fn" style="margin-top:6px">${[1, 2, 3, 4, 5].map(n => `<button data-n="${n}" style="padding:8px 12px;font-size:14px">${n} ${n === 1 ? 'раз' : 'раза'}</button>`).join('')}</div>
+      <div class="sub tiny" id="h-fqh" style="margin-top:6px"></div></div>
     <div class="field"><label>Цвет</label><div class="swatches" id="h-col">${PALETTE.map(c => `<button data-c="${c}" class="${hcol(x) === c ? 'on' : ''}" style="background:${c}" aria-label="цвет"></button>`).join('')}</div></div>
     <div class="field"><label>Важность <small>— сколько XP даёт</small></label><input id="h-x" type="number" inputmode="numeric" value="${x.xp}"></div>
     <button class="btn dark block" id="h-s">Сохранить</button>${id ? '<button class="btn red block" id="h-d" style="margin-top:8px">Удалить</button>' : ''}`, root => {
-    let color = hcol(x);
+    let color = hcol(x), fq = { type: 'daily', days: [], n: 1, ...(x.freq || {}) };
+    if (!Array.isArray(fq.days)) fq.days = [];
+    const drawFq = () => {
+      root.querySelectorAll('#h-fq button').forEach(b => b.classList.toggle('on', b.dataset.v === fq.type));
+      root.querySelector('#h-days').style.display = fq.type === 'days' ? '' : 'none';
+      root.querySelector('#h-fn').style.display = fq.type === 'week' ? '' : 'none';
+      root.querySelectorAll('#h-days [data-d]').forEach(b => { const on = fq.days.includes(+b.dataset.d); b.classList.toggle('on', on); b.style.background = on ? color : ''; b.style.borderColor = on ? color : ''; });
+      root.querySelectorAll('#h-fn [data-n]').forEach(b => b.classList.toggle('on', +b.dataset.n === (fq.n || 1)));
+      root.querySelector('#h-fqh').textContent = fq.type === 'week' ? 'Можно в любой день недели. Если не сделал сегодня — день не портится, за выполнение даются XP.' : fq.type === 'days' ? 'В остальные дни это дело не показывается и не считается.' : '';
+    };
+    root.querySelector('#h-fq').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; fq.type = b.dataset.v; if (fq.type === 'days' && !fq.days.length) fq.days = [5]; drawFq(); };
+    root.querySelector('#h-days').onclick = e => { const b = e.target.closest('[data-d]'); if (!b) return; const i = +b.dataset.d; fq.days = fq.days.includes(i) ? fq.days.filter(z => z !== i) : [...fq.days, i]; drawFq(); };
+    root.querySelector('#h-fn').onclick = e => { const b = e.target.closest('[data-n]'); if (!b) return; fq.n = +b.dataset.n; drawFq(); };
+    drawFq();
     root.querySelector('#h-col').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; color = b.dataset.c; root.querySelectorAll('#h-col button').forEach(y => y.classList.toggle('on', y === b)); };
     const tSel = root.querySelector('#h-t');
     const upd = () => { if (!tSel) return; root.querySelector('#h-cnt').style.display = tSel.value === 'count' ? '' : 'none'; root.querySelector('#h-mul').style.display = tSel.value === 'multi' ? '' : 'none'; };
     if (tSel) tSel.onchange = upd; upd();
     root.querySelector('#h-s').onclick = () => {
       const name = root.querySelector('#h-n').value.trim(); if (!name) return toast('Название?');
-      const o = { name, color, icon: root.querySelector('#h-i').value.trim() || '⭐', cat: root.querySelector('#h-c').value, xp: Math.max(1, Math.round(+root.querySelector('#h-x').value || 10)), u: now() };
+      if (fq.type === 'days' && !fq.days.length) return toast('Выбери хотя бы один день');
+      const o = { freq: fq.type === 'daily' ? { type: 'daily' } : fq.type === 'days' ? { type: 'days', days: fq.days } : { type: 'week', n: fq.n || 1 }, name, color, icon: root.querySelector('#h-i').value.trim() || '⭐', cat: root.querySelector('#h-c').value, xp: Math.max(1, Math.round(+root.querySelector('#h-x').value || 10)), u: now() };
       if (tSel) {
         o.type = tSel.value;
         if (o.type === 'count') { o.target = Math.max(1, +root.querySelector('#h-tg').value || 1); o.unit = root.querySelector('#h-u').value.trim(); }
@@ -1677,7 +1712,7 @@ function handleOpen(what) {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S) { if (!sheetOpen()) render(); syncPull(); } });
 addEventListener('online', () => S && syncPush());
 /* обновления: приложение само подтягивает новую версию */
-const APP_VERSION = 7;
+const APP_VERSION = 8;
 async function checkUpdate() {
   try { const r = await fetch('/version.json', { cache: 'no-store' }); const j = await r.json(); if (j.v > APP_VERSION && !sheetOpen()) { const k = 'istiqama-reloaded-' + j.v; if (!sessionStorage.getItem(k)) { sessionStorage.setItem(k, '1'); location.reload(); } } } catch {}
 }
