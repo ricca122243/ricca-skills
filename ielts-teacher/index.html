@@ -803,7 +803,8 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 function h(html){const t=document.createElement("template");t.innerHTML=html.trim();return t.content.firstElementChild}
 function md(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").split(/\n{2,}/).map(p=>"<p>"+p.replace(/\n/g,"<br>")+"</p>").join("")}
 let toastT;function toast(msg){document.querySelector(".toast")?.remove();const t=h('<div class="toast" role="status"></div>');t.textContent=msg;document.body.append(t);clearTimeout(toastT);toastT=setTimeout(()=>t.remove(),1800)}
-const thinking=(label="Учитель готовит задание…")=>`<div class="thinking">${mascotSVG(S.profile.char,"m-thinkanim")}<span>${esc(label)}</span></div>`;
+const thinking=(label="Учитель готовит задание…")=>`<div class="thinking" data-t0="${Date.now()}">${mascotSVG(S.profile.char,"m-thinkanim")}<span>${esc(label)}<small class="tsec muted" style="display:block;font-size:13px;margin-top:4px">обычно 10–20 секунд</small></span></div>`;
+setInterval(()=>{document.querySelectorAll(".thinking[data-t0]").forEach(el=>{const sec=Math.round((Date.now()+0-el.dataset.t0)/1000),t=el.querySelector(".tsec");if(t)t.textContent=sec<25?`обычно 10–20 секунд · ${sec} c`:`${sec} c · долго… не сворачивай браузер и не блокируй экран — иначе запрос оборвётся`})},1000);
 function errCopy(e){const c=e&&e.code;return({
   not_granted:"Ты не разрешил странице обращаться к Claude. Обнови страницу и нажми «Разрешить», чтобы учитель работал.",
   rate_limited:"Слишком много запросов подряд. Подожди минуту и нажми «Ещё раз».",
@@ -919,10 +920,11 @@ async function loadLesson(body,id,prompt,label,validate,retry){
 }
 
 /* words */
-async function lessonWords(body){
+const WORDS_OK=d=>Array.isArray(d?.words)&&d.words.length>=6&&d.words.every(w=>w.en&&w.ru);
+function wordsPrompt(){
   const m=curMonth(),bk=todayBooks();
   const known=S.notebook.words.slice(-80).map(w=>w.en).join(", ");
-  const prompt=`${teacherContext()}
+  return `${teacherContext()}
 
 Задание: составь РОВНО ${bk.words} новых слов или выражений на сегодня.
 Микс: ${bk.kid?`${bk.words-2} по теме месяца «${m.vocab.ru}» и 2 полезные фразы для общения с ровесниками — всё для школьницы 7 класса, простые и нужные слова`:bk.awl?`${bk.words-8} по теме юнита «${bk.ct.t}» (${bk.ct.topics}), 4 из Academic Word List sublist ${bk.awl}`:`${bk.words-4} по теме юнита «${bk.ct.t}» (${bk.ct.topics})`}${bk.kid?"":`, 2 профессиональных (${m.pro.ru}), 2 полезных фразы для переговоров с руководителями`}.
@@ -930,7 +932,14 @@ async function lessonWords(body){
 Пример — короткое естественное предложение из жизни пилота, дизайнера или SMM.
 Для каждого слова дай подсказку-ассоциацию для запоминания по-русски (созвучие, образ или смешная связка, до 12 слов), например runway — «ран-вэй: бежишь (run) по пути (way) на взлёт».
 Ответь только JSON: {"words":[{"en":"слово","ru":"перевод","ipa":"/транскрипция/","example":"English sentence","example_ru":"перевод примера","hint_ru":"подсказка"}]}`;
-  const data=await loadLesson(body,"words",prompt,"Учитель подбирает слова…",d=>Array.isArray(d?.words)&&d.words.length>=6&&d.words.every(w=>w.en&&w.ru));
+}
+let wordsPrefetch=null;
+function prefetchWords(force){if(!cap.sample||wordsPrefetch||!S.profile.onboarded||(!force&&!STANDALONE))return null;const k=cacheKey("words");if(WORDS_OK(ls.get(k))||dayRec().done.includes("words"))return null;
+  wordsPrefetch=askJson(wordsPrompt(),{cache:false,modelTier:"quick"}).then(d=>{if(WORDS_OK(d)){ls.set(k,d);return d}return null}).catch(()=>null).finally(()=>{setTimeout(()=>{wordsPrefetch=null},0)});return wordsPrefetch}
+async function lessonWords(body){
+  let data=ls.get(cacheKey("words"));
+  if(!WORDS_OK(data)){body.innerHTML=thinking("Учитель подбирает слова…");const pf=wordsPrefetch||prefetchWords(true);data=pf?await pf:null}
+  if(!WORDS_OK(data))data=await loadLesson(body,"words",wordsPrompt(),"Учитель подбирает слова…",WORDS_OK);
   if(!data)return;
   const words=data.words.slice(0,15);
   const review=dueWords(10).filter(w=>!words.some(n=>n.en.toLowerCase()===w.en.toLowerCase()));
@@ -1757,6 +1766,7 @@ function viewToday(app){
   app.append(card);
   if(S.profile.hw)app.append(hwCard());
   maybeIncoming();
+  if(!d.done.includes("words"))setTimeout(prefetchWords,800);
   if(!cap.sample)app.append(h(`<p class="note info">Учитель оживёт, когда страница откроется на claude.ai. При первом задании нажми «Разрешить», чтобы он мог отвечать.</p>`));
 }
 function ringSVG(frac,color,label,sub){
