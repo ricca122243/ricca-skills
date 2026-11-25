@@ -735,7 +735,7 @@ function bookCard(){
     const on=!!d.book[x.id];
     const r=h(`<button class="mission ${on?"done":""}" type="button" aria-pressed="${on}"><span class="ic ${on?"":"c-yellow"}">${on?I.check:I.words}</span><span><b></b><span class="sub" style="display:block;font-weight:800;color:var(--ink)"></span><span class="sub tk"></span></span><span class="xp">${on?"готово":"+10 XP"}</span></button>`);
     r.querySelector("b").textContent=x.book;r.querySelector(".sub").textContent=x.unit;r.querySelector(".tk").textContent=x.task;
-    r.onclick=()=>{if(d.book[x.id])return;d.book[x.id]=true;if(!award(null,10))persist("profile");render()};
+    r.onclick=()=>{if(d.book[x.id])return;d.book[x.id]=true;persist("profile");toast("Отмечено. XP дают за проверенные задания");render()};
     c.querySelector(".bk").append(r);
   });
   c.querySelector(".btn.ghost").onclick=()=>{go("plan");setTimeout(()=>document.getElementById("books")?.scrollIntoView({behavior:"smooth"}),60)};
@@ -776,15 +776,16 @@ ${booksLine()}
 Профессиональный фокус месяца: ${m.pro.ru}. IELTS-фокус месяца: ${m.ielts.ru}.
 Доля английского в твоей речи сейчас ≈ ${m.ratio}% (объяснения правил — по-русски, практика — по-английски). Подбирай сложность английского под уровень ${m.cefr}.
 ${personaLine()}
-${studentStatus()}`;
+${studentStatus()}
+${wordsLine()}`;
 }
 
 /* ---------- xp / streak ---------- */
 function dayRec(k=todayKey()){return S.profile.days[k]||(S.profile.days[k]={done:[],xp:0,talk:0})}
-function award(missionId,xp){
+function award(missionId,xp,real=!!missionId){
   const d=dayRec();
   if(missionId){if(d.done.includes(missionId))return false;d.done.push(missionId)}
-  d.xp+=xp;S.profile.xp+=xp;touchStreak();persist("profile");updateStats();
+  d.xp+=xp;S.profile.xp+=xp;if(real)touchStreak();persist("profile");updateStats();
   toast("+"+xp+" XP");return true;
 }
 function touchStreak(){
@@ -876,7 +877,7 @@ function micButton(target){
 }
 
 /* ---------- router ---------- */
-const TABS=[{id:"today",ru:"Сегодня",icon:"today"},{id:"teacher",ru:"Говорить",icon:"chat"},{id:"games",ru:"Игры",icon:"games"},{id:"progress",ru:"Прогресс",icon:"stats"}];
+const TABS=[{id:"today",ru:"Сегодня",icon:"today"},{id:"teacher",ru:"Говорить",icon:"chat"},{id:"dict",ru:"Словарь",icon:"words"},{id:"games",ru:"Игры",icon:"games"},{id:"progress",ru:"Прогресс",icon:"stats"}];
 let route="today",lesson=null;
 const ROUTES=[...TABS.map(t=>t.id),"plan"];
 function buildTabs(){for(const host of [$("#tabsTop"),$("#tabsBottom")]){host.innerHTML="";for(const t of TABS){const b=h(`<button class="tab" type="button">${I[t.icon]}<span>${t.ru}</span></button>`);b.dataset.tab=t.id;b.onclick=()=>go(t.id);host.append(b)}}}
@@ -889,7 +890,7 @@ function render(){
   if(!S.profile.onboarded){viewOnboarding(app);return}
   const lg=$("#logoChar");if(lg&&lg.dataset.c!==S.profile.char){lg.dataset.c=S.profile.char;lg.innerHTML=mascotSVG(S.profile.char,"m-static")}
   if(lesson){app.append(lesson.el);return}
-  ({today:viewToday,teacher:viewTalk,games:viewGames,plan:viewPlan,progress:viewProgress}[route]||viewToday)(app);
+  ({today:viewToday,teacher:viewTalk,dict:viewDict,games:viewGames,plan:viewPlan,progress:viewProgress}[route]||viewToday)(app);
 }
 function rerenderIfAiView(){if(!lesson&&(route==="teacher"||route==="today"))render()}
 window.addEventListener("hashchange",()=>{const id=location.hash.slice(1);if(ROUTES.includes(id)&&id!==route)go(id)});
@@ -927,61 +928,100 @@ async function lessonWords(body){
 Микс: ${bk.kid?`${bk.words-2} по теме месяца «${m.vocab.ru}» и 2 полезные фразы для общения с ровесниками — всё для школьницы 7 класса, простые и нужные слова`:bk.awl?`${bk.words-8} по теме юнита «${bk.ct.t}» (${bk.ct.topics}), 4 из Academic Word List sublist ${bk.awl}`:`${bk.words-4} по теме юнита «${bk.ct.t}» (${bk.ct.topics})`}${bk.kid?"":`, 2 профессиональных (${m.pro.ru}), 2 полезных фразы для переговоров с руководителями`}.
 Уровень ${m.cefr}: слова должны быть посильными, но новыми. Не повторяй уже выученные: ${known||"(пока нет)"}.
 Пример — короткое естественное предложение из жизни пилота, дизайнера или SMM.
-Ответь только JSON: {"words":[{"en":"слово","ru":"перевод","ipa":"/транскрипция/","example":"English sentence","example_ru":"перевод примера"}]}`;
+Для каждого слова дай подсказку-ассоциацию для запоминания по-русски (созвучие, образ или смешная связка, до 12 слов), например runway — «ран-вэй: бежишь (run) по пути (way) на взлёт».
+Ответь только JSON: {"words":[{"en":"слово","ru":"перевод","ipa":"/транскрипция/","example":"English sentence","example_ru":"перевод примера","hint_ru":"подсказка"}]}`;
   const data=await loadLesson(body,"words",prompt,"Учитель подбирает слова…",d=>Array.isArray(d?.words)&&d.words.length>=6&&d.words.every(w=>w.en&&w.ru));
   if(!data)return;
   const words=data.words.slice(0,15);
-  const ago=n=>{const x=new Date();x.setDate(x.getDate()-n);return dkey(x)};const revDays=[1,3,7,14].map(ago);
-  const review=S.notebook.words.filter(w=>revDays.includes(w.date)&&!words.some(n=>n.en.toLowerCase()===w.en.toLowerCase())).slice(-10);
-  let i=0,phase="cards",qi=0,score=0;const quiz=[];
+  const review=dueWords(10).filter(w=>!words.some(n=>n.en.toLowerCase()===w.en.toLowerCase()));
+  let i=0;
   const draw=()=>{
     body.innerHTML="";
-    if(phase==="cards"){
-      const w=words[i];let shown=false;
-      const steps=h(`<div class="progress-steps">${words.map((_,j)=>`<i class="${j<=i?"on":""}"></i>`).join("")}</div>`);
-      const card=h(`<button class="flash" type="button" aria-label="Показать перевод"><div><div class="w"></div><div class="ipa"></div><div class="muted" style="font-size:13px;margin-top:10px">Нажми, чтобы увидеть перевод</div></div></button>`);
-      card.querySelector(".w").textContent=w.en;card.querySelector(".ipa").textContent=w.ipa||"";
-      card.onclick=()=>{if(shown)return;shown=true;card.innerHTML="";const d=h(`<div><div class="w"></div><div class="tr" style="margin-top:4px"></div><p style="margin:14px 0 2px"></p><small class="muted"></small></div>`);d.querySelector(".w").textContent=w.en;d.querySelector(".tr").textContent=w.ru;d.querySelector("p").textContent=w.example||"";d.querySelector("small").textContent=w.example_ru||"";card.append(d)};
-      const ctr=h(`<div class="row" style="justify-content:space-between;margin-top:14px"><div class="row"><button class="btn" type="button" data-a="say">${I.speaker} Слушать</button><button class="btn ghost" type="button" data-a="ex">Пример вслух</button></div><button class="btn primary" type="button" data-a="next">${i<words.length-1?"Дальше":"К проверке"}</button></div>`);
-      ctr.querySelector('[data-a="say"]').onclick=()=>speak(w.en);
-      ctr.querySelector('[data-a="ex"]').onclick=()=>speak(w.example||w.en);
-      ctr.querySelector('[data-a="next"]').onclick=()=>{if(i<words.length-1){i++;draw()}else{phase="quiz";buildQuiz();draw()}};
-      body.append(h(`<div class="eyebrow">Карточка ${i+1} из ${words.length}</div>`),steps,h('<div style="height:14px"></div>'),card,ctr);
-    }else if(phase==="quiz"){
-      const q=quiz[qi];
-      body.append(h(`<div class="eyebrow">Проверка ${qi+1} из ${quiz.length}</div>`),h(`<div class="progress-steps">${quiz.map((x,j)=>`<i class="${x.res===true?"ok":x.res===false?"bad":j===qi?"on":""}"></i>`).join("")}</div>`));
-      const qq=h(`<p class="q" style="margin-top:16px"></p>`);qq.textContent=q.prompt;body.append(qq);
-      const opts=h(`<div class="opts"></div>`);
-      q.options.forEach((o,j)=>{const b=h(`<button class="opt" type="button"></button>`);b.textContent=o;b.onclick=()=>{
-        const ok=j===q.answer;q.res=ok;if(ok)score++;
-        opts.querySelectorAll("button").forEach((x,k)=>{x.disabled=true;if(k===q.answer)x.classList.add("ok");else if(k===j)x.classList.add("bad")});
-        const nx=h(`<div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" type="button">${qi<quiz.length-1?"Дальше":"Готово"}</button></div>`);
-        nx.querySelector("button").onclick=()=>{if(qi<quiz.length-1){qi++;draw()}else{phase="done";draw()}};body.append(nx);nx.querySelector("button").focus()};opts.append(b)});
-      body.append(opts);
-    }else{
-      const added=addWords(words);const first=award("words",20);
-      body.append(h(`<div class="view"><h2>Слова дня выучены</h2><p>Результат проверки: <b class="mono">${score}/${quiz.length}</b> (новых слов ${words.length}, повтор старых ${quiz.length-words.length}). В твой словарь добавлено слов: ${added}.${first?"":" (XP за эту миссию уже был получен сегодня.)"}</p><div class="row"><button class="btn primary" type="button" data-a="home">К миссиям</button><button class="btn" type="button" data-a="again">Пройти ещё раз</button></div></div>`));
-      body.querySelector('[data-a="home"]').onclick=()=>go("today");body.querySelector('[data-a="again"]').onclick=()=>{i=0;qi=0;score=0;phase="cards";draw()};
-    }
+    const w=words[i];let shown=false;
+    const steps=h(`<div class="progress-steps">${words.map((_,j)=>`<i class="${j<=i?"on":""}"></i>`).join("")}</div>`);
+    const card=h(`<button class="flash" type="button" aria-label="Показать перевод"><div><div class="w"></div><div class="ipa"></div><div class="muted" style="font-size:13px;margin-top:10px">Нажми, чтобы увидеть перевод</div></div></button>`);
+    card.querySelector(".w").textContent=w.en;card.querySelector(".ipa").textContent=w.ipa||"";
+    const ctr=h(`<div class="row" style="justify-content:space-between;margin-top:14px"><div class="row"><button class="btn" type="button" data-a="say">${I.speaker} Слушать</button></div><button class="btn primary" type="button" data-a="next" disabled>${i<words.length-1?"Дальше":"К проверке"}</button></div>`);
+    card.onclick=()=>{if(shown)return;shown=true;speak(w.en);card.innerHTML="";const d=h(`<div><div class="w"></div><div class="tr" style="margin-top:4px"></div><p style="margin:14px 0 2px"></p><small class="muted"></small><div class="hint" style="margin-top:12px;font-weight:700"></div></div>`);d.querySelector(".w").textContent=w.en;d.querySelector(".tr").textContent=w.ru;d.querySelector("p").textContent=w.example||"";d.querySelector("small").textContent=w.example_ru||"";if(w.hint_ru)d.querySelector(".hint").textContent="💡 "+w.hint_ru;else d.querySelector(".hint").remove();card.append(d);ctr.querySelector('[data-a="next"]').disabled=false};
+    ctr.querySelector('[data-a="say"]').onclick=()=>speak(w.en);
+    ctr.querySelector('[data-a="next"]').onclick=()=>{if(i<words.length-1){i++;draw()}else quiz()};
+    body.append(h(`<div class="eyebrow">Новое слово ${i+1} из ${words.length}${review.length?` · потом повтор ${review.length} старых`:""}</div>`),steps,h('<div style="height:14px"></div>'),card,ctr);
   };
-  function buildQuiz(){
-    quiz.length=0;
-    words.forEach((w,j)=>{
-      const others=words.filter((_,k)=>k!==j).sort(()=>Math.random()-.5).slice(0,3);
-      const dir=j%2===0;
-      const opts=[w,...others].sort(()=>Math.random()-.5);
-      quiz.push({prompt:dir?`Как переводится «${w.en}»?`:`Как сказать по-английски «${w.ru}»?`,options:opts.map(o=>dir?o.ru:o.en),answer:opts.indexOf(w),res:null});
-    });
-    const pool=[...words,...S.notebook.words.slice(-60)];
-    review.forEach(w=>{const others=pool.filter(o=>o.en!==w.en&&o.ru!==w.ru).sort(()=>Math.random()-.5).slice(0,3);if(others.length<3)return;const opts=[w,...others].sort(()=>Math.random()-.5);
-      quiz.push({prompt:`Повтор: как переводится «${w.en}»?`,options:opts.map(o=>o.ru),answer:opts.indexOf(w),res:null})});
-  }
+  const quiz=()=>{
+    const list=[...words.map(w=>({...w,hint:w.hint_ru||"",isNew:true})),...review];
+    wordQuiz(body,list,{title:"Проверка",onDone:({acc,firstOk,results})=>{
+      addWords(words);
+      results.forEach((r,j)=>{const w=list[j];if(w.isNew){const nw=findWord(w.en);if(nw&&nw.date===todayKey()){nw.lvl=r.first===true&&!r.hinted?1:0;nw.due=addDays(1);if(r.first===false)nw.bad=(nw.bad||0)+1}}else srsMark(w,r.first===true,r.hinted)});
+      persist("notebook");
+      const pass=acc>=0.6,pct=Math.round(acc*100);
+      if(!pass){mascotFlash(curMascot,"angry");body.append(h(`<div class="view"><h2>Не засчитано</h2><p>С первого раза и без подсказок правильно: <b class="mono">${firstOk}/${list.length}</b> (${pct}%). Нужно минимум 60%. Слова уже в словаре — пройди проверку ещё раз, без угадывания.</p><div class="row"><button class="btn primary" type="button" data-a="again">Пройти проверку заново</button><button class="btn" type="button" data-a="cards">Ещё раз карточки</button></div></div>`));
+        body.querySelector('[data-a="again"]').onclick=quiz;body.querySelector('[data-a="cards"]').onclick=()=>{i=0;draw()};return}
+      const first=award("words",Math.max(10,Math.round(20*acc)));
+      body.append(h(`<div class="view"><h2>Слова дня засчитаны</h2><p>С первого раза правильно: <b class="mono">${firstOk}/${list.length}</b> (${pct}%). Новых слов: ${words.length}, повтор старых: ${review.length}. Ошибки вернутся на повтор завтра.${first?"":" XP за эту миссию сегодня уже начислен."}</p><p class="muted">Используй новые слова в разговоре с Беркутом — каждое использованное слово засчитывается как повторение.</p><div class="row"><button class="btn primary" type="button" data-a="home">На главную</button><button class="btn" type="button" data-a="dict">Открыть словарь</button></div></div>`));
+      body.querySelector('[data-a="home"]').onclick=()=>go("today");body.querySelector('[data-a="dict"]').onclick=()=>go("dict");
+    }});
+  };
   draw();
 }
-function addWords(words){let n=0;const have=new Set(S.notebook.words.map(w=>w.en.toLowerCase()));for(const w of words){if(have.has(String(w.en).toLowerCase()))continue;S.notebook.words.push({en:String(w.en),ru:String(w.ru),ipa:String(w.ipa||""),example:String(w.example||""),date:todayKey()});n++}
+function addWords(words){let n=0;const have=new Set(S.notebook.words.map(w=>w.en.toLowerCase()));for(const w of words){if(have.has(String(w.en).toLowerCase()))continue;S.notebook.words.push({en:String(w.en),ru:String(w.ru),ipa:String(w.ipa||""),example:String(w.example||""),hint:String(w.hint_ru||w.hint||""),date:todayKey(),lvl:0,due:addDays(1),ok:0,bad:0});n++}
   if(S.notebook.words.length>400)S.notebook.words=S.notebook.words.slice(-400);persist("notebook");return n}
 function addMistakes(list){for(const x of list){if(!x||!x.wrong||!x.right)continue;S.notebook.mistakes.push({wrong:String(x.wrong).slice(0,200),right:String(x.right).slice(0,200),why:String(x.why_ru||x.why||"").slice(0,240),date:todayKey()})}
   if(S.notebook.mistakes.length>200)S.notebook.mistakes=S.notebook.mistakes.slice(-200);persist("notebook")}
+
+/* ---------- dictionary: spaced repetition ---------- */
+const SRS_DAYS=[0,1,3,7,14,30];
+function addDays(n){const x=new Date();x.setDate(x.getDate()+n);return dkey(x)}
+function wInit(w){if(w.lvl==null){w.lvl=0;w.due=todayKey();w.ok=0;w.bad=0}return w}
+function srsMark(w,ok,hinted){wInit(w);if(ok&&!hinted){w.lvl=Math.min(5,w.lvl+1);w.ok++;w.due=addDays(SRS_DAYS[w.lvl])}else if(ok){w.due=addDays(1)}else{w.bad++;w.lvl=0;w.due=addDays(1)}w.last=todayKey()}
+function findWord(en){const k=String(en).toLowerCase();return S.notebook.words.find(w=>w.en.toLowerCase()===k)}
+function dueWords(n=15){const t=todayKey();return S.notebook.words.map(wInit).filter(w=>w.due<=t&&w.date!==t).sort((a,b)=>a.lvl-b.lvl||(a.due<b.due?-1:a.due>b.due?1:0)).slice(0,n)}
+function weakWords(n=6){return S.notebook.words.map(wInit).filter(w=>w.bad>0&&w.lvl<3).sort((a,b)=>b.bad-a.bad||a.lvl-b.lvl).slice(0,n)}
+function newToday(){const t=todayKey();return S.notebook.words.filter(w=>w.date===t)}
+function focusWords(n=10){const seen=new Set(),out=[];for(const w of [...newToday(),...weakWords(6),...dueWords(6)]){const k=w.en.toLowerCase();if(seen.has(k))continue;seen.add(k);out.push(w);if(out.length>=n)break}return out}
+function wordsLine(){const f=focusWords(10);if(!f.length)return "";return `Слова ученика для отработки (он их сейчас учит — вплетай в разговор и задания, проси использовать в ответах, проверяй перевод и произношение): ${f.map(w=>`${w.en} (${w.ru})`).join(", ")}.`}
+const LEARNED=4;
+function wordState(w){wInit(w);return w.lvl>=LEARNED?"learned":w.bad>0&&w.lvl<3?"hard":"learning"}
+function stripAns(x){return norm(x).replace(/\([^)]*\)/g,"").replace(/^(to|a|an|the)\s+/,"").replace(/\s+/g," ").trim()}
+function lev(a,b){const m=a.length,n=b.length;if(Math.abs(m-n)>1)return 2;const d=Array.from({length:m+1},(_,i)=>[i]);for(let j=1;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n]}
+function ansCheck(input,en){const v=stripAns(input);if(!v)return "no";const vars=String(en).split(/[\/;,]| or /).map(stripAns).filter(Boolean);if(vars.includes(v))return "ok";if(vars.some(x=>x.length>=5&&lev(v,x)<=1))return "almost";return "no"}
+/* talk anti-cheat: only real English phrases count, no repeats */
+const FILLER=new Set(["ok","okay","yes","yeah","yep","no","nope","hi","hello","hey","bye","lol","hm","hmm","oh","uh","um","thanks","thank","you"]);
+function realPhrase(t){const d=dayRec();const k=norm(t);if(!k)return false;const en=(k.match(/[a-z']{2,}/g)||[]).filter(x=>!FILLER.has(x));if(!en.length||!en.some(x=>x.length>=3))return false;d.talkSeen=d.talkSeen||[];if(d.talkSeen.includes(k))return false;d.talkSeen.push(k);if(d.talkSeen.length>80)d.talkSeen.shift();return true}
+function usedWords(t){const k=" "+norm(t)+" ",d=dayRec(),hits=[];d.used=d.used||[];for(const w of focusWords(12)){const e=stripAns(w.en);if(e.length<3||d.used.includes(e))continue;if(k.includes(" "+e+" ")||k.includes(" "+e+"s ")){d.used.push(e);srsMark(w,true,false);hits.push(w.en)}}if(hits.length){persist("notebook");toast("Слово в деле: "+hits.join(", ")+" ✓")}return hits}
+function countTalk(t){if(!realPhrase(t)){persist("profile");return false}usedWords(t);const d=dayRec();d.talk=(d.talk||0)+1;if(d.talk>=TALK_TARGET&&!d.done.includes("talk"))award("talk",25);else persist("profile");return true}
+
+/* shared word quiz: MC + typing, hints, mastery loop (wrong answers come back) */
+function wordQuiz(body,list,opts){
+  const pool=[...list,...S.notebook.words.slice(-80)];
+  const st=list.map(()=>({first:null,hinted:false}));
+  let queue=shuffle(list.map((w,j)=>({j,type:(w.isNew?(j%2===0?"mc":"type"):(wInit(w).lvl>=2||j%2===1?"type":"mc"))}))),pos=0;
+  const total=queue.length;
+  const draw=()=>{
+    body.innerHTML="";
+    if(pos>=queue.length){const firstOk=st.filter(x=>x.first===true&&!x.hinted).length;opts.onDone({acc:list.length?firstOk/list.length:0,firstOk,results:st});return}
+    const q=queue[pos],w=list[q.j],s0=st[q.j],again=pos>=total;
+    body.append(h(`<div class="eyebrow">${opts.title||"Проверка"} · ${Math.min(pos+1,total)} из ${total}${again?" · работа над ошибками":""}</div>`),h(`<div class="progress-steps">${list.map((_,k)=>`<i class="${st[k].first===true&&!st[k].hinted?"ok":st[k].first===false||st[k].hinted?"bad":k===q.j?"on":""}"></i>`).join("")}</div>`));
+    const qq=h(`<p class="q" style="margin-top:16px"></p>`);body.append(qq);
+    const next=ok=>{if(s0.first===null)s0.first=ok;if(!ok)queue.push({j:q.j,type:"type"});
+      const n=h(`<div class="note ${ok?"ok":"bad"}" style="margin-top:12px"><b></b><div class="muted" style="margin-top:4px"></div></div>`);n.querySelector("b").textContent=(ok?"Верно: ":"Правильно: ")+w.en+" — "+w.ru;n.querySelector("div").textContent=w.example||"";speak(w.en);body.append(n);
+      const nx=h(`<div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" type="button">Дальше</button></div>`);nx.querySelector("button").onclick=()=>{pos++;draw()};body.append(nx);nx.querySelector("button").focus()};
+    if(q.type==="mc"){
+      qq.textContent=`Как переводится «${w.en}»?`;
+      const others=shuffle(pool.filter(o=>o.ru!==w.ru&&o.en!==w.en)).filter((o,k,a)=>a.findIndex(x=>x.ru===o.ru)===k).slice(0,3);
+      const op=shuffle([w,...others]);const box=h(`<div class="opts"></div>`);
+      op.forEach(o=>{const b=h(`<button class="opt" type="button"></button>`);b.textContent=o.ru;b.onclick=()=>{box.querySelectorAll("button").forEach(x=>{x.disabled=true;if(x.textContent===w.ru)x.classList.add("ok")});const ok=o===w;if(!ok)b.classList.add("bad");next(ok)};box.append(b)});
+      body.append(box);
+    }else{
+      qq.textContent=`Напиши по-английски: «${w.ru}»`;
+      const f=h(`<form class="row"><input class="field" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Впиши слово" style="flex:1;min-width:0"><button class="btn primary" type="submit">Проверить</button></form>`);
+      const hb=h(`<div class="row" style="margin-top:10px"><button class="btn ghost" type="button">💡 Подсказка</button><span class="muted hinttxt" style="font-size:14px"></span></div>`);
+      hb.querySelector("button").onclick=e=>{s0.hinted=true;e.currentTarget.disabled=true;const en=String(w.en);hb.querySelector(".hinttxt").textContent=en.split(" ").map(x=>x[0]+"_".repeat(Math.max(0,x.length-1))).join(" ")+(w.hint?" · "+w.hint:"")+" (с подсказкой не засчитается)"};
+      f.onsubmit=ev=>{ev.preventDefault();const r=ansCheck(f.querySelector("input").value,w.en);if(r==="no"&&!f.querySelector("input").value.trim())return;f.querySelectorAll("input,button").forEach(x=>x.disabled=true);hb.querySelector("button").disabled=true;if(r==="almost")toast("Почти! Правильно пишется: "+w.en);next(r!=="no")};
+      body.append(f,hb);setTimeout(()=>f.querySelector("input").focus(),30);
+    }
+  };
+  draw();
+}
 
 /* grammar (also reused for mistake review) */
 async function lessonGrammar(body,opts={}){
@@ -990,7 +1030,7 @@ async function lessonGrammar(body,opts={}){
 
 Задание: ${bk.kid?`урок грамматики для школьницы 7 класса на тему «${bk.mt}» (тема месяца). Выбери ОДНУ часть темы под неделю ${weekInMonth()}. Объясняй очень просто и весело.`:`урок грамматики строго по English Grammar in Use, Unit ${bk.mu} «${bk.mt}»`}${bk.kid?"":(bk.review?" (повтор пройденного юнита)":"")+". "+(bk.muDay?"Сегодня второй день юнита: короткое напоминание правила и более сложные задания, смешанные с соседними юнитами.":"Сегодня первый день юнита: объясни правило с нуля.")+" Ученик параллельно делает этот юнит в книге — твои задания должны быть СВОИМИ (не копируй упражнения книги)."}
 Объяснение — по-русски, просто, как для уровня ${m.cefr}. Все примеры и предложения в заданиях — ${bk.kid?"из жизни школьницы: школа, друзья, хобби, животные, мультики":"из жизни пилота, дизайнера, SMM и деловых переговоров"}.
-8 заданий: 5 типа "mc" (4 варианта) и 3 типа "gap" (одно-два слова, в скобках подсказка-глагол). В "gap" поле answer — массив всех допустимых ответов.
+В примерах и заданиях по возможности используй слова ученика из строки «Слова ученика для отработки». 8 заданий: 5 типа "mc" (4 варианта) и 3 типа "gap" (одно-два слова, в скобках подсказка-глагол). В "gap" поле answer — массив всех допустимых ответов.
 Ответь только JSON: {"topic":"название темы","explain_ru":"3–6 предложений","pattern":"формула, например: I/You/We + have + V3","examples":[{"en":"","ru":""}],"items":[{"type":"mc","q":"вопрос","options":["","","",""],"answer":0,"why_ru":"почему"},{"type":"gap","q":"She ___ (fly) to Almaty yesterday.","answer":["flew"],"why_ru":""}]}`;
   const data=await loadLesson(body,opts.key||"grammar",prompt,opts.label||"Учитель готовит урок грамматики…",d=>d&&Array.isArray(d.items)&&d.items.length>=3);
   if(!data)return;
@@ -1005,6 +1045,9 @@ async function lessonGrammar(body,opts={}){
       ex.querySelector(".btn").onclick=()=>{qi=0;draw()};body.append(ex);return;
     }
     if(qi>=items.length){
+      const passed=score>=Math.ceil(items.length*0.6);
+      if(opts.mission!==false&&!passed){body.innerHTML="";const v=h(`<div class="view"><h2>Не засчитано: ${score}/${items.length}</h2><p>Нужно минимум ${Math.ceil(items.length*0.6)} правильных. Ошибки сохранены в тетрадь. Пройди тему ещё раз — задания будут новые.</p><div class="row"><button class="btn primary" type="button">Новые задания</button></div></div>`);v.querySelector("button").onclick=()=>lessonGrammar(body,{...opts,key:(opts.key||"grammar")+"_r"+Date.now()});body.append(v);
+        const wr=items.map((it,j)=>({it,ok:res[j]})).filter(x=>!x.ok);if(wr.length&&!opts.noSave)addMistakes(wr.map(({it})=>({wrong:it.q,right:it.type==="mc"?it.options?.[it.answer]:(Array.isArray(it.answer)?it.answer[0]:it.answer),why_ru:it.why_ru})));return}
       const first=opts.mission===false?false:award(opts.missionId||"grammar",opts.xp||25);
       const wrongs=items.map((it,j)=>({it,ok:res[j]})).filter(x=>!x.ok);
       const v=h(`<div class="view"><h2>Готово: ${score}/${items.length}</h2><p class="muted">${score>=items.length*0.8?"Отлично, тема усвоена.":"Ошибки сохранены в тетрадь — повторим их позже."}${first||opts.mission===false?"":" XP за эту миссию сегодня уже начислен."}</p><div class="row"><button class="btn primary" type="button">${opts.mission===false?"Готово":"К миссиям"}</button></div></div>`);
@@ -1066,7 +1109,7 @@ async function lessonListen(body){
     (q.options||[]).forEach((o,j)=>{const b=h(`<button class="opt" type="button"></button>`);b.textContent=o;b.onclick=()=>{
       opts.querySelectorAll("button").forEach((x,k)=>{x.disabled=true;if(k===q.answer)x.classList.add("ok");else if(k===j)x.classList.add("bad")});
       if(j===q.answer)score++;answered++;
-      if(answered===qs.length){const first=award("listen",20);const end=h(`<div class="note ${score>=qs.length-1?"ok":"info"}"><b>Результат: ${score}/${qs.length}.</b> Теперь включи аудио ещё раз и повторяй каждую фразу вслух.${first?"":" XP за эту миссию сегодня уже начислен."}<div style="margin-top:10px"><button class="btn primary" type="button">К миссиям</button></div></div>`);end.querySelector("button").onclick=()=>go("today");qbox.append(end)}
+      if(answered===qs.length){const first=score>=Math.ceil(qs.length*0.6)?award("listen",20):(toast("Не засчитано: нужно минимум 60% правильных. Послушай ещё раз и пройди снова"),false);const end=h(`<div class="note ${score>=qs.length-1?"ok":"info"}"><b>Результат: ${score}/${qs.length}.</b> Теперь включи аудио ещё раз и повторяй каждую фразу вслух.${first?"":" XP за эту миссию сегодня уже начислен."}<div style="margin-top:10px"><button class="btn primary" type="button">К миссиям</button></div></div>`);end.querySelector("button").onclick=()=>go("today");qbox.append(end)}
     };opts.append(b)});
     qbox.append(block);
   });
@@ -1168,6 +1211,59 @@ function viewPlan(app){
   if(!isKid())app.append(booksSection());
 }
 
+/* ---------- DICTIONARY ---------- */
+let dictFilter="all",dictQ="";
+function viewDict(app){
+  const ws=S.notebook.words.map(wInit),t=todayKey();
+  const due=dueWords(999),learned=ws.filter(w=>w.lvl>=LEARNED).length,hard=ws.filter(w=>wordState(w)==="hard").length;
+  const head=h(`<section class="card"><h2>Мой словарь</h2>
+    <div class="tiles" style="margin-top:12px"><div class="tile"><span class="eyebrow">Всего</span><b>${ws.length}</b><span class="muted">слов</span></div><div class="tile"><span class="eyebrow">Выучено</span><b>${learned}</b><span class="muted">навсегда</span></div><div class="tile"><span class="eyebrow">Повторить</span><b>${due.length}</b><span class="muted">сегодня</span></div><div class="tile"><span class="eyebrow">Трудные</span><b>${hard}</b><span class="muted">с ошибками</span></div></div>
+    <div class="row" style="margin-top:14px" data-a="acts"></div>
+    <p class="muted" style="font-size:13px;margin:12px 0 0">Слово выучено, когда ты сам вспомнил его ${LEARNED} раза с перерывами: через 1, 3, 7 и 14 дней. Ошибся — слово начинает круг заново. Угаданное с подсказкой не засчитывается.</p></section>`);
+  const acts=head.querySelector('[data-a="acts"]');
+  if(due.length){const b=h(`<button class="btn primary big" type="button">${I.refresh} Повторить ${Math.min(due.length,15)} слов</button>`);b.onclick=()=>openReview();acts.append(b)}
+  else if(ws.length)acts.append(h(`<div class="note ok" style="margin:0;flex:1">На сегодня всё повторено. Завтра будут новые слова на повтор.</div>`));
+  else{const b=h(`<button class="btn primary big" type="button">${I.words} Начать «Слова дня»</button>`);b.onclick=()=>openMission("words");acts.append(b)}
+  app.append(head);
+  if(!ws.length)return;
+  const box=h(`<section class="card"><input class="field" type="search" placeholder="Найти слово…" autocomplete="off" style="width:100%"><div class="seg" role="group" aria-label="Фильтр" style="margin-top:10px;flex-wrap:wrap"><button type="button" data-f="all">Все</button><button type="button" data-f="learning">Учу</button><button type="button" data-f="hard">Трудные</button><button type="button" data-f="learned">Выучено</button></div><div class="list dlist" style="margin-top:12px;max-height:none"></div></section>`);
+  const inp=box.querySelector("input");inp.value=dictQ;
+  const list=box.querySelector(".dlist");
+  const fill=()=>{
+    box.querySelectorAll("[data-f]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.f===dictFilter)));
+    const q=norm(dictQ);list.innerHTML="";
+    const rows=ws.slice().reverse().filter(w=>(dictFilter==="all"||wordState(w)===dictFilter)&&(!q||norm(w.en).includes(q)||norm(w.ru).includes(q)));
+    if(!rows.length){list.append(h(`<div class="empty">Ничего не найдено.</div>`));return}
+    rows.slice(0,300).forEach(w=>{
+      const st=wordState(w),dots=[1,2,3,4].map(k=>`<i style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px;background:${w.lvl>=k?"var(--green)":"var(--line)"}"></i>`).join("");
+      const r=h(`<details class="word" style="display:block"><summary style="display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none"><div style="flex:1;min-width:0"><b></b> <span class="mono muted" style="font-size:12px"></span><small style="display:block"></small></div><span title="уровень">${dots}</span><span class="pill" style="font-size:11px">${st==="learned"?"выучено":st==="hard"?"трудное":"учу"}</span><button class="mini" type="button" aria-label="Слушать">${I.speaker}</button></summary><div class="muted" style="font-size:14px;margin-top:8px"><div class="ex"></div><div class="hn" style="margin-top:4px"></div><div style="margin-top:4px;font-size:12px" class="meta"></div></div></details>`);
+      r.querySelector("b").textContent=w.en;r.querySelector(".mono").textContent=w.ipa||"";r.querySelector("small").textContent=w.ru;
+      r.querySelector(".ex").textContent=w.example||"";r.querySelector(".hn").textContent=w.hint?"💡 "+w.hint:"";
+      r.querySelector(".meta").textContent=`Добавлено ${w.date||"—"} · верно ${w.ok||0}, ошибок ${w.bad||0} · следующий повтор: ${w.lvl>=5?"через месяц":w.due<=t?"сегодня":w.due}`;
+      r.querySelector(".mini").onclick=e=>{e.preventDefault();speak(w.en)};
+      list.append(r);
+    });
+  };
+  inp.oninput=()=>{dictQ=inp.value;fill()};
+  box.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{dictFilter=b.dataset.f;fill()});
+  fill();app.append(box);
+}
+function openReview(){
+  const list=dueWords(15);if(!list.length){toast("Сейчас нечего повторять");return}
+  stopSpeak();
+  const el=h(`<section class="view"><div class="lesson-head"><button class="btn ghost" type="button">${I.back} Словарь</button><div><div class="eyebrow">Spaced repetition</div><h2 style="font-size:20px">Повтор слов</h2></div></div><div class="card"></div></section>`);
+  el.querySelector("button").onclick=()=>go("dict");
+  lesson={id:"review",el};render();window.scrollTo({top:0});
+  const body=el.querySelector(".card");
+  wordQuiz(body,list,{title:"Повтор",onDone:({acc,firstOk,results})=>{
+    results.forEach((r,j)=>srsMark(list[j],r.first===true,r.hinted));persist("notebook");
+    const d=dayRec();let xp="";
+    if(acc>=0.6&&!d.revDone){d.revDone=true;award(null,10,true);xp=" +10 XP."}else persist("profile");
+    const v=h(`<div class="view"><h2>Повтор: ${firstOk}/${list.length}</h2><p>${acc>=0.6?"Хорошо держишь слова.":"Много ошибок — эти слова вернутся завтра."}${xp} Выученных слов: ${S.notebook.words.filter(w=>w.lvl>=LEARNED).length}.</p><div class="row"><button class="btn primary" type="button">В словарь</button></div></div>`);
+    v.querySelector("button").onclick=()=>{lesson=null;go("dict")};body.append(v);
+  }});
+}
+
 /* ---------- PROGRESS ---------- */
 function viewProgress(app){
   {const msg=checkLeagueWeek();if(msg)toast(msg)}
@@ -1179,7 +1275,7 @@ function viewProgress(app){
   app.append(h(`<section class="tiles">
     <div class="tile"><span class="eyebrow">Серия</span><b>${liveStreak()}</b><span class="muted">дней подряд</span></div>
     <div class="tile"><span class="eyebrow">Опыт</span><b>${S.profile.xp}</b><span class="muted">XP · ${total} дн. занятий</span></div>
-    <div class="tile"><span class="eyebrow">Словарь</span><b>${nb.words.length}</b><span class="muted">слов выучено</span></div>
+    <div class="tile"><span class="eyebrow">Словарь</span><b>${nb.words.filter(w=>w.lvl>=LEARNED).length}</b><span class="muted">выучено из ${nb.words.length}</span></div>
     <div class="tile"><span class="eyebrow">IELTS</span><b>${band?band.toFixed(1):"—"}</b><span class="muted">${band?"средний band (3 последних)":"сделай IELTS-задание"}</span></div>
   </section>`));
   const days=[];for(let k=13;k>=0;k--){const d=new Date();d.setDate(d.getDate()-k);days.push(d)}
@@ -1198,7 +1294,7 @@ function viewProgress(app){
   const wl=h(`<div class="card"><div class="row" style="justify-content:space-between"><h3>Мой словарь</h3><span class="eyebrow">${nb.words.length}</span></div><div class="list" style="margin-top:10px"></div></div>`);
   if(nb.words.length)nb.words.slice().reverse().slice(0,120).forEach(w=>{const r=h(`<div class="word"><div><b></b> <span class="mono muted" style="font-size:12px"></span><small></small></div><button class="mini" type="button" aria-label="Слушать">${I.speaker}</button></div>`);r.querySelector("b").textContent=w.en;r.querySelector(".mono").textContent=w.ipa||"";r.querySelector("small").textContent=w.ru;r.querySelector("button").onclick=()=>speak(w.en);wl.querySelector(".list").append(r)});
   else wl.querySelector(".list").append(h(`<div class="empty">Пройди миссию «Слова дня» — новые слова появятся здесь.</div>`));
-  grid.append(mist,wl);app.append(grid);
+  grid.append(mist);app.append(grid);
   if(S.profile.bands.length){const bh=h(`<section class="card"><h3>История IELTS-оценок</h3><div class="list" style="margin-top:10px;max-height:240px"></div></section>`);S.profile.bands.slice().reverse().forEach(b=>{const r=h(`<div class="word"><div><b class="mono"></b> <span></span></div><span class="mono muted" style="font-size:12px"></span></div>`);r.querySelector("b").textContent=Number(b.band).toFixed(1);r.querySelector("span").textContent=b.kind;r.querySelector(".mono.muted").textContent=b.date;bh.querySelector(".list").append(r)});app.append(bh)}
   const redo=h(`<div class="row"><button class="btn" type="button">Пройти опрос и сменить цель</button><button class="btn blue" type="button" data-a="pt">${S.profile.placement?"Пройти тест уровня заново ("+S.profile.placement.level+")":"Пройти тест уровня"}</button></div>`);redo.querySelector('[data-a="pt"]').onclick=openPlacement;redo.querySelector("button").onclick=()=>{S.profile.onboarded=false;obStep=0;persist("profile");render();window.scrollTo({top:0})};app.append(redo);
   app.append(h(`<p class="muted" style="font-size:13px;margin:0">${cap.db?"Прогресс сохраняется в твоём аккаунте и виден только тебе — можно заниматься с телефона и компьютера.":"Прогресс сохраняется в этом браузере. На claude.ai со входом в аккаунт он будет синхронизироваться между устройствами."}</p>`));
@@ -1713,7 +1809,7 @@ const LIVE_HELLO=["Ну здравствуй, курсант! Капитан Б�
 const LIVE_ASK=["А ну-ка скажи: как будет «%» по-английски?","Разминка: как будет «%»? Время пошло!","Первый вопрос, и не облажайся: «%» по-английски?","Ну-ка, мозг на взлёт: как будет «%»?","Давай проверим, что у тебя в голове: «%» — это?"];
 function livePick(a){return a[Math.floor(Math.random()*a.length)]}
 function liveVars(){
-  const mine=shuffle(S.notebook.words.slice(-40)).slice(0,5).map(w=>[String(w.ru),String(w.en)]);
+  const mine=focusWords(6).map(w=>[String(w.ru),String(w.en)]);
   const set=shuffle(LIVE_POOL).slice(0,10);const all=[...mine,...set];const first=all[0];
   return {opener:livePick(LIVE_HELLO)+" "+livePick(LIVE_ASK).replace("%",first[0]),word_set:all.map(([ru,en])=>`${en} (${ru})`).join(", ")};
 }
@@ -1762,7 +1858,7 @@ async function startLive(){
       onModeChange:({mode})=>{if(mode==="speaking"){liveStatus("talking","Беркут говорит…");if(curMascot)mascotSet(curMascot,"idle")}else{liveStatus("listening","Слушаю тебя…");if(curMascot)mascotSet(curMascot,"listening")}},
       onMessage:(p)=>{const role=p.role||p.source,t=String(p.message||"");if(!t)return;
         if(role==="agent"||role==="ai"){const b=liveEl(".b-text");if(b)b.textContent=t;if(curMascot){mascotMood(curMascot,liveMood(t));clearTimeout(live&&live.mt);if(live)live.mt=setTimeout(()=>curMascot&&mascotMood(curMascot,"calm"),6000)}}
-        else{const y=liveEl(".you");if(y)y.textContent="Ты: "+t;const d=dayRec();d.talk=(d.talk||0)+1;if(d.talk>=TALK_TARGET&&!d.done.includes("talk"))award("talk",25);else persist("profile")}}
+        else{const y=liveEl(".you");if(y)y.textContent="Ты: "+t;countTalk(t)}}
     });
     const loop=()=>{if(!live||!live.conv)return;let v=0;try{v=live.conv.getOutputVolume()||0}catch(e){}if(curMascot){const o=v<.02?0:Math.min(1,.25+v*3.2);live.ov=(live.ov||0)*.35+o*.65;mascotOpen(curMascot,live.ov<.05?0:live.ov)}live.raf=requestAnimationFrame(loop)};loop();
   }catch(e){live=null;liveUi("idle");liveStatus("idle","Не получилось позвонить");const t=liveEl(".b-text");if(t)t.textContent="Проверь интернет и нажми ещё раз. ("+((e&&e.message)||"ошибка")+")"}
@@ -1890,7 +1986,7 @@ function modeHint(){return({blitz:isKid()?"Я спрашиваю слово — 
 async function speakTeacher(text){if(!text)return;const t=spoken(text);if(!t)return;setStatus("talking");try{await speak(t,monthIndex()<4?0.95:1,null,S.profile.char)}finally{if(!talkBusy&&!talkListening)setStatus("idle")}}
 async function sendTalk(text,hidden){
   chatState.turns.push({role:"user",content:text,hidden});
-  if(!hidden){const d=dayRec();d.talk=(d.talk||0)+1;if(d.talk>=TALK_TARGET&&!d.done.includes("talk"))award("talk",25);else persist("profile")}
+  if(!hidden)countTalk(text);
   talkBusy=true;const mic=document.querySelector(".stage .micbig");if(mic)mic.disabled=true;
   const fx=document.querySelector(".stage .fixes");if(fx)fx.innerHTML="";
   setBubble("…");setStatus("thinking");
@@ -2197,7 +2293,7 @@ function hwCard(){
         const r=await askJson(prompt);
         hw.status="done";hw.doneDate=t;hw.score=Math.max(0,Math.min(10,Number(r.score)||0));hw.comment=String(r.comment||"");hw.fixes=(r.fixes||[]).slice(0,6);
         addMistakes(hw.fixes);ls.del(LS_KEY+".hwdraft");
-        if(!award(null,late>0?15:30))persist("profile");
+        if(!award(null,late>0?15:30,true))persist("profile");
         if(route==="today"&&!lesson)render();
       }catch(err){out.innerHTML="";const p=h(`<p class="note bad"></p>`);p.textContent=errCopy(err);out.append(p);btn.disabled=false}
     };
@@ -2270,7 +2366,7 @@ function gameEnd(body,html,again){
 }
 function gameMatch(body){
   body.innerHTML="";
-  const pool=S.notebook.words.length>=6?shuffle(S.notebook.words.slice(-40)).map(w=>[w.en,w.ru]):shuffle(STARTER);
+  const pool=S.notebook.words.length>=6?(()=>{const seen=new Set();return [...shuffle(focusWords(6)),...shuffle(S.notebook.words.slice(-40))].filter(w=>!seen.has(w.en)&&seen.add(w.en)).map(w=>[w.en,w.ru])})():shuffle(STARTER);
   const pairs=pool.slice(0,6);let sel=null,left=pairs.length,t0=0,miss=0;
   body.append(h(`<p class="muted" style="margin:0 0 12px">Нажми английское слово, потом его перевод. Быстрее и без ошибок!</p>`));
   const grid=h(`<div class="tilegrid"></div>`);
