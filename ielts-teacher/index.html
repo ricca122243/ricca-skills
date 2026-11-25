@@ -16,7 +16,7 @@
   --r:22px; --shadow:0 2px 0 rgba(22,22,43,.04),0 8px 24px rgba(22,22,43,.06);
 }
 *{box-sizing:border-box}
-html,body{background:var(--bg);color:var(--ink)}
+html,body{background:var(--bg);color:var(--ink);overflow-x:clip;overscroll-behavior-x:none}
 body{font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
 h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em;font-weight:700}
@@ -353,11 +353,12 @@ textarea.field{min-height:160px;resize:vertical;line-height:1.55}
 .wchip{border:2px solid var(--line);background:var(--surface);padding:8px 13px;border-radius:12px;font-weight:800}
 .bk .mission{grid-template-columns:1fr auto;align-items:start}.bk .mission .ic,#books .mission .ic{display:none}#books .mission{grid-template-columns:1fr!important}
 /* map */
-.map{display:grid;gap:6px;padding:8px 0 20px}
+.map{display:flex;flex-direction:column;gap:6px;padding:8px 0 20px;overflow:hidden;contain:paint}
 .map-head{display:flex;justify-content:space-between;align-items:center;gap:10px;border-radius:20px;padding:14px 16px;margin:14px 0 6px;background:var(--surface);border:2px solid var(--line);cursor:pointer}
 .map-head.now{background:var(--coral);border-color:var(--coral);color:#fff}.map-head.now .eyebrow{color:rgba(255,255,255,.85)}.map-head.now .pill{background:#fff;color:var(--coral)}
 .map-head.past{background:var(--green-soft);border-color:transparent}.map-head.past .pill{background:var(--green);color:#fff}
-.map-row{position:relative;display:grid;justify-items:center;gap:2px;transform:translateX(var(--x));padding:4px 0}
+.map-row{position:relative;display:grid;justify-items:center;gap:2px;padding:4px 0}
+.map-row>.node,.map-row>.stars,.map-row>.map-char{position:relative;left:var(--x)}
 .node{width:70px;height:66px;border-radius:50%;border:0;display:grid;place-items:center;color:#fff;background:var(--line);box-shadow:0 6px 0 color-mix(in srgb,var(--ink) 18%,transparent);transition:transform .12s}
 .node:active{transform:translateY(4px);box-shadow:0 2px 0 color-mix(in srgb,var(--ink) 18%,transparent)}
 .node .ico svg{width:28px;height:28px}
@@ -367,7 +368,7 @@ textarea.field{min-height:160px;resize:vertical;line-height:1.55}
 .node.chest{border-radius:18px;background:var(--yellow);box-shadow:0 6px 0 #C98C12}.node.chest.future{background:var(--line);box-shadow:0 6px 0 color-mix(in srgb,var(--ink) 18%,transparent);color:#A4A8BA}.node.chest.done{background:var(--green);box-shadow:0 6px 0 #178048}
 @keyframes nodepulse{50%{box-shadow:0 6px 0 var(--coral-d),0 0 0 14px var(--coral-soft)}}
 .stars{display:flex;gap:2px;font-size:15px;color:var(--line);margin-top:4px}.stars i{font-style:normal}.stars i.on{color:var(--yellow)}
-.map-char{position:absolute;left:calc(50% + 46px);top:-6px;width:70px}
+.map-char{position:absolute!important;left:calc(50% + 46px + var(--x))!important;top:-6px;width:64px}
 .chest-t{font-size:12px;font-weight:800;color:var(--muted);text-align:center;max-width:200px;margin-top:6px}
 /* league */
 .league{--lc:#C98A4B}
@@ -1159,6 +1160,7 @@ function weekStars(w){
 function viewMap(app){
   const M=MS(),dI=dayIndex(),curW=Math.floor(dI/7),c=curChar();
   const box=h(`<section class="map"></section>`);
+  const items=[];const add=x=>items.push(x);
   let n=0;
   for(let mi=0;mi<12;mi++){
     const m=M[mi],w0=Math.ceil(mi*30.4/7),w1=Math.ceil((mi+1)*30.4/7)-1;
@@ -1166,24 +1168,25 @@ function viewMap(app){
     const hd=h(`<div class="map-head ${state}"><div><div class="eyebrow"></div><h3></h3></div><span class="pill"></span></div>`);
     hd.querySelector(".eyebrow").textContent=`${isKid()?"Месяц":"Раздел"} ${mi+1} · ${m.cefr}`;hd.querySelector("h3").textContent=m.title.ru;hd.querySelector(".pill").textContent=state==="past"?"пройдено":state==="now"?"ты здесь":"скоро";
     hd.onclick=()=>document.getElementById("plan-"+mi)?.scrollIntoView({behavior:"smooth",block:"center"});
-    box.append(hd);
+    add(hd);
     for(let w=w0;w<=w1;w++){
       const st=w<curW?"done":w===curW?"cur":"lock";const ws=weekStars(w);
-      const x=Math.round(Math.sin(n*0.9)*28);n++;
+      const x=Math.round(Math.sin(n*0.9)*22);n++;
       const node=h(`<div class="map-row" style="--x:${x}%"><button class="node ${st}" type="button" aria-label="Неделя ${w+1}"><span class="ico">${st==="done"?I.check:st==="cur"?I.bolt:I.lockI}</span></button><div class="stars">${[0,1,2].map(k=>`<i class="${st!=="lock"&&k<ws.stars?"on":""}">★</i>`).join("")}</div></div>`);
       if(st==="cur"){const mw=h(`<div class="map-char"></div>`);mw.append(mascotEl(S.profile.char,"",false));node.append(mw)}
       node.querySelector(".node").onclick=()=>{
         if(st==="cur"){go("today");return}
         if(st==="done"){toast(`Неделя ${w+1}: полная норма ${ws.full} из 7 дней`+(ws.stars===3?" — идеально!":""));return}
         toast(`Откроется через ${Math.max(1,w*7-dI)} дн.`)};
-      box.append(node);
+      add(node);
     }
     const ch=h(`<div class="map-row" style="--x:0%"><button class="node chest ${state==="past"?"done":state}" type="button" aria-label="Финиш месяца"><span class="ico">${I.gift}</span></button><div class="chest-t"></div></div>`);
     ch.querySelector(".chest-t").textContent=m.milestone.ru;
     ch.querySelector(".node").onclick=()=>toast(state==="past"?"Сундук открыт! Финиш месяца пройден.":"Финиш месяца: "+m.milestone.ru);
-    box.append(ch);
+    add(ch);
   }
-  app.append(h(`<section class="card"><div class="eyebrow">${isKid()?"Учебный год":"Путь к C1 и IELTS 7+"}</div><h2 style="margin-top:4px">Карта уровней</h2><p class="muted" style="margin:6px 0 0;font-weight:600">Каждый кружок — неделя. Звёзды — сколько дней ты сделал полную норму: 1 день — ★, 3 дня — ★★, 5 дней — ★★★. В конце раздела — сундук с финальным заданием месяца.</p></section>`));
+  items.reverse().forEach(x=>box.append(x));
+  app.append(h(`<section class="card"><div class="eyebrow">${isKid()?"Учебный год":"Путь к C1 и IELTS 7+"}</div><h2 style="margin-top:4px">Карта уровней</h2><p class="muted" style="margin:6px 0 0;font-weight:600">Путь идёт снизу вверх: внизу старт, наверху финиш. Каждый кружок — неделя. Звёзды — сколько дней ты сделал полную норму: 1 день — ★, 3 дня — ★★, 5 дней — ★★★. В конце раздела — сундук с финальным заданием месяца.</p></section>`));
   app.append(box);
   setTimeout(()=>box.querySelector(".node.cur")?.scrollIntoView({block:"center"}),80);
 }
