@@ -352,6 +352,34 @@ textarea.field{min-height:160px;resize:vertical;line-height:1.55}
 .chips.answer{background:var(--surface-2)}
 .wchip{border:2px solid var(--line);background:var(--surface);padding:8px 13px;border-radius:12px;font-weight:800}
 .bk .mission{grid-template-columns:1fr auto;align-items:start}.bk .mission .ic,#books .mission .ic{display:none}#books .mission{grid-template-columns:1fr!important}
+/* map */
+.map{display:grid;gap:6px;padding:8px 0 20px}
+.map-head{display:flex;justify-content:space-between;align-items:center;gap:10px;border-radius:20px;padding:14px 16px;margin:14px 0 6px;background:var(--surface);border:2px solid var(--line);cursor:pointer}
+.map-head.now{background:var(--coral);border-color:var(--coral);color:#fff}.map-head.now .eyebrow{color:rgba(255,255,255,.85)}.map-head.now .pill{background:#fff;color:var(--coral)}
+.map-head.past{background:var(--green-soft);border-color:transparent}.map-head.past .pill{background:var(--green);color:#fff}
+.map-row{position:relative;display:grid;justify-items:center;gap:2px;transform:translateX(var(--x));padding:4px 0}
+.node{width:70px;height:66px;border-radius:50%;border:0;display:grid;place-items:center;color:#fff;background:var(--line);box-shadow:0 6px 0 color-mix(in srgb,var(--ink) 18%,transparent);transition:transform .12s}
+.node:active{transform:translateY(4px);box-shadow:0 2px 0 color-mix(in srgb,var(--ink) 18%,transparent)}
+.node .ico svg{width:28px;height:28px}
+.node.done{background:var(--green);box-shadow:0 6px 0 #178048}
+.node.cur{background:var(--coral);box-shadow:0 6px 0 var(--coral-d),0 0 0 8px var(--coral-soft);animation:nodepulse 1.6s ease-in-out infinite}
+.node.lock{color:#A4A8BA}
+.node.chest{border-radius:18px;background:var(--yellow);box-shadow:0 6px 0 #C98C12}.node.chest.future{background:var(--line);box-shadow:0 6px 0 color-mix(in srgb,var(--ink) 18%,transparent);color:#A4A8BA}.node.chest.done{background:var(--green);box-shadow:0 6px 0 #178048}
+@keyframes nodepulse{50%{box-shadow:0 6px 0 var(--coral-d),0 0 0 14px var(--coral-soft)}}
+.stars{display:flex;gap:2px;font-size:15px;color:var(--line);margin-top:4px}.stars i{font-style:normal}.stars i.on{color:var(--yellow)}
+.map-char{position:absolute;left:calc(50% + 46px);top:-6px;width:70px}
+.chest-t{font-size:12px;font-weight:800;color:var(--muted);text-align:center;max-width:200px;margin-top:6px}
+/* league */
+.league{--lc:#C98A4B}
+.lbadge{width:52px;height:52px;border-radius:16px;background:var(--lc);color:#fff;display:grid;place-items:center}.lbadge svg{width:28px;height:28px}
+.lrows{display:grid;gap:6px}
+.lrow{display:grid;grid-template-columns:28px 38px 1fr auto;gap:10px;align-items:center;padding:8px 10px;border-radius:14px;font-weight:700}
+.lrow.me{background:var(--blue-soft)}
+.lrow .rk{font-family:var(--f-display);font-weight:800;color:var(--muted);text-align:center}
+.lrow.up .rk{color:var(--green)}.lrow.down .rk{color:var(--bad)}
+.lrow .av{width:38px;height:38px}.lrow .av .mascot{width:38px}
+.botav{width:38px;height:38px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;color:var(--muted)}.botav svg{width:18px;height:18px}
+.lzone{font-size:12px;font-weight:800;text-align:center;padding:2px}.lzone.up{color:var(--green)}.lzone.down{color:var(--bad)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -375,6 +403,9 @@ textarea.field{min-height:160px;resize:vertical;line-height:1.55}
 "use strict";
 /* ---------- icons ---------- */
 const I={
+ lockI:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+ gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v8h14v-8M12 8v13M12 8c-2-4-6-4-6-1.5S10 8 12 8zm0 0c2-4 6-4 6-1.5S14 8 12 8z"/></svg>',
+ trophy:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 3h10v3h3v2a5 5 0 0 1-4.6 5A5 5 0 0 1 13 15.9V19h3v2H8v-2h3v-3.1A5 5 0 0 1 8.6 13 5 5 0 0 1 4 8V6h3zm0 5V8H6a3 3 0 0 0 1 2.2zm10 0v2.2A3 3 0 0 0 18 8z"/></svg>',
  keyboard:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>',
  phone:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11 11 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11 11 0 0 0 .6 3.6 1 1 0 0 1-.25 1z"/></svg>',
  games:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M15 12h.01M18 14h.01"/></svg>',
@@ -774,7 +805,7 @@ function micButton(target){
 }
 
 /* ---------- router ---------- */
-const TABS=[{id:"today",ru:"Сегодня",icon:"today"},{id:"teacher",ru:"Говорить",icon:"chat"},{id:"games",ru:"Игры",icon:"games"},{id:"plan",ru:"План",icon:"plan"},{id:"progress",ru:"Прогресс",icon:"stats"}];
+const TABS=[{id:"today",ru:"Сегодня",icon:"today"},{id:"teacher",ru:"Говорить",icon:"chat"},{id:"games",ru:"Игры",icon:"games"},{id:"plan",ru:"Путь",icon:"plan"},{id:"progress",ru:"Прогресс",icon:"stats"}];
 let route="today",lesson=null;
 function buildTabs(){for(const host of [$("#tabsTop"),$("#tabsBottom")]){host.innerHTML="";for(const t of TABS){const b=h(`<button class="tab" type="button">${I[t.icon]}<span>${t.ru}</span></button>`);b.dataset.tab=t.id;b.onclick=()=>go(t.id);host.append(b)}}}
 function go(id){if(route==="teacher"&&id!=="teacher")leaveTalk();stopSpeak();talkPicker=false;lesson=null;route=id;if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);render();window.scrollTo({top:0})}
@@ -1036,6 +1067,7 @@ function fixEl(wrong,right,why){const d=h(`<div class="fix"><span><s></s> → <i
 
 /* ---------- PLAN ---------- */
 function viewPlan(app){
+  viewMap(app);
   const L=planLang,cur=monthIndex();
   const t=(ru,en)=>L==="ru"?ru:en;
   const head=h(`<section class="card"><div class="row" style="justify-content:space-between;align-items:flex-start"><div style="min-width:0;flex:1 1 300px"><div class="eyebrow">${isKid()?t("План на учебный год","School-year plan")+" · A1 → B1 · A2 Key":t("План на год","One-year flight plan")+" · A2 → C1 · IELTS 7.0+"}</div><h2 style="margin-top:4px;font-size:22px">${isKid()?t("7 класс: от сентября до августа","Year 7: September to August"):t("Маршрут: от взлёта до FL070","Route: from take-off to FL070")}</h2>
@@ -1048,7 +1080,7 @@ function viewPlan(app){
   app.append(head);
   const list=h(`<section class="months"></section>`);
   MS().forEach((m,i)=>{
-    const d=h(`<details class="month ${i===cur?"now":i<cur?"past":""}" ${i===cur?"open":""}><summary><span class="fl">${m.fl}</span><span style="min-width:0"><b></b><br><span class="cefr"></span></span><span class="cefr">${i<cur?t("пройдено","done"):i===cur?t("сейчас","now"):""}</span></summary><div class="body"></div></details>`);
+    const d=h(`<details id="plan-${i}" class="month ${i===cur?"now":i<cur?"past":""}" ${i===cur?"open":""}><summary><span class="fl">${m.fl}</span><span style="min-width:0"><b></b><br><span class="cefr"></span></span><span class="cefr">${i<cur?t("пройдено","done"):i===cur?t("сейчас","now"):""}</span></summary><div class="body"></div></details>`);
     d.querySelector("b").textContent=`${t("Месяц","Month")} ${i+1}: ${m.title[L]}`;
     d.querySelector(".cefr").textContent=`${m.cefr} · ${t("английский в уроках","English in lessons")} ${m.ratio}%`;
     const rows=[...(isKid()?[]:[[t("По книгам","Books"),monthBooks(i)]]),[t("Грамматика","Grammar"),m.grammar[L]],[t("Слова","Vocabulary"),m.vocab[L]],[isKid()?t("Практика","Practice"):t("Профессия","Job English"),m.pro[L]],[isKid()?"A2 Key":"IELTS",m.ielts[L]],[t("Контрольная точка","Checkpoint"),m.milestone[L]]];
@@ -1065,6 +1097,8 @@ function viewPlan(app){
 
 /* ---------- PROGRESS ---------- */
 function viewProgress(app){
+  {const msg=checkLeagueWeek();if(msg)toast(msg)}
+  app.append(leagueCard());
   const band=estBand();const nb=S.notebook;
   const total=Object.values(S.profile.days).filter(d=>d.xp>0).length;
   app.append(h(`<section class="tiles">
@@ -1109,6 +1143,206 @@ ${list}
 Составь урок «работа над ошибками»: найди 1–2 главные закономерности в этих ошибках, объясни их по-русски и дай 8 НОВЫХ заданий на те же правила (не копируй предложения ученика). 5 заданий "mc" (4 варианта) и 3 "gap" (answer — массив допустимых ответов).
 Ответь только JSON: {"topic":"","explain_ru":"","pattern":"","examples":[{"en":"","ru":""}],"items":[{"type":"mc","q":"","options":["","","",""],"answer":0,"why_ru":""},{"type":"gap","q":"","answer":[""],"why_ru":""}]}`;
   lessonGrammar(body,{prompt,key:"review."+S.notebook.mistakes.length,label:"Учитель разбирает твои ошибки…",mission:false,noSave:true});
+}
+
+/* ---------- MAP (Duolingo-style path) ---------- */
+function weekStars(w){
+  const start=new Date(S.profile.startDate+"T00:00:00");let full=0,any=0;const need=todayMissions().length;
+  for(let k=0;k<7;k++){const d=new Date(start);d.setDate(d.getDate()+w*7+k);const r=S.profile.days[dkey(d)];if(r){if(r.xp>0)any++;if(r.done.length>=need)full++}}
+  return{stars:full>=5?3:full>=3?2:full>=1?1:0,full,any};
+}
+function viewMap(app){
+  const M=MS(),dI=dayIndex(),curW=Math.floor(dI/7),c=curChar();
+  const box=h(`<section class="map"></section>`);
+  let n=0;
+  for(let mi=0;mi<12;mi++){
+    const m=M[mi],w0=Math.ceil(mi*30.4/7),w1=Math.ceil((mi+1)*30.4/7)-1;
+    const state=curW>w1?"past":curW>=w0?"now":"future";
+    const hd=h(`<div class="map-head ${state}"><div><div class="eyebrow"></div><h3></h3></div><span class="pill"></span></div>`);
+    hd.querySelector(".eyebrow").textContent=`${isKid()?"Месяц":"Раздел"} ${mi+1} · ${m.cefr}`;hd.querySelector("h3").textContent=m.title.ru;hd.querySelector(".pill").textContent=state==="past"?"пройдено":state==="now"?"ты здесь":"скоро";
+    hd.onclick=()=>document.getElementById("plan-"+mi)?.scrollIntoView({behavior:"smooth",block:"center"});
+    box.append(hd);
+    for(let w=w0;w<=w1;w++){
+      const st=w<curW?"done":w===curW?"cur":"lock";const ws=weekStars(w);
+      const x=Math.round(Math.sin(n*0.9)*28);n++;
+      const node=h(`<div class="map-row" style="--x:${x}%"><button class="node ${st}" type="button" aria-label="Неделя ${w+1}"><span class="ico">${st==="done"?I.check:st==="cur"?I.bolt:I.lockI}</span></button><div class="stars">${[0,1,2].map(k=>`<i class="${st!=="lock"&&k<ws.stars?"on":""}">★</i>`).join("")}</div></div>`);
+      if(st==="cur"){const mw=h(`<div class="map-char"></div>`);mw.append(mascotEl(S.profile.char,"",false));node.append(mw)}
+      node.querySelector(".node").onclick=()=>{
+        if(st==="cur"){go("today");return}
+        if(st==="done"){toast(`Неделя ${w+1}: полная норма ${ws.full} из 7 дней`+(ws.stars===3?" — идеально!":""));return}
+        toast(`Откроется через ${Math.max(1,w*7-dI)} дн.`)};
+      box.append(node);
+    }
+    const ch=h(`<div class="map-row" style="--x:0%"><button class="node chest ${state==="past"?"done":state}" type="button" aria-label="Финиш месяца"><span class="ico">${I.gift}</span></button><div class="chest-t"></div></div>`);
+    ch.querySelector(".chest-t").textContent=m.milestone.ru;
+    ch.querySelector(".node").onclick=()=>toast(state==="past"?"Сундук открыт! Финиш месяца пройден.":"Финиш месяца: "+m.milestone.ru);
+    box.append(ch);
+  }
+  app.append(h(`<section class="card"><div class="eyebrow">${isKid()?"Учебный год":"Путь к C1 и IELTS 7+"}</div><h2 style="margin-top:4px">Карта уровней</h2><p class="muted" style="margin:6px 0 0;font-weight:600">Каждый кружок — неделя. Звёзды — сколько дней ты сделал полную норму: 1 день — ★, 3 дня — ★★, 5 дней — ★★★. В конце раздела — сундук с финальным заданием месяца.</p></section>`));
+  app.append(box);
+  setTimeout(()=>box.querySelector(".node.cur")?.scrollIntoView({block:"center"}),80);
+}
+
+/* ---------- LEAGUES ---------- */
+const LEAGUES=[["Бронза","#C98A4B"],["Серебро","#8F9BA8"],["Золото","#E9A623"],["Сапфир","#2F5FE8"],["Рубин","#E5484D"],["Аметист","#9257E0"],["Жемчуг","#38B2C4"],["Обсидиан","#3A3A4A"],["Алмаз","#18B4E8"]];
+const BOTS=["Бот Пельмень","Бот Отличница","Бот Ракета","Бот Соня","Бот Профессор","Бот Турбо"];
+function weekStart(d=new Date()){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-(x.getDay()+6)%7);return dkey(x)}
+function weekXP(days,ws){const s=new Date(ws+"T00:00:00");let t=0;for(let k=0;k<7;k++){const d=new Date(s);d.setDate(d.getDate()+k);t+=(days&&days[dkey(d)]&&days[dkey(d)].xp)||0}return t}
+function seeded(str){let h1=2166136261;for(let i=0;i<str.length;i++){h1^=str.charCodeAt(i);h1=Math.imul(h1,16777619)}return((h1>>>0)%10000)/10000}
+function botXP(name,ws,tier,frac){const r=seeded(name+ws),r2=seeded(ws+name+"x");const target=(50+tier*22)*7*(0.25+r*1.25);const curve=Math.min(1,frac*(0.7+r2*0.6));return Math.round(target*curve)}
+function weekFrac(ws){const s=new Date(ws+"T00:00:00");return Math.max(0,Math.min(1,(Date.now()-s)/(7*864e5)))}
+function leagueBoard(ws,frac){
+  const lg=S.profile.league||{tier:0},tier=lg.tier||0,rows=[];
+  rows.push({name:profileName()+" (ты)",xp:weekXP(S.profile.days,ws),me:true,ch:S.profile.char});
+  getProfiles().filter(p=>p.id!==PROFILE).forEach(p=>{const st=ls.get(p.id==="me"?"berkut.v1":"berkut.v1."+p.id);if(st&&st.profile)rows.push({name:(st.profile.ob&&st.profile.ob.name)||p.name,xp:weekXP(st.profile.days,ws),ch:st.profile.char||"zefir"})});
+  BOTS.slice(0,7-rows.length+3).forEach(b=>rows.push({name:b,xp:botXP(b,ws,tier,frac),bot:true}));
+  return rows.sort((a,b)=>b.xp-a.xp);
+}
+function checkLeagueWeek(){
+  const ws=weekStart();const lg=S.profile.league||(S.profile.league={tier:0,week:ws});
+  if(lg.week===ws)return null;
+  const board=leagueBoard(lg.week,1);const rank=board.findIndex(r=>r.me)+1,n=board.length;let msg;
+  if(rank<=3&&lg.tier<LEAGUES.length-1){lg.tier++;msg=`Неделя закрыта: ${rank} место. Повышение — лига «${LEAGUES[lg.tier][0]}»!`}
+  else if(rank>=n-1&&lg.tier>0){lg.tier--;msg=`Неделя закрыта: ${rank} место. Понижение — лига «${LEAGUES[lg.tier][0]}». Отыграемся!`}
+  else msg=`Неделя закрыта: ${rank} место из ${n}. Остаёшься в лиге «${LEAGUES[lg.tier][0]}».`;
+  lg.week=ws;lg.last=msg;persist("profile");return msg;
+}
+function leagueCard(){
+  const ws=weekStart(),frac=weekFrac(ws),lg=S.profile.league||{tier:0},L=LEAGUES[lg.tier||0];
+  const board=leagueBoard(ws,frac),n=board.length,daysLeft=Math.max(1,Math.ceil((1-frac)*7));
+  const c=h(`<section class="card league" style="--lc:${L[1]}"><div class="row" style="justify-content:space-between"><div class="row" style="gap:12px"><span class="lbadge">${I.trophy}</span><div><div class="eyebrow">Лига недели</div><h2 style="margin-top:2px"></h2></div></div><span class="pill">ещё ${daysLeft} дн.</span></div>
+    <p class="muted" style="margin:8px 0 12px;font-weight:600">Топ-3 переходят в следующую лигу, последние 2 — опускаются. Очки — твой XP за неделю.</p><div class="lrows"></div></section>`);
+  c.querySelector("h2").textContent=L[0];
+  board.forEach((r,i)=>{
+    const zone=i<3?"up":i>=n-2?"down":"";
+    const row=h(`<div class="lrow ${zone} ${r.me?"me":""}"><span class="rk">${i+1}</span><span class="av"></span><span class="nm"></span><span class="xpv mono">${r.xp} XP</span></div>`);
+    row.querySelector(".nm").textContent=r.name;
+    if(r.bot)row.querySelector(".av").innerHTML=`<span class="botav">${I.bolt}</span>`;else row.querySelector(".av").innerHTML=mascotSVG(r.ch||"berkut","m-static");
+    c.querySelector(".lrows").append(row);
+    if(i===2&&n>5)c.querySelector(".lrows").append(h(`<div class="lzone up">▲ зона повышения</div>`));
+    if(i===n-3)c.querySelector(".lrows").append(h(`<div class="lzone down">▼ зона понижения</div>`));
+  });
+  return c;
+}
+
+/* ---------- FULL MOCK IELTS ---------- */
+const BAND_L=[[39,9],[37,8.5],[35,8],[32,7.5],[30,7],[26,6.5],[23,6],[18,5.5],[16,5],[13,4.5],[10,4],[8,3.5],[6,3],[4,2.5],[0,2]];
+const BAND_R=[[39,9],[37,8.5],[35,8],[33,7.5],[30,7],[27,6.5],[23,6],[19,5.5],[15,5],[13,4.5],[10,4],[8,3.5],[6,3],[4,2.5],[0,2]];
+const toBand=(raw40,t)=>{for(const [m,b] of t)if(raw40>=m)return b;return 2};
+const roundBand=x=>Math.round(x*2)/2;
+function mockInfo(){if(!S.profile.mockDate){const d=new Date();d.setDate(d.getDate()+30);S.profile.mockDate=dkey(d);persist("profile")}const left=daysBetween(todayKey(),S.profile.mockDate);return{date:S.profile.mockDate,left}}
+function mockCard(){
+  const mi=mockInfo(),last=(S.profile.mocks||[]).slice(-1)[0],run=ls.get(LS_KEY+".mock");
+  const c=h(`<section class="hero-card" style="--c:#16162B;grid-template-columns:1fr 92px"><div><div class="eyebrow">Полный пробный IELTS</div><h2 style="margin-top:6px"></h2><p></p></div><div class="hero-char"><div style="font-family:var(--f-display);font-size:42px;font-weight:800;text-align:center;line-height:1" class="big"></div></div><div class="row"></div></section>`);
+  const t=c.querySelector("h2"),p=c.querySelector("p"),big=c.querySelector(".big"),row=c.querySelector(".row");
+  if(run){t.textContent="Тест не закончен";p.textContent="Продолжи с того раздела, где остановился.";big.textContent="⏸";const b=h(`<button class="btn white" type="button">Продолжить тест →</button>`);b.onclick=openMock;row.append(b)}
+  else if(mi.left>0){t.textContent=`Через ${mi.left} дн.`;p.textContent=`${new Date(mi.date+"T00:00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long"})}: Listening, Reading, Writing и Speaking на время, около 2,5 часа. Оценка по всем 4 частям и общий band.`;big.textContent=mi.left;
+    const b=h(`<button class="btn ghost-white" type="button">Пройти раньше</button>`);b.onclick=openMock;row.append(b)}
+  else{t.textContent=last&&last.date===todayKey()?`Результат: ${last.overall.toFixed(1)}`:"Сегодня день пробного IELTS!";p.textContent=last&&last.date===todayKey()?`Listening ${last.L} · Reading ${last.R} · Writing ${last.W} · Speaking ${last.S}`:"Выдели 2,5 часа в тишине. 4 части, таймер, проверка как на экзамене.";big.textContent=last&&last.date===todayKey()?last.overall.toFixed(1):"🎯";
+    const b=h(`<button class="btn white" type="button">${last&&last.date===todayKey()?"Пройти ещё раз":"Начать пробный IELTS →"}</button>`);b.onclick=openMock;row.append(b)}
+  return c;
+}
+const MOCK_SECTIONS=[{id:"L",name:"Listening",min:15},{id:"R",name:"Reading",min:30},{id:"W",name:"Writing",min:60},{id:"S",name:"Speaking",min:12}];
+let mockTimer=null;
+function openMock(){
+  stopSpeak();const el=h(`<section class="view"></section>`);lesson={id:"mock",el};
+  const head=h(`<div class="lesson-head" style="justify-content:space-between"><button class="btn ghost" type="button">${I.back} Выйти</button><span class="pill mono mtimer">--:--</span></div>`);
+  head.querySelector("button").onclick=()=>{clearInterval(mockTimer);go("today")};
+  const body=h(`<div class="card"></div>`);el.append(head,body);render();window.scrollTo({top:0});
+  let st=ls.get(LS_KEY+".mock")||{sec:0,res:{},started:todayKey()};
+  const save=()=>ls.set(LS_KEY+".mock",st);
+  const timer=(min,onEnd)=>{clearInterval(mockTimer);const end=Date.now()+min*60000;const tk=()=>{const left=Math.max(0,end-Date.now());const t=el.querySelector(".mtimer");if(t)t.textContent=String(Math.floor(left/60000)).padStart(2,"0")+":"+String(Math.floor(left/1000)%60).padStart(2,"0");if(left<=0){clearInterval(mockTimer);onEnd()}};tk();mockTimer=setInterval(tk,1000)};
+  const intro=()=>{
+    if(st.sec>=4)return finish();
+    const s=MOCK_SECTIONS[st.sec];body.innerHTML="";clearInterval(mockTimer);el.querySelector(".mtimer").textContent=s.min+":00";
+    const v=h(`<div class="view"><div class="row">${MOCK_SECTIONS.map((x,i)=>`<span class="pill" style="${i===st.sec?"background:var(--coral);color:#fff":i<st.sec?"background:var(--green-soft);color:var(--green)":""}">${i<st.sec?"✓ ":""}${x.name}</span>`).join("")}</div><h1></h1><p class="muted" style="margin:0;font-weight:600"></p><button class="btn primary big" type="button">Начать ${s.name} · ${s.min} мин</button></div>`);
+    v.querySelector("h1").textContent=`Часть ${st.sec+1} из 4: ${s.name}`;
+    v.querySelector("p").textContent=({L:"2 записи, 10 вопросов. Каждую запись можно прослушать только один раз — как на экзамене. Текст записи не показывается.",R:"Академический текст и 12 вопросов: True/False/Not Given, выбор ответа, пропуски. 30 минут.",W:"Task 1 (описание графика, 150+ слов) и Task 2 (эссе, 250+ слов). Рекомендуется 20 + 40 минут.",S:"Part 1 — вопросы о тебе, Part 2 — монолог по карточке, Part 3 — обсуждение. Отвечай голосом через микрофон или текстом."})[s.id];
+    v.querySelector("button").onclick=()=>({L:secL,R:secR,W:secW,S:secS})[s.id]();
+    body.append(v);
+  };
+  const gen=async(key,prompt,valid,label)=>{
+    if(st["d"+key]&&valid(st["d"+key]))return st["d"+key];
+    body.innerHTML=thinking(label);
+    try{const d=await askJson(prompt,{cache:false,modelTier:"default"});if(!valid(d))throw{code:"invalid_json"};st["d"+key]=d;save();return d}
+    catch(e){body.innerHTML="";const n=h(`<div class="view"><p class="note bad"></p><button class="btn primary" type="button">Ещё раз</button></div>`);n.querySelector("p").textContent=errCopy(e);n.querySelector("button").onclick=intro;body.append(n);return null}
+  };
+  const done=(id,val)=>{st.res[id]=val;st.sec++;save();clearInterval(mockTimer);intro()};
+  const mcBlock=(q,i,ans)=>{const b=h(`<div><p class="q" style="font-size:16px"></p><div class="opts"></div></div>`);b.querySelector(".q").textContent=(i+1)+". "+q.q;
+    (q.options||[]).forEach((o,j)=>{const x=h(`<button class="opt" type="button"></button>`);x.textContent=o;x.onclick=()=>{ans[i]=j;b.querySelectorAll(".opt").forEach((y,k)=>{y.style.borderColor=k===j?"var(--blue)":"";y.style.background=k===j?"var(--blue-soft)":""})};b.querySelector(".opts").append(x)});return b};
+  const secL=async()=>{
+    const d=await gen("L",`${teacherContext()}\n\nСоставь секцию IELTS Listening для пробного экзамена (уровень сложности — настоящий IELTS, ученик сейчас ${curMonth().cefr}). 2 записи: Part 1 — бытовой диалог (бронирование, регистрация, ~180 слов, помечай реплики «A:» и «B:»), Part 3 или 4 — учебный монолог или обсуждение (~220 слов). К каждой записи 5 вопросов с 4 вариантами ответа, в порядке появления информации.\nОтветь только JSON: {"parts":[{"title":"","script":"","questions":[{"q":"","options":["","","",""],"answer":0}]}]}`,x=>Array.isArray(x?.parts)&&x.parts.length>=2&&x.parts.every(p=>p.script&&Array.isArray(p.questions)),"Готовим записи Listening…");
+    if(!d)return;
+    const ans={};let qn=0;body.innerHTML="";const v=h(`<div class="view"></div>`);body.append(v);
+    d.parts.slice(0,2).forEach((p,pi)=>{
+      const blk=h(`<div class="view"><div class="eyebrow">Part ${pi+1}</div><h3></h3><button class="btn blue" type="button">${I.speaker} Прослушать запись (1 раз)</button></div>`);
+      blk.querySelector("h3").textContent=p.title||("Recording "+(pi+1));
+      const pb=blk.querySelector("button");if(st["playedL"+pi]){pb.disabled=true;pb.textContent="Запись уже прослушана"}
+      pb.onclick=()=>{pb.disabled=true;pb.textContent="Идёт запись…";st["playedL"+pi]=true;save();speak(p.script,1,"en").finally(()=>{pb.textContent="Запись прослушана"})};
+      p.questions.slice(0,5).forEach(q=>{blk.append(mcBlock(q,qn,ans));q._i=qn;qn++});v.append(blk)});
+    const sb=h(`<button class="btn primary big" type="button">Сдать Listening</button>`);v.append(sb);
+    const submit=()=>{stopSpeak();let ok=0,tot=0;d.parts.slice(0,2).forEach(p=>p.questions.slice(0,5).forEach(q=>{tot++;if(ans[q._i]===q.answer)ok++}));done("L",{ok,tot,band:toBand(Math.round(ok/tot*40),BAND_L)})};
+    sb.onclick=submit;timer(15,submit);
+  };
+  const secR=async()=>{
+    const d=await gen("R",`Составь секцию IELTS Academic Reading для пробного экзамена: один академический текст 550–700 слов (тема: наука, технологии, авиация или общество), разбитый на абзацы A–F, и 12 вопросов: 5 типа TRUE/FALSE/NOT GIVEN (options ровно ["TRUE","FALSE","NOT GIVEN"]), 4 с выбором из 4 вариантов, 3 на заполнение пропуска словами из текста (ответ — массив допустимых вариантов, не больше двух слов).\nОтветь только JSON: {"title":"","passage":"","questions":[{"type":"mc","q":"","options":[],"answer":0},{"type":"gap","q":"","answer":[""]}]}`,x=>x&&x.passage&&Array.isArray(x.questions)&&x.questions.length>=8,"Готовим текст Reading…");
+    if(!d)return;
+    const ans={},gaps={};body.innerHTML="";const v=h(`<div class="view"><div class="eyebrow">Reading passage</div><h2></h2><div class="note" style="white-space:pre-wrap;max-height:55vh;overflow:auto;font-weight:500;line-height:1.6"></div></div>`);
+    v.querySelector("h2").textContent=d.title||"Reading";v.querySelector(".note").textContent=d.passage;body.append(v);
+    d.questions.slice(0,12).forEach((q,i)=>{
+      if(q.type==="gap"){const b=h(`<div><p class="q" style="font-size:16px"></p><input class="field" autocomplete="off" placeholder="Ответ (1–2 слова)"></div>`);b.querySelector(".q").textContent=(i+1)+". "+q.q;b.querySelector("input").oninput=e=>gaps[i]=e.target.value;v.append(b)}
+      else v.append(mcBlock(q,i,ans))});
+    const sb=h(`<button class="btn primary big" type="button">Сдать Reading</button>`);v.append(sb);
+    const submit=()=>{let ok=0;const qs=d.questions.slice(0,12);qs.forEach((q,i)=>{if(q.type==="gap"){const a=(Array.isArray(q.answer)?q.answer:[q.answer]).map(norm);if(a.includes(norm(gaps[i])))ok++}else if(ans[i]===q.answer)ok++});done("R",{ok,tot:qs.length,band:toBand(Math.round(ok/qs.length*40),BAND_R)})};
+    sb.onclick=submit;timer(30,submit);
+  };
+  const secW=async()=>{
+    const d=await gen("W",`Составь IELTS Academic Writing для пробного экзамена. Task 1: опиши словами данные графика или таблицы (картинки нет — все цифры в тексте задания), 150+ слов. Task 2: эссе-мнение или обсуждение, 250+ слов. Задания как на настоящем экзамене.\nОтветь только JSON: {"task1":"","task2":""}`,x=>x&&x.task1&&x.task2,"Готовим задания Writing…");
+    if(!d)return;
+    body.innerHTML="";const v=h(`<div class="view"><div class="eyebrow">Writing Task 1 · 20 мин · 150+ слов</div><p class="t1" style="margin:0;font-weight:700;white-space:pre-wrap"></p><textarea class="field" id="mockW1" style="min-height:200px" placeholder="Task 1…"></textarea><span class="mono muted c1">0 слов</span>
+      <div class="eyebrow" style="margin-top:10px">Writing Task 2 · 40 мин · 250+ слов</div><p class="t2" style="margin:0;font-weight:700;white-space:pre-wrap"></p><textarea class="field" id="mockW2" style="min-height:280px" placeholder="Task 2…"></textarea><span class="mono muted c2">0 слов</span><button class="btn primary big" type="button">Сдать Writing</button><div class="out"></div></div>`);
+    v.querySelector(".t1").textContent=d.task1;v.querySelector(".t2").textContent=d.task2;
+    const a1=v.querySelector("#mockW1"),a2=v.querySelector("#mockW2");a1.value=st.w1||"";a2.value=st.w2||"";
+    const cnt=()=>{st.w1=a1.value;st.w2=a2.value;save();v.querySelector(".c1").textContent=(a1.value.match(/\S+/g)||[]).length+" слов";v.querySelector(".c2").textContent=(a2.value.match(/\S+/g)||[]).length+" слов"};a1.oninput=a2.oninput=cnt;cnt();
+    body.append(v);
+    const submit=async()=>{clearInterval(mockTimer);const b=v.querySelector(".btn.primary");b.disabled=true;v.querySelector(".out").innerHTML=thinking("Экзаменатор проверяет Writing…");
+      try{const r=await askJson(`Ты — сертифицированный экзаменатор IELTS. Оцени Writing строго по официальным дескрипторам (TR/TA, CC, LR, GRA), шаг 0.5, не завышай. Короткий или пустой ответ — низкий балл.\nTask 1: ${d.task1}\nОтвет 1: """${a1.value}"""\nTask 2: ${d.task2}\nОтвет 2: """${a2.value}"""\nИтог Writing = (Task1 + 2×Task2)/3, округли до 0.5.\nОтвет только JSON: {"t1":5.5,"t2":5.5,"band":5.5,"comment_ru":"3–4 предложения","fixes":[{"wrong":"","right":"","why_ru":""}]}`,{cache:false});
+        addMistakes((r.fixes||[]).slice(0,6));done("W",{band:Math.max(0,Math.min(9,roundBand(+r.band||0))),t1:r.t1,t2:r.t2,comment:String(r.comment_ru||"")})}
+      catch(e){v.querySelector(".out").textContent=errCopy(e);b.disabled=false}};
+    v.querySelector(".btn.primary").onclick=submit;timer(60,submit);
+  };
+  const secS=async()=>{
+    const d=await gen("S",`Составь IELTS Speaking для пробного экзамена: Part 1 — 4 вопроса о себе (учёба, работа, хобби), Part 2 — карточка (тема + 4 пункта «You should say»), Part 3 — 3 абстрактных вопроса по теме карточки.\nОтвет только JSON: {"p1":["","","",""],"p2":{"topic":"","points":["","","",""]},"p3":["","",""]}`,x=>x&&Array.isArray(x.p1)&&x.p2&&Array.isArray(x.p3),"Готовим Speaking…");
+    if(!d)return;
+    const qs=[...d.p1.slice(0,4).map(q=>({part:1,q})),{part:2,q:d.p2.topic+"\nYou should say:\n• "+(d.p2.points||[]).join("\n• ")},...d.p3.slice(0,3).map(q=>({part:3,q}))];
+    let i=0;const answers=st.sp||[];
+    const ask2=()=>{
+      body.innerHTML="";if(i>=qs.length)return grade();const q=qs[i];
+      const v=h(`<div class="view"><div class="eyebrow">Speaking · Part ${q.part} · вопрос ${i+1} из ${qs.length}</div><div class="stage" style="--c:${curChar().color};padding:10px"><div class="stage-char" style="width:min(130px,36vw);margin:0"></div></div><p class="q" style="white-space:pre-wrap"></p>${q.part===2?`<p class="muted" style="margin:0;font-weight:600">1 минута на подготовку, потом говори 1–2 минуты.</p>`:""}<div class="row" style="flex-wrap:nowrap;align-items:flex-end"><textarea class="field" id="mockSp" style="min-height:130px" placeholder="Нажми микрофон и отвечай по-английски…"></textarea></div><button class="btn primary big" type="button">${i<qs.length-1?"Следующий вопрос":"Закончить Speaking"}</button></div>`);
+      v.querySelector(".q").textContent=q.q;v.querySelector(".stage-char").append(mascotEl("sokol","",true));
+      const ta=v.querySelector("textarea");ta.value=answers[i]||"";v.querySelector(".row").append(micButton(ta));
+      v.querySelector(".btn.primary").onclick=()=>{if(cap.dict?.active())cap.dict.stop();answers[i]=ta.value.trim();st.sp=answers;save();i++;ask2()};
+      body.append(v);speak(q.q.replace(/•/g,""),1,"en","sokol");
+    };
+    const grade=async()=>{clearInterval(mockTimer);body.innerHTML=thinking("Экзаменатор оценивает Speaking…");
+      try{const r=await askJson(`Ты — сертифицированный экзаменатор IELTS Speaking. Ответы получены распознаванием речи или напечатаны. Оцени по Fluency & Coherence, Lexical Resource, Grammatical Range & Accuracy (произношение оцени осторожно, по косвенным признакам), шаг 0.5, не завышай; пустые и очень короткие ответы — низкий балл.\n${qs.map((q,k)=>`Q${k+1} (Part ${q.part}): ${q.q}\nA: """${answers[k]||""}"""`).join("\n")}\nОтвет только JSON: {"band":5.5,"comment_ru":"3–4 предложения","fixes":[{"wrong":"","right":"","why_ru":""}]}`,{cache:false});
+        addMistakes((r.fixes||[]).slice(0,6));done("S",{band:Math.max(0,Math.min(9,roundBand(+r.band||0))),comment:String(r.comment_ru||"")})}
+      catch(e){body.innerHTML="";const n=h(`<div class="view"><p class="note bad"></p><button class="btn primary" type="button">Ещё раз</button></div>`);n.querySelector("p").textContent=errCopy(e);n.querySelector("button").onclick=grade;body.append(n)}};
+    timer(12,()=>{i=qs.length;ask2()});ask2();
+  };
+  const finish=()=>{
+    clearInterval(mockTimer);const r=st.res;const L=r.L.band,R=r.R.band,W=r.W.band,Sp=r.S.band;const overall=roundBand((L+R+W+Sp)/4);
+    const rec={date:todayKey(),L,R,W,S:Sp,overall};S.profile.mocks=[...(S.profile.mocks||[]),rec].slice(-20);
+    S.profile.bands.push({band:overall,date:todayKey(),kind:"Полный пробный IELTS"});ls.del(LS_KEY+".mock");
+    if(!award(null,100))persist("profile");
+    body.innerHTML="";el.querySelector(".mtimer").textContent="готово";
+    const v=h(`<div class="view" style="text-align:center;justify-items:center"><div class="mw" style="width:140px"></div><div class="eyebrow">Overall band</div><div style="font-family:var(--f-display);font-size:72px;font-weight:800;line-height:1;color:var(--coral)">${overall.toFixed(1)}</div><div class="crit" style="width:100%"><div><b>${L.toFixed(1)}</b>Listening · ${r.L.ok}/${r.L.tot}</div><div><b>${R.toFixed(1)}</b>Reading · ${r.R.ok}/${r.R.tot}</div><div><b>${W.toFixed(1)}</b>Writing</div><div><b>${Sp.toFixed(1)}</b>Speaking</div></div><div class="note" style="text-align:left;width:100%"></div><button class="btn primary big" type="button">На главную</button></div>`);
+    v.querySelector(".note").textContent=`Writing: ${r.W.comment||""}\n\nSpeaking: ${r.S.comment||""}`;v.querySelector(".note").style.whiteSpace="pre-wrap";
+    v.querySelector(".mw").append(mascotEl(S.profile.char,"",true));setTimeout(()=>mascotMood(curMascot,overall>=7?"wow":overall>=5.5?"happy":curPersona()==="savage"?"angry":"sad"),100);
+    v.querySelector("button").onclick=()=>go("today");body.append(v);
+    speak(`Overall band ${overall}.`,1,"en");
+  };
+  intro();
 }
 
 /* ---------- profiles (me + sister) ---------- */
@@ -1323,6 +1557,8 @@ function viewToday(app){
   hero.querySelector('[data-a="next"]')?.addEventListener("click",()=>{const nx=list.find(x=>!d.done.includes(x.id));if(nx)openMission(nx.id)});
   if(!S.profile.placement)app.append(placementBanner());
   app.append(hero);
+  {const msg=checkLeagueWeek();if(msg)setTimeout(()=>toast(msg),600)}
+  if(!isKid())app.append(mockCard());
   app.append(isKid()?schoolCard():bookCard());
   const card=h(`<section class="card"><div class="row" style="justify-content:space-between"><h2>Миссии на сегодня</h2><span class="eyebrow">${doneN}/${list.length}</span></div><div class="missions" style="margin-top:14px"></div></section>`);
   const box=card.querySelector(".missions");
