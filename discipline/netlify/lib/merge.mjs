@@ -1,5 +1,5 @@
 // Слияние данных двух устройств: по каждой записи побеждает более свежая (поле u).
-export const SINGLE = ['profile', 'goals', 'settings', 'body', 'insight'];
+export const SINGLE = ['profile', 'goals', 'settings', 'body', 'insight', 'prayer'];
 export const LISTS = ['habits', 'money', 'rewards', 'purchases', 'reminders', 'books', 'meals', 'claims'];
 
 export function mergeState(a, b) {

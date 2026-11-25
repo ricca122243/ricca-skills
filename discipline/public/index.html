@@ -404,7 +404,7 @@ function newState(p) {
 function mergeState(a, b) {
   if (!a) return b; if (!b) return a;
   const out = { v: 1 };
-  for (const k of ['profile','goals','settings','body','insight']) { const v = ((a[k]?.u || 0) >= (b[k]?.u || 0)) ? a[k] : b[k]; if (v !== undefined) out[k] = v; }
+  for (const k of ['profile','goals','settings','body','insight','prayer']) { const v = ((a[k]?.u || 0) >= (b[k]?.u || 0)) ? a[k] : b[k]; if (v !== undefined) out[k] = v; }
   for (const k of ['habits','money','rewards','purchases','reminders','books','meals','claims']) {
     const m = new Map();
     for (const it of [...(a[k] || []), ...(b[k] || [])]) { const c = m.get(it.id); if (!c || (it.u || 0) > (c.u || 0)) m.set(it.id, it); }
@@ -603,6 +603,61 @@ function render() {
 const dayNav = d => `<div class="daynav"><button data-act="day-prev" ${d <= startDate() ? 'disabled' : ''} aria-label="Назад">‹</button><button data-act="day-next" ${d >= today() ? 'disabled' : ''} aria-label="Вперёд">›</button></div>`;
 const titleFor = d => d === today() ? 'Сегодня' : d === addDays(today(), -1) ? 'Вчера' : dayTitle(d);
 
+/* ============ ВРЕМЯ НАМАЗА (официальные данные Муфтията Казахстана) ============ */
+const PR_KEYS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'], PR_NAMES = ['Фаджр', 'Зухр', 'Аср', 'Магриб', 'Иша'];
+const ptMem = {};
+function prayerYear(year) {
+  const p = S.prayer; if (!p?.lat) return null;
+  const k = `istiqama-pt|${p.lat}|${p.lng}|${year}`;
+  if (ptMem[k]) return ptMem[k] === 'loading' ? null : ptMem[k];
+  try { const c = JSON.parse(lsGet(k)); if (c?.length) return (ptMem[k] = c); } catch {}
+  ptMem[k] = 'loading';
+  fetch(`/api/prayer?lat=${encodeURIComponent(p.lat)}&lng=${encodeURIComponent(p.lng)}&year=${year}`).then(r => r.json()).then(j => {
+    if (!j.days?.length) throw 0;
+    ptMem[k] = j.days; lsSet(k, JSON.stringify(j.days)); if (!sheetOpen()) render();
+  }).catch(() => { delete ptMem[k]; });
+  return null;
+}
+function prayerDay(d) { const y = prayerYear(+d.slice(0, 4)); return y?.find(x => x.date === d) || null; }
+const tMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+function nextPrayer() {
+  const day = prayerDay(today()); if (!day) return null;
+  const n = new Date().getHours() * 60 + new Date().getMinutes();
+  for (let i = 0; i < 5; i++) { const t = tMin(day[PR_KEYS[i]]); if (t > n) return { i, name: PR_NAMES[i], time: day[PR_KEYS[i]], left: t - n }; }
+  const tm = prayerDay(addDays(today(), 1)); return tm ? { i: 0, name: PR_NAMES[0], time: tm.fajr, left: 24 * 60 - n + tMin(tm.fajr), tomorrow: true } : null;
+}
+const leftTxt = m => m >= 60 ? `${Math.floor(m / 60)} ч ${m % 60} мин` : `${m} мин`;
+function openCityPick() {
+  let timer;
+  openSheet(`<h2>Твой город</h2><div class="sub small" style="margin-bottom:12px">Время намаза — официальное, от Духовного управления мусульман Казахстана.</div>
+    <button class="btn line block" id="c-geo" style="margin-bottom:10px">📍 Определить по геолокации</button>
+    <div class="field"><input id="c-q" placeholder="Начни писать: Алматы, Шымкент…" autocomplete="off"></div>
+    <div id="c-res"></div>`, root => {
+    const res = root.querySelector('#c-res');
+    const pick = c => { S.prayer = { on: S.prayer?.on ?? true, before: S.prayer?.before ?? 0, ...(S.prayer || {}), title: c.title, region: c.region, lat: c.lat, lng: c.lng, tz: c.tz, u: now() }; save(); pushResave(); closeSheet(); render(); toast(`🕌 ${c.title} — время намаза загружено`); };
+    const show = list => { res.innerHTML = list.length ? `<div class="list">${list.map((c, i) => `<button class="item" data-i="${i}"><span class="ic">📍</span><span class="grow"><div class="t">${esc(c.title)}</div><div class="s">${esc([c.district, c.region].filter(Boolean).join(', '))}</div></span></button>`).join('')}</div>` : '<div class="empty">Ничего не нашлось — попробуй по-казахски или короче</div>'; res.querySelectorAll('[data-i]').forEach(b => b.onclick = () => pick(list[+b.dataset.i])); };
+    root.querySelector('#c-q').oninput = e => { clearTimeout(timer); const q = e.target.value.trim(); if (q.length < 2) { res.innerHTML = ''; return; } res.innerHTML = '<div class="empty"><span class="spin"></span></div>'; timer = setTimeout(async () => { try { const j = await (await fetch('/api/prayer?q=' + encodeURIComponent(q))).json(); show(j.results || []); } catch { res.innerHTML = '<div class="empty">Нет связи</div>'; } }, 350); };
+    root.querySelector('#c-geo').onclick = () => {
+      if (!navigator.geolocation) return toast('Геолокация недоступна');
+      const b = root.querySelector('#c-geo'); b.innerHTML = '<span class="spin"></span> Ищу…';
+      navigator.geolocation.getCurrentPosition(async pos => {
+        try { const j = await (await fetch(`/api/prayer?near=${pos.coords.latitude},${pos.coords.longitude}`)).json(); if (j.city) pick(j.city); else { b.textContent = '📍 Определить по геолокации'; toast('Рядом нет населённого пункта из справочника — найди город поиском'); } }
+        catch { b.textContent = '📍 Определить по геолокации'; toast('Нет связи'); }
+      }, () => { b.textContent = '📍 Определить по геолокации'; toast('Разреши доступ к геопозиции или найди город поиском'); }, { timeout: 15000, maximumAge: 600000 });
+    };
+  });
+}
+function prayerBlock() {
+  const p = S.prayer, day = p?.lat ? prayerDay(today()) : null;
+  if (!p?.lat) return `<div class="list"><button class="item" data-act="city"><span class="ic">📍</span><span class="grow"><div class="t">Выбрать город</div><div class="s">Покажу время намаза и буду напоминать</div></span><span class="dim">›</span></button></div>`;
+  const nx = nextPrayer(), pushOn = lsGet(LS_PUSH) === '1';
+  return `<div class="list"><button class="item" data-act="city"><span class="ic">📍</span><span class="grow"><div class="t">${esc(p.title)}</div><div class="s">${nx ? `Следующий: ${nx.name} в ${nx.time}${nx.tomorrow ? ' (завтра)' : ''}` : 'загружаю время…'}</div></span><span class="dim">изменить</span></button>
+    ${day ? `<div class="item" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${[['Фаджр', day.fajr], ['Восход', day.sunrise], ['Зухр', day.dhuhr], ['Аср', day.asr], ['Магриб', day.maghrib], ['Иша', day.isha]].map(([n, t]) => `<div><div class="s">${n}</div><b>${t}</b></div>`).join('')}</div>` : ''}
+    <div class="item"><span class="grow"><div class="t">Напоминать о каждом намазе</div><div class="s">${pushOn ? '5 уведомлений в день' : 'сначала включи уведомления ниже'}</div></span><button class="switch ${p.on ? 'on' : ''}" data-act="pr-toggle" aria-label="Напоминать о намазах"></button></div>
+    <div class="item"><span class="grow"><div class="t">Когда напомнить</div></div><div class="opts">${[0, 5, 10, 15].map(m => `<button class="${(p.before || 0) === m ? 'on' : ''}" data-act="pr-before" data-v="${m}" style="padding:7px 10px;font-size:13px">${m ? 'за ' + m : 'в начале'}</button>`).join('')}</div></div></div>
+    <div class="sub tiny" style="margin:-2px 4px 0">Источник: Духовное управление мусульман Казахстана (muftyat.kz)</div>`;
+}
+
 /* ============ СЕГОДНЯ ============ */
 const CAT_HEX = { iman: '#3ba776', body: '#f28c38', mind: '#7c6bd6', work: '#2f6fde' };
 const PALETTE = ['#3ba776', '#2a9d8f', '#3aa0e0', '#2f6fde', '#5b6bd6', '#7c6bd6', '#e05fa0', '#e2574c', '#f28c38', '#e5a83b', '#b07d5a', '#8e8e99'];
@@ -650,6 +705,7 @@ function viewToday() {
   const dt = parse(d);
   let h = headerBlock() + `<div class="row between" style="margin-bottom:6px"><div><b style="font-size:17px;text-transform:capitalize">${MONTHS[dt.getMonth()]}</b> <span class="sub">${d === today() ? 'сегодня' : titleFor(d).toLowerCase() === 'вчера' ? 'вчера' : WD[dt.getDay()]}</span></div>${d !== today() ? '<button class="btn sm line" data-act="pick-day" data-d="' + today() + '">К сегодня</button>' : ''}</div>` + weekStrip(d);
   if (q.length) h += q.slice(0, 3).map(x => `<button class="q" data-act="${x.act}" data-arg="${x.arg || ''}"><span class="qi">${x.icon}</span><span><div class="qt">${x.t}</div><div class="sub tiny">${x.s}</div></span><span class="arrow">›</span></button>`).join('');
+  if (!S.prayer?.lat && d === today()) h += `<button class="q" data-act="city"><span class="qi">🕌</span><span><div class="qt">Выбери свой город</div><div class="sub tiny">Покажу время намаза и буду напоминать о каждом</div></span><span class="arrow">›</span></button>`;
   h += `<div class="sec"><h2>Задания</h2><span class="sub">${done.length} из ${hs.length} выполнено</span></div>`;
   h += open.map(x => habitCard(x, d)).join('') || '<div class="box" style="text-align:center"><b>Всё выполнено! 💯</b><div class="sub small">Машаллах. Не забудь отчёт дня.</div></div>';
   if (done.length) h += `<div class="donehead">Выполнено</div>` + done.map(x => habitCard(x, d, true)).join('');
@@ -665,12 +721,14 @@ function habitCard(x, d, fin) {
   let sub = '', act = 'tog', mk = '';
   if (x.type === 'check') sub = x.hint || 'Ежедневно';
   if (x.type === 'count') { sub = x.id === 'water' ? `${liters(v)} из ${liters(x.target)} л` : `${+v || 0} из ${x.target} ${esc(x.unit || '')}`; act = 'inc'; mk = '+'; }
-  if (x.type === 'multi') { const n = Array.isArray(v) ? v.filter(Boolean).length : 0; sub = `${n} из ${x.labels.length}`; act = 'multi-next'; mk = n ? '' : ''; }
+  if (x.type === 'multi') { const n = Array.isArray(v) ? v.filter(Boolean).length : 0; sub = `${n} из ${x.labels.length}`; act = 'multi-next'; mk = '';
+    if (x.id === 'namaz' && d === today()) { const nx = nextPrayer(); if (nx && !nx.tomorrow) sub += ` · ${nx.name} в ${nx.time}, через ${leftTxt(nx.left)}`; } }
   if (x.type === 'food') { const ms = mealsOn(d); sub = ms.length ? `${ms.length} приём. · ${num(sum(ms, m => m.kcal))} ккал` : 'Запиши, что ел'; act = 'food-add'; mk = '+'; }
   if (x.type === 'auto') { const ms = moneyOn(d); sub = ms.length ? `${ms.length} зап. · −${money(sum(ms.filter(m => m.type === 'out'), m => m.amount))}` : dayObj(d).noSpend ? 'Без трат' : 'Запиши траты'; act = 'spend-ask'; mk = '+'; }
   if (fin) sub = `+${x.xp} XP${fire}`; else sub += fire;
   const done = f >= 1;
-  const pills = x.type === 'multi' && !fin ? `<div class="pills">${x.labels.map((l, i) => `<button class="pill ${(Array.isArray(v) && v[i]) ? 'on' : ''}" data-act="multi" data-id="${x.id}" data-i="${i}">${esc(l)}</button>`).join('')}</div>` : '';
+  const pday = x.id === 'namaz' && x.labels.length === 5 && S.prayer?.lat ? prayerDay(d) : null;
+  const pills = x.type === 'multi' && !fin ? `<div class="pills">${x.labels.map((l, i) => `<button class="pill ${(Array.isArray(v) && v[i]) ? 'on' : ''}" data-act="multi" data-id="${x.id}" data-i="${i}">${esc(l)}${pday ? ` <span style="font-weight:500;opacity:.75">${pday[PR_KEYS[i]]}</span>` : ''}</button>`).join('')}</div>` : '';
   return `<div class="hcard ${fin ? 'fin' : ''}" style="--c:${c};--t:${tint(c, .13)};--t2:${tint(c, .18)}">
     ${!fin && f > 0 ? `<div class="hfill" style="width:${Math.round(f * 100)}%"></div>` : ''}
     <button class="hmain" data-act="habit-open" data-id="${x.id}"><span class="tile">${x.icon}</span><span class="grow"><div class="t">${esc(x.name)}</div><div class="s">${sub}</div></span></button>
@@ -1134,6 +1192,7 @@ function viewMore() {
   const pushOn = lsGet(LS_PUSH) === '1', b = S.body;
   let h = `<h1>Ещё</h1><div style="height:10px"></div>`;
   if (!isStandalone()) h += installNote();
+  h += `<h3>🕌 Время намаза</h3>${prayerBlock()}`;
   h += `<h3>Уведомления</h3><div class="list"><div class="item"><span class="grow"><div class="t">Напоминания на это устройство</div><div class="s">${pushOn ? 'Включены — придут, даже если приложение закрыто' : isIOS() && !isStandalone() ? 'Сначала установи на экран «Домой»' : 'Выключены'}</div></span><button class="switch ${pushOn ? 'on' : ''}" data-act="push-toggle" aria-label="Уведомления"></button></div>
     ${S.reminders.filter(r => !r.del).sort((a, b) => a.time < b.time ? -1 : 1).map(r => `<div class="item"><b style="width:52px;flex:none">${r.time}</b><span class="grow" data-act="rem-edit" data-id="${r.id}" role="button"><div class="t small">${esc(r.title)}</div><div class="s" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.body)}</div></span><button class="switch ${r.on ? 'on' : ''}" data-act="rem-toggle" data-id="${r.id}" aria-label="Вкл/выкл"></button></div>`).join('')}</div>
     <div class="row" style="gap:8px"><button class="btn sm" data-act="rem-add">+ Напоминание</button>${pushOn ? '<button class="btn sm" data-act="push-test">Проверить</button>' : ''}</div>
@@ -1241,7 +1300,7 @@ async function pushEnable() {
 }
 async function pushSave(sub) {
   const reminders = S.reminders.filter(r => r.on && !r.del).map(({ id, time, title, body, onlyIfNoReport, open }) => ({ id, time, title, body, onlyIfNoReport, open }));
-  const r = await fetch('/api/push', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'save', device: deviceId(), sub: sub.toJSON(), tz: Intl.DateTimeFormat().resolvedOptions().timeZone, reminders, key: syncKey() }) });
+  const r = await fetch('/api/push', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'save', device: deviceId(), sub: sub.toJSON(), tz: Intl.DateTimeFormat().resolvedOptions().timeZone, reminders, key: syncKey(), prayer: S.prayer?.lat ? { on: !!S.prayer.on, lat: S.prayer.lat, lng: S.prayer.lng, tz: S.prayer.tz, before: S.prayer.before || 0, title: S.prayer.title } : null }) });
   if (!r.ok) throw new Error('сервер ответил ' + r.status);
 }
 async function pushResave() {
@@ -1264,6 +1323,9 @@ $('#app').addEventListener('click', async e => {
     case 'dec': setVal(id, Math.max(0, (+cur || 0) - (hb.target >= 20 ? 5 : 1))); break;
     case 'multi': { const arr = Array.isArray(cur) ? [...cur] : []; arr[+el.dataset.i] = !arr[+el.dataset.i]; if (arr[+el.dataset.i]) vibrate(); setVal(id, arr); break; }
     case 'pick-day': ui.day = el.dataset.d; render(); break;
+    case 'city': openCityPick(); break;
+    case 'pr-toggle': { S.prayer = { ...S.prayer, on: !S.prayer.on, u: now() }; save(); render(); if (S.prayer.on && lsGet(LS_PUSH) !== '1') { toast('Включи уведомления — переключатель ниже'); } else { pushResave(); toast(S.prayer.on ? 'Буду напоминать о намазах' : 'Напоминания о намазах выключены'); } break; }
+    case 'pr-before': S.prayer = { ...S.prayer, before: +el.dataset.v, u: now() }; save(); pushResave(); render(); break;
     case 'habit-open': openHabit(id); break;
     case 'multi-next': { const arr = Array.isArray(cur) ? [...cur] : []; const i = hb.labels.findIndex((_, k) => !arr[k]); if (i < 0) return openHabit(id); arr[i] = true; vibrate(); toast(`${hb.labels[i]} ✓`); setVal(id, arr); break; }
     case 'claim': { const a = achievements().find(x => x.id === id); if (!a?.on || S.claims.some(x => x.id === id && !x.del)) return; S.claims.push({ id, u: now(), coins: a.reward }); save(); render(); toast(`${a.e} +${a.reward} монет!`); break; }
@@ -1450,7 +1512,7 @@ function handleOpen(what) {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S) { if (!sheetOpen()) render(); syncPull(); } });
 addEventListener('online', () => S && syncPush());
 /* обновления: приложение само подтягивает новую версию */
-const APP_VERSION = 5;
+const APP_VERSION = 6;
 async function checkUpdate() {
   try { const r = await fetch('/version.json', { cache: 'no-store' }); const j = await r.json(); if (j.v > APP_VERSION && !sheetOpen()) { const k = 'istiqama-reloaded-' + j.v; if (!sessionStorage.getItem(k)) { sessionStorage.setItem(k, '1'); location.reload(); } } } catch {}
 }

@@ -24,7 +24,10 @@ export default async (req) => {
       .map(r => ({ id: String(r.id).slice(0, 40), time: r.time, title: String(r.title || '').slice(0, 80), body: String(r.body || '').slice(0, 200), onlyIfNoReport: !!r.onlyIfNoReport, open: ['food', 'report', 'money'].includes(r.open) ? r.open : null, days: Array.isArray(r.days) ? r.days.slice(0, 7) : null }));
     let tz = 'Asia/Almaty';
     try { if (b.tz) { new Intl.DateTimeFormat('en', { timeZone: b.tz }); tz = b.tz; } } catch {}
-    const doc = { sub: b.sub, tz, reminders, keyHash: validKey(b.key) ? await hashKey(b.key) : null, saved: Date.now() };
+    const pr = b.prayer || {};
+    const okc = x => typeof x === 'string' && /^\d{1,2}\.\d{1,8}$/.test(x);
+    const prayer = pr.on && okc(pr.lat) && okc(pr.lng) ? { on: true, lat: pr.lat, lng: pr.lng, tz: +pr.tz || 5, before: Math.max(0, Math.min(30, +pr.before || 0)), title: String(pr.title || '').slice(0, 60) } : null;
+    const doc = { sub: b.sub, tz, reminders, prayer, keyHash: validKey(b.key) ? await hashKey(b.key) : null, saved: Date.now() };
     await store.setJSON(id, doc);
     return Response.json({ ok: true, count: reminders.length });
   }
