@@ -232,6 +232,20 @@ html.lock,html.lock body{overflow:hidden;overscroll-behavior:none}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 #app.fade{animation:fi .22s ease}
 @media (prefers-reduced-motion:reduce){#app.fade{animation:none}#sheet-root .sheet{transition:none}}
+
+/* ---- v7: пиксельный аул ---- */
+nav.tabs .in{grid-template-columns:repeat(6,1fr)}
+nav.tabs button{font-size:10.5px}
+.town-wrap{border-radius:18px;overflow:hidden;box-shadow:var(--shadow);border:3px solid #3d7a2e;background:#64b448;margin-top:8px}
+.town-wrap canvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:manipulation}
+.shopgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.shopit{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.shopit img{width:48px;height:48px;image-rendering:pixelated;border-radius:8px}
+.shopit b{font-size:13px;line-height:1.15;margin-top:4px}
+.shopit span{font-size:12.5px;font-weight:700;color:var(--amber)}
+.shopit small{font-size:11px;color:var(--muted)}
+.shopit.off{opacity:.45}
+#sheet-root:not(.show) .bg,#sheet-root:not(.show) .sheet{pointer-events:none}
 </style>
 </head>
 <body>
@@ -377,7 +391,7 @@ let ui = { tab: 'today', day: today(), month: ymOf(today()), moneyMonth: ymOf(to
 const lsGet = k => { try { return localStorage.getItem(k); } catch { return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 function load() { try { const s = JSON.parse(lsGet(LS)); return s && s.v === 1 ? normalize(s) : null; } catch { return null; } }
-function normalize(s) { for (const k of ['habits','money','rewards','purchases','reminders','books','meals','claims']) s[k] = s[k] || []; s.days = s.days || {}; s.body = s.body || { u: 0, sex: 'm', goal: 'keep', activity: 1.375 }; return s; }
+function normalize(s) { for (const k of ['habits','money','rewards','purchases','reminders','books','meals','claims','builds','harvests']) s[k] = s[k] || []; s.days = s.days || {}; s.body = s.body || { u: 0, sex: 'm', goal: 'keep', activity: 1.375 }; return s; }
 function persist() { lsSet(LS, JSON.stringify(S)); }
 function save() { memoReset(); S.updatedAt = now(); persist(); queueSync(); }
 function randKey(n = 24) { const a = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; const r = crypto.getRandomValues(new Uint8Array(n)); return [...r].map(x => a[x % a.length]).join(''); }
@@ -405,7 +419,7 @@ function mergeState(a, b) {
   if (!a) return b; if (!b) return a;
   const out = { v: 1 };
   for (const k of ['profile','goals','settings','body','insight','prayer']) { const v = ((a[k]?.u || 0) >= (b[k]?.u || 0)) ? a[k] : b[k]; if (v !== undefined) out[k] = v; }
-  for (const k of ['habits','money','rewards','purchases','reminders','books','meals','claims']) {
+  for (const k of ['habits','money','rewards','purchases','reminders','books','meals','claims','builds','harvests']) {
     const m = new Map();
     for (const it of [...(a[k] || []), ...(b[k] || [])]) { const c = m.get(it.id); if (!c || (it.u || 0) > (c.u || 0)) m.set(it.id, it); }
     out[k] = [...m.values()];
@@ -507,7 +521,7 @@ function totalXP() {
   for (let d = startDate(); d <= today(); d = addDays(d, 1)) xp += dayXP(d);
   return (_xp = xp + booksDone().length * 300);
 }
-const coins = () => totalXP() + sum(S.claims.filter(c => !c.del), c => c.coins) - sum(S.purchases.filter(p => !p.del), p => p.cost);
+const coins = () => totalXP() + sum(S.claims.filter(c => !c.del), c => c.coins) + sum(S.harvests.filter(h => !h.del), h => h.coins) - sum(S.purchases.filter(p => !p.del), p => p.cost) - townSpent();
 const lvlNeed = L => 125 * (L - 1) * L;
 function level(xp = totalXP()) { let L = 1; while (xp >= lvlNeed(L + 1)) L++; return { L, cur: xp - lvlNeed(L), need: lvlNeed(L + 1) - lvlNeed(L) }; }
 const rank = L => RANKS.filter(r => L >= r[0]).pop()[1];
@@ -588,16 +602,18 @@ const ICONS = {
   today: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.6 2.5L16 9.5"/></svg>',
   food: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v8M4.5 3v5a2.5 2.5 0 005 0V3M7 11v10M17 21V3c-2 1.5-3 4-3 7v3h3"/></svg>',
   money: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 15h2"/></svg>',
+  town: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 20h18M5 20v-7l7-6 7 6v7"/><path d="M10 20v-5h4v5"/><path d="M12 3v2"/></svg>',
   stats: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg>',
 };
-const TABS = [['today','Сегодня'],['food','Еда'],['money','Деньги'],['stats','Итоги'],['more','Ещё']];
+const TABS = [['today','Сегодня'],['food','Еда'],['town','Аул'],['money','Деньги'],['stats','Итоги'],['more','Ещё']];
 function renderTabs() { $('#tabs').innerHTML = TABS.map(([id, t]) => `<button class="${ui.tab === id ? 'on' : ''}" data-tab="${id}">${ICONS[id]}${t}</button>`).join(''); }
 $('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; ui.tab = b.dataset.tab; ui.day = today(); render(); scrollTo(0, 0); const a = $('#app'); a.classList.remove('fade'); void a.offsetWidth; a.classList.add('fade'); });
 function render() {
   if (!S) return renderOnboarding();
   memoReset(); renderTabs();
-  $('#app').innerHTML = ({ today: viewToday, food: viewFood, money: viewMoney, stats: viewStats, more: viewMore })[ui.tab]();
+  $('#app').innerHTML = ({ today: viewToday, food: viewFood, town: viewTown, money: viewMoney, stats: viewStats, more: viewMore })[ui.tab]();
+  if (ui.tab === 'town') startTown(); else stopTown();
   setSync(syncState);
 }
 const dayNav = d => `<div class="daynav"><button data-act="day-prev" ${d <= startDate() ? 'disabled' : ''} aria-label="Назад">‹</button><button data-act="day-next" ${d >= today() ? 'disabled' : ''} aria-label="Вперёд">›</button></div>`;
@@ -657,6 +673,153 @@ function prayerBlock() {
     <div class="item"><span class="grow"><div class="t">Когда напомнить</div></div><div class="opts">${[0, 5, 10, 15].map(m => `<button class="${(p.before || 0) === m ? 'on' : ''}" data-act="pr-before" data-v="${m}" style="padding:7px 10px;font-size:13px">${m ? 'за ' + m : 'в начале'}</button>`).join('')}</div></div></div>
     <div class="sub tiny" style="margin:-2px 4px 0">Источник: Духовное управление мусульман Казахстана (muftyat.kz)</div>`;
 }
+
+/* ============ АУЛ — пиксельная игра: монеты за дисциплину → строишь свой аул ============ */
+const TW = 10, TH = 12, T = 16; // поле 10×12 клеток по 16 пикселей
+const ITEMS = {
+  path:     { n: 'Тропинка', cost: 10, lv: 1, y: 0, g: 'Земля' },
+  field:    { n: 'Огород', cost: 60, lv: 1, y: 1, g: 'Земля' },
+  pond:     { n: 'Пруд', cost: 120, lv: 2, y: 0, g: 'Земля' },
+  flowers:  { n: 'Цветы', cost: 30, lv: 1, y: 0, g: 'Сад' },
+  apple:    { n: 'Яблоня апорт', cost: 100, lv: 1, y: 2, g: 'Сад' },
+  pine:     { n: 'Ель', cost: 70, lv: 1, y: 0, g: 'Сад' },
+  sheep:    { n: 'Овца', cost: 180, lv: 2, y: 3, g: 'Животные' },
+  horse:    { n: 'Конь', cost: 450, lv: 3, y: 5, g: 'Животные' },
+  camel:    { n: 'Верблюд', cost: 650, lv: 4, y: 6, g: 'Животные' },
+  yurt:     { n: 'Юрта', cost: 300, lv: 1, y: 2, g: 'Постройки' },
+  well:     { n: 'Колодец', cost: 220, lv: 2, y: 1, g: 'Постройки' },
+  barn:     { n: 'Амбар', cost: 400, lv: 3, y: 4, g: 'Постройки' },
+  fountain: { n: 'Фонтан', cost: 700, lv: 4, y: 2, g: 'Постройки' },
+  bazaar:   { n: 'Базар', cost: 900, lv: 5, y: 8, g: 'Постройки' },
+  library:  { n: 'Библиотека', cost: 1200, lv: 6, y: 6, g: 'Постройки' },
+  mosque:   { n: 'Мечеть', cost: 2500, lv: 7, y: 12, g: 'Постройки' },
+};
+const builds = () => S.builds.filter(b => !b.del);
+const buildAt = (x, y) => builds().find(b => b.x === x && b.y === y);
+const townSpent = () => sum(S.builds, b => b.del ? b.cost * .5 : b.cost);
+const harvestYield = () => sum(builds(), b => ITEMS[b.item]?.y || 0);
+function harvestState() {
+  const id = 'h-' + today(), got = S.harvests.some(h => h.id === id && !h.del), y = harvestYield();
+  const yd = addDays(today(), -1), ok = yd >= startDate() && (dayScore(yd) ?? 0) >= GOOD_DAY;
+  return { id, got, y, ok, yScore: dayScore(yd) ?? 0 };
+}
+// ---------- пиксель-арт: рисуем процедурно, 1 единица = 1 пиксель холста ----------
+function seedRand(n) { let s = n * 9301 + 49297; return () => ((s = (s * 9301 + 49297) % 233280) / 233280); }
+function drawGround(c, tx, ty, kind, f) {
+  const ox = tx * T, oy = ty * T, P = (col, x, y, w = 1, h = 1) => { c.fillStyle = col; c.fillRect(ox + x, oy + y, w, h); };
+  const r = seedRand(tx * 31 + ty * 17 + 7);
+  if (kind === 'path') { P('#d3b07a', 0, 0, 16, 16); for (let i = 0; i < 7; i++) P(r() > .5 ? '#bf9a62' : '#e2c48f', r() * 15 | 0, r() * 15 | 0); return; }
+  if (kind === 'pond') { P('#5fb24a', 0, 0, 16, 16); P('#3d8be0', 1, 2, 14, 12); P('#3d8be0', 2, 1, 12, 14); P('#2f72c2', 2, 9, 12, 3);
+    const w = (f >> 2) % 4; P('#a8d8ff', 3 + w, 4, 3, 1); P('#a8d8ff', 9 - w, 8, 3, 1); P('#2c8a3c', 1, 13, 2, 2); P('#2c8a3c', 13, 1, 2, 2); return; }
+  if (kind === 'field') { P('#7a5230', 0, 0, 16, 16); for (let y = 1; y < 16; y += 3) { P('#5e3d22', 0, y, 16, 1); for (let x = 1; x < 16; x += 3) { P('#4caf3c', x, y - 1, 1, 1); P('#7bd35e', x, y - 2 < 0 ? 0 : y - 2, 1, 1); } } return; }
+  P('#64b448', 0, 0, 16, 16);
+  for (let i = 0; i < 6; i++) P(r() > .5 ? '#58a63f' : '#73c457', r() * 15 | 0, r() * 15 | 0);
+}
+function drawSprite(c, ox, oy, item, f) {
+  const P = (col, x, y, w = 1, h = 1) => { c.fillStyle = col; c.fillRect(ox + x, oy + y, w, h); };
+  const bob = (f >> 3) % 2;
+  switch (item) {
+    case 'flowers': for (const [x, y, col] of [[3, 4, '#ff5d73'], [9, 3, '#ffd23f'], [12, 9, '#c86bff'], [5, 11, '#ffffff'], [10, 13, '#ff5d73'], [2, 8, '#ffd23f']]) { P('#2c8a3c', x, y + 1, 1, 2); P(col, x - 1, y, 3, 1); P(col, x, y - 1, 1, 3); P('#fff3a0', x, y); } break;
+    case 'apple': P('#7a4a24', 7, 10, 2, 5); P('#5e3818', 7, 14, 3, 1); P('#2f8f3a', 3, 3, 10, 7); P('#2f8f3a', 2, 5, 12, 4); P('#2f8f3a', 5, 1, 6, 2); P('#3fae4a', 4, 2, 5, 3); P('#1f6e2a', 3, 9, 10, 1);
+      for (const [x, y] of [[4, 5], [9, 3], [11, 7], [6, 8], [8, 6]]) P('#e8322c', x, y); break;
+    case 'pine': P('#6b4220', 7, 12, 2, 3); P('#1f6b3a', 6, 1, 4, 3); P('#1f6b3a', 4, 4, 8, 3); P('#1f6b3a', 3, 7, 10, 3); P('#1f6b3a', 2, 10, 12, 2); P('#2f8a4e', 7, 2, 2, 2); P('#2f8a4e', 6, 5, 3, 1); P('#2f8a4e', 5, 8, 3, 1); break;
+    case 'sheep': P('#00000022', 3, 13, 11, 2); P('#f2f2f2', 4, 6 + bob, 9, 6); P('#ffffff', 5, 5 + bob, 7, 1); P('#d8d8d8', 4, 11 + bob, 9, 1); P('#3a3a3a', 11, 5 + bob, 4, 4); P('#ffffff', 13, 6 + bob, 1, 1); P('#3a3a3a', 5, 12, 1, 2); P('#3a3a3a', 11, 12, 1, 2); break;
+    case 'horse': P('#00000022', 2, 13, 12, 2); P('#8a4b23', 3, 6, 9, 5); P('#8a4b23', 11, 3, 3, 5); P('#8a4b23', 13, 2, 2, 3); P('#3a2412', 10, 2, 2, 6); P('#3a2412', 2, 6, 1, 4); P('#5e3214', 3, 11, 1, 3); P('#5e3214', 5, 11 - bob, 1, 3 + bob); P('#5e3214', 9, 11, 1, 3); P('#5e3214', 11, 11 - bob, 1, 3 + bob); P('#000', 14, 3); break;
+    case 'camel': P('#00000022', 2, 13, 12, 2); P('#c9a063', 3, 7, 9, 4); P('#c9a063', 4, 5, 3, 2); P('#c9a063', 8, 5, 3, 2); P('#c9a063', 11, 4, 2, 5); P('#c9a063', 12, 2, 3, 3); P('#a67f45', 3, 11, 1, 3); P('#a67f45', 6, 11, 1, 3); P('#a67f45', 9, 11 - bob, 1, 3 + bob); P('#000', 14, 3); break;
+    case 'yurt': P('#00000025', 1, 13, 14, 2); P('#f4f0e6', 2, 7, 12, 7); P('#f4f0e6', 3, 5, 10, 2); P('#f4f0e6', 5, 3, 6, 2); P('#e2dccd', 7, 2, 2, 1); P('#c8312c', 2, 9, 12, 1); P('#e0b23a', 3, 9, 1, 1); P('#e0b23a', 7, 9, 1, 1); P('#e0b23a', 11, 9, 1, 1);
+      P('#c8312c', 6, 10, 4, 4); P('#8a1f1b', 7, 11, 2, 3); P('#d9d2c0', 2, 13, 12, 1); break;
+    case 'well': P('#00000025', 2, 13, 12, 2); P('#8d8d93', 3, 8, 10, 5); P('#a9a9b0', 3, 8, 10, 1); P('#2f6fbf', 4, 9, 8, 2); P('#6b4220', 3, 3, 1, 6); P('#6b4220', 12, 3, 1, 6); P('#a04a28', 2, 2, 12, 2); P('#6b4220', 7, 4, 2, 1); P('#555', 8, 5, 1, 4); break;
+    case 'barn': P('#00000025', 1, 13, 14, 2); P('#c23b2e', 2, 6, 12, 8); P('#8a2a20', 1, 4, 14, 2); P('#8a2a20', 3, 2, 10, 2); P('#f4f0e6', 6, 8, 4, 6); P('#c23b2e', 7, 9, 2, 5); P('#f4f0e6', 6, 10, 4, 1); break;
+    case 'fountain': P('#00000025', 1, 13, 14, 2); P('#a9a9b0', 2, 9, 12, 5); P('#3d8be0', 3, 10, 10, 3); P('#a9a9b0', 7, 4, 2, 6); P('#bde3ff', 7, 1 + bob, 2, 3); P('#bde3ff', 5, 3 + bob, 1, 2); P('#bde3ff', 10, 3 + bob, 1, 2); break;
+    case 'bazaar': P('#00000025', 1, 13, 14, 2); for (let x = 1; x < 15; x += 2) { P('#e8322c', x, 3, 1, 4); P('#fff', x + 1, 3, 1, 4); } P('#8a5a2b', 2, 7, 1, 7); P('#8a5a2b', 13, 7, 1, 7); P('#a0703a', 3, 10, 10, 3); P('#ffb02e', 4, 9, 2, 1); P('#e8322c', 7, 9, 2, 1); P('#5bbf3a', 10, 9, 2, 1); break;
+    case 'library': P('#00000025', 1, 13, 14, 2); P('#2f5ea8', 2, 5, 12, 9); P('#1f4580', 1, 3, 14, 2); P('#f4f0e6', 4, 7, 3, 3); P('#f4f0e6', 9, 7, 3, 3); P('#e0b23a', 6, 10, 4, 4); P('#ffe9a8', 4, 7 + 0, 1, 1); break;
+    case 'mosque': P('#00000025', 0, 13, 16, 2); P('#f4f0e6', 2, 8, 10, 6); P('#2aa36b', 4, 4, 6, 4); P('#2aa36b', 5, 3, 4, 1); P('#36c27f', 5, 4, 2, 2); P('#e0b23a', 7, 1, 1, 2); P('#f4f0e6', 12, 3, 2, 11); P('#2aa36b', 12, 2, 2, 1); P('#e0b23a', 13, 0, 1, 2);
+      P('#2a8a5a', 6, 10, 3, 4); P('#9ad', 3, 9, 2, 2); P('#9ad', 9, 9, 2, 2); break;
+  }
+}
+function drawPerson(c, x, y, f, dir) {
+  const P = (col, a, b, w = 1, h = 1) => { c.fillStyle = col; c.fillRect(Math.round(x) + a, Math.round(y) + b, w, h); };
+  const st = (f >> 2) % 2;
+  P('#00000030', 0, 9, 6, 1); P('#2b2b2b', 1, 0, 4, 1); P('#f0c49a', 1, 1, 4, 3); P('#000', dir > 0 ? 3 : 2, 2); P('#ffffff', 0, 4, 6, 3); P('#2f6fde', 1, 7, 4, 1);
+  P('#3a3a3a', 1, 8 - st, 1, 1 + st); P('#3a3a3a', 4, 8 - (1 - st), 1, 2 - st);
+}
+let townAnim = null, townSel = null;
+const walker = { x: 4.5 * T, y: 6 * T, tx: 4.5 * T, ty: 6 * T, dir: 1, wait: 0 };
+function townFrame(cv, f) {
+  const c = cv.getContext('2d');
+  for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) { const b = buildAt(x, y); drawGround(c, x, y, b && ['path', 'pond', 'field'].includes(b.item) ? b.item : 'grass', f); }
+  const items = builds().filter(b => !['path', 'pond', 'field'].includes(b.item)).sort((a, b) => a.y - b.y);
+  // человечек ходит по клеткам без построек
+  if (walker.wait > 0) walker.wait--; else {
+    const dx = walker.tx - walker.x, dy = walker.ty - walker.y;
+    if (Math.abs(dx) + Math.abs(dy) < 1) { walker.wait = 10 + (Math.random() * 30 | 0); for (let k = 0; k < 20; k++) { const nx = Math.random() * TW | 0, ny = Math.random() * TH | 0, b = buildAt(nx, ny); if (!b || ['path', 'field'].includes(b.item)) { walker.tx = nx * T + 5; walker.ty = ny * T + 4; break; } } }
+    else { if (Math.abs(dx) > .5) { walker.x += Math.sign(dx) * .6; walker.dir = Math.sign(dx); } else walker.y += Math.sign(dy) * .6; }
+  }
+  let drawn = false;
+  for (const b of items) { if (!drawn && b.y * T > walker.y) { drawPerson(c, walker.x, walker.y, f, walker.dir); drawn = true; } drawSprite(c, b.x * T, b.y * T, b.item, f); }
+  if (!drawn) drawPerson(c, walker.x, walker.y, f, walker.dir);
+  // погода и время суток: день отражает твою дисциплину
+  const h = new Date().getHours(), sc = dayScore(today()) ?? 0;
+  if (h < 6 || h >= 20) { c.fillStyle = 'rgba(20,24,70,.42)'; c.fillRect(0, 0, TW * T, TH * T); for (const b of builds()) if (['yurt', 'mosque', 'library', 'barn'].includes(b.item)) { c.fillStyle = '#ffd86b'; c.fillRect(b.x * T + 7, b.y * T + 11, 2, 2); } }
+  else if (sc < 40 && h >= 12) { c.fillStyle = 'rgba(110,110,125,.28)'; c.fillRect(0, 0, TW * T, TH * T); }
+  if (townSel) { c.strokeStyle = '#fff'; c.lineWidth = 1; c.strokeRect(townSel.x * T + .5, townSel.y * T + .5, T - 1, T - 1); }
+}
+function startTown() {
+  stopTown();
+  const cv = document.getElementById('town'); if (!cv) return;
+  let f = 0, last = 0;
+  const loop = ts => { if (!document.getElementById('town')) return stopTown(); if (ts - last > 110) { last = ts; townFrame(cv, f++); } townAnim = requestAnimationFrame(loop); };
+  townAnim = requestAnimationFrame(loop);
+  cv.onclick = e => {
+    const r = cv.getBoundingClientRect(), x = Math.floor((e.clientX - r.left) / r.width * TW), y = Math.floor((e.clientY - r.top) / r.height * TH);
+    if (x < 0 || y < 0 || x >= TW || y >= TH) return;
+    const b = buildAt(x, y);
+    if (townMove) { if (!b) { townMove.x = x; townMove.y = y; townMove.u = now(); townMove = null; townSel = null; save(); render(); toast('Переставлено'); } else toast('Эта клетка занята — выбери пустую'); return; }
+    townSel = { x, y };
+    b ? openBuildInfo(b) : openTownShop(x, y);
+  };
+}
+function stopTown() { if (townAnim) cancelAnimationFrame(townAnim); townAnim = null; }
+const iconCache = {};
+function itemIcon(item) {
+  if (iconCache[item]) return iconCache[item];
+  const cv = document.createElement('canvas'); cv.width = 16; cv.height = 16; const c = cv.getContext('2d');
+  if (['path', 'pond', 'field'].includes(item)) drawGround(c, 0, 0, item, 0); else { drawGround(c, 0, 0, 'grass', 0); drawSprite(c, 0, 0, item, 0); }
+  return (iconCache[item] = cv.toDataURL());
+}
+function viewTown() {
+  const c = coins(), lv = level().L, hs = harvestState(), n = builds().length;
+  let h = `<div class="row between"><div><div class="sub">Твой аул · ${n} ${n === 1 ? 'постройка' : 'построек'}</div><h1>Аул</h1></div><span class="chip" style="margin-left:auto">🪙 ${num(c)}</span></div>
+    <div class="town-wrap"><canvas id="town" width="${TW * T}" height="${TH * T}" aria-label="Пиксельный аул: нажми на клетку, чтобы построить"></canvas></div>
+    <div class="sub tiny" style="text-align:center;margin:6px 0 12px">Нажми на пустую клетку — построить. На постройку — подробнее.</div>`;
+  if (hs.y) h += hs.got ? `<div class="box"><b>🧺 Урожай собран</b><div class="sub small">Завтра снова — если сегодня наберёшь ${GOOD_DAY}%+</div></div>`
+    : hs.ok ? `<button class="btn green block" data-act="harvest" style="margin-bottom:10px">🧺 Собрать урожай · +${hs.y} монет</button>`
+    : `<div class="box"><b>🥀 Урожая сегодня нет</b><div class="sub small">Вчера день был ${hs.yScore}% — нужно ${GOOD_DAY}%+. Сделай сегодня — завтра соберёшь +${hs.y}.</div></div>`;
+  else h += `<div class="box"><b>Начни с юрты или яблони</b><div class="sub small">Постройки приносят урожай монет каждый день, когда вчерашний день засчитан.</div></div>`;
+  h += `<div class="box"><div class="row between"><span class="b">Доход аула</span><span class="b">+${harvestYield()} 🪙 в день</span></div><div class="sub tiny" style="margin-top:4px">Новые постройки открываются с уровнем. Сейчас уровень ${lv}.</div></div>`;
+  return h;
+}
+function openTownShop(x, y) {
+  const c = coins(), lv = level().L, groups = {};
+  for (const [k, it] of Object.entries(ITEMS)) (groups[it.g] = groups[it.g] || []).push([k, it]);
+  openSheet(`<h2>Что построить?</h2><div class="sub small" style="margin-bottom:12px">У тебя 🪙 ${num(c)}</div>
+    ${Object.entries(groups).map(([g, list]) => `<h3 style="margin-top:12px">${g}</h3><div class="shopgrid">${list.map(([k, it]) => { const lock = lv < it.lv, can = !lock && c >= it.cost;
+      return `<button class="shopit ${can ? '' : 'off'}" data-buy="${k}" ${can ? '' : 'disabled'}><img src="${itemIcon(k)}" alt=""><b>${it.n}</b><span>${lock ? `🔒 ур. ${it.lv}` : `🪙 ${num(it.cost)}`}</span>${it.y ? `<small>+${it.y}/день</small>` : '<small>красота</small>'}</button>`; }).join('')}</div>`).join('')}`, root => {
+    root.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => {
+      const k = b.dataset.buy, it = ITEMS[k]; if (coins() < it.cost || buildAt(x, y)) return;
+      S.builds.push({ id: uid(), u: now(), item: k, x, y, cost: it.cost }); save(); closeSheet(); townSel = null; render(); toast(`${it.n} построена! −${it.cost} 🪙`); vibrate();
+    });
+  });
+}
+function openBuildInfo(b) {
+  const it = ITEMS[b.item];
+  openSheet(`<div class="row" style="gap:14px;margin-bottom:12px"><img src="${itemIcon(b.item)}" alt="" style="width:64px;height:64px;image-rendering:pixelated;border-radius:12px"><div><h2 style="margin:0">${it.n}</h2><div class="sub small">${it.y ? `Приносит +${it.y} 🪙 в день` : 'Украшает аул'}</div></div></div>
+    <button class="btn line block" id="b-mv">Переставить</button><button class="btn red block" id="b-del" style="margin-top:8px">Убрать (вернуть ${num(it.cost / 2)} 🪙)</button>`, root => {
+    root.querySelector('#b-del').onclick = () => { if (!confirm(`Убрать «${it.n}»? Вернётся половина цены.`)) return; b.del = true; b.u = now(); save(); closeSheet(); townSel = null; render(); };
+    root.querySelector('#b-mv').onclick = () => { closeSheet(); townMove = b; toast('Нажми на пустую клетку, куда переставить'); };
+  });
+}
+let townMove = null;
 
 /* ============ СЕГОДНЯ ============ */
 const CAT_HEX = { iman: '#3ba776', body: '#f28c38', mind: '#7c6bd6', work: '#2f6fde' };
@@ -1324,6 +1487,7 @@ $('#app').addEventListener('click', async e => {
     case 'multi': { const arr = Array.isArray(cur) ? [...cur] : []; arr[+el.dataset.i] = !arr[+el.dataset.i]; if (arr[+el.dataset.i]) vibrate(); setVal(id, arr); break; }
     case 'pick-day': ui.day = el.dataset.d; render(); break;
     case 'city': openCityPick(); break;
+    case 'harvest': { const hs = harvestState(); if (hs.got || !hs.ok || !hs.y) return; S.harvests.push({ id: hs.id, u: now(), coins: hs.y }); save(); render(); toast(`🧺 +${hs.y} монет с урожая!`); vibrate(); break; }
     case 'pr-toggle': { S.prayer = { ...S.prayer, on: !S.prayer.on, u: now() }; save(); render(); if (S.prayer.on && lsGet(LS_PUSH) !== '1') { toast('Включи уведомления — переключатель ниже'); } else { pushResave(); toast(S.prayer.on ? 'Буду напоминать о намазах' : 'Напоминания о намазах выключены'); } break; }
     case 'pr-before': S.prayer = { ...S.prayer, before: +el.dataset.v, u: now() }; save(); pushResave(); render(); break;
     case 'habit-open': openHabit(id); break;
@@ -1455,6 +1619,7 @@ function refreshSheet(html, mount) {
   const top = sh.scrollTop; sh.innerHTML = sheetFrame(html); mount && mount(sh); wireSheet(sh); sh.scrollTop = top;
 }
 function closeSheet() {
+  if (typeof townSel !== 'undefined') townSel = null;
   const root = $('#sheet-root'), gen = ++sheetGen, sh = root.querySelector('.sheet'), bg = root.querySelector('.bg');
   if (sh) sh.style.transform = 'translateY(105%)';
   if (bg) bg.style.opacity = '0';
@@ -1512,7 +1677,7 @@ function handleOpen(what) {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S) { if (!sheetOpen()) render(); syncPull(); } });
 addEventListener('online', () => S && syncPush());
 /* обновления: приложение само подтягивает новую версию */
-const APP_VERSION = 6;
+const APP_VERSION = 7;
 async function checkUpdate() {
   try { const r = await fetch('/version.json', { cache: 'no-store' }); const j = await r.json(); if (j.v > APP_VERSION && !sheetOpen()) { const k = 'istiqama-reloaded-' + j.v; if (!sessionStorage.getItem(k)) { sessionStorage.setItem(k, '1'); location.reload(); } } } catch {}
 }
