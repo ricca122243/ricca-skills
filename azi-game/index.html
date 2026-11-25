@@ -294,38 +294,43 @@ h2{font-size:21px;font-weight:700}
 .backs{position:absolute;top:-16px;right:-14px;display:flex;z-index:-1}
 .backs i{width:28px;height:40px;border-radius:4px;margin-left:-18px;display:block;transform:rotate(calc(var(--k)*14deg - 8deg));transform-origin:50% 100%}
 .back-pat{background:repeating-linear-gradient(45deg,transparent 0 5px,rgba(255,255,255,.55) 5px 6px),repeating-linear-gradient(-45deg,transparent 0 5px,rgba(255,255,255,.55) 5px 6px),#D63A3F;border:2.5px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.4)}
-.deal .backs i,.deal-me{animation:deal .5s cubic-bezier(.2,.8,.2,1) backwards}
+.backs i.dealt,.card.dealt{animation:deal .4s cubic-bezier(.2,.8,.2,1) backwards}
+.card.flipc{animation:flipin .55s ease-out}
+.deck{box-shadow:2px 2px 0 #fff,3px 3px 0 #B8262C,5px 5px 0 #fff,6px 6px 0 #B8262C,0 8px 14px rgba(0,0,0,.5)}
+.dealer-btn{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;background:#F4F1EA;color:#1A1A1A;font:800 13px/26px var(--f-body);text-align:center;box-shadow:0 2px 0 #B9B2A2,0 3px 6px rgba(0,0,0,.5);z-index:2}
+.played.sweep{animation:sweep .65s ease-in .45s forwards}
+@keyframes sweep{to{transform:translate(calc(-50% + var(--wx)),calc(-50% + var(--wy))) scale(.35);opacity:0}}
 @keyframes deal{from{transform:translate(var(--dx),var(--dy)) scale(.5);opacity:0}}
 .tricks{display:flex;gap:3px;margin-top:3px;min-height:6px}
 .tricks i{width:18px;height:6px;border-radius:3px;background:#E0B32E;display:block}
 .betchip{position:absolute;z-index:2;transform:translate(-50%,-50%);display:flex;align-items:center;gap:5px;font-weight:800;font-size:19px;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.4);transition:none}
 .betchip .ic{width:22px;height:22px}
-.betchip.collect{animation:collect .42s ease-in forwards}
+.betchip.collect{animation:collect .75s cubic-bezier(.4,0,.2,1) forwards}
 @keyframes collect{to{transform:translate(calc(-50% + var(--cx)),calc(-50% + var(--cy))) scale(.6);opacity:0}}
 .bubble{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#fff;color:#111;font-weight:800;font-size:14px;padding:7px 12px;border-radius:8px;white-space:nowrap;z-index:8;animation:pop .2s;box-shadow:0 6px 14px rgba(0,0,0,.35)}
 .bubble::after{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);border:7px solid transparent;border-bottom:0;border-top-color:#fff}
 .bubble.side{bottom:auto;top:4px;left:auto;right:calc(50% + 40px);transform:none}.bubble.side::after{left:auto;right:-7px;bottom:auto;top:12px;transform:none;border:7px solid transparent;border-right:0;border-left-color:#fff}
-.bubble.bl{left:-6px;transform:none}.bubble.bl::after{left:46px}
-.bubble.br{left:auto;right:-6px;transform:none}.bubble.br::after{left:auto;right:40px;transform:none}
+.bubble.bl{left:calc(50% - 30px);transform:none}.bubble.bl::after{left:30px}
+.bubble.br{left:auto;right:calc(50% - 30px);transform:none}.bubble.br::after{left:auto;right:24px;transform:none}
 @keyframes pop{from{opacity:0}}
 .center{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:2}
 .trump{position:relative}
 .trump small{position:absolute;left:50%;top:-16px;transform:translateX(-50%);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55);white-space:nowrap}
 .pot{display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(0,0,0,.2);padding:6px 16px;border-radius:999px;font-weight:800;font-size:20px}
 .pot .ic{width:26px;height:26px}
-.pot.fly{animation:potfly .7s cubic-bezier(.4,0,.2,1) .35s forwards}
+.pot.fly{animation:potfly 1s cubic-bezier(.4,0,.2,1) .8s forwards}
 @keyframes potfly{to{transform:translate(var(--tx),var(--ty)) scale(.5);opacity:0}}
 .shoha{font-size:11px;font-weight:800;color:#FFE1A6;background:rgba(150,20,25,.7);padding:3px 9px;border-radius:7px}
 .aziN{font-size:11px;font-weight:800;background:var(--red);color:#fff;padding:3px 9px;border-radius:7px}
 .played{position:absolute;z-index:4;transform:translate(-50%,-50%) rotate(var(--rot,0deg))}
-.played.fresh{animation:fly .32s cubic-bezier(.2,.8,.2,1)}
+.played.fresh{animation:fly .48s cubic-bezier(.2,.8,.2,1)}
 @keyframes fly{from{transform:translate(calc(-50% + var(--fx)),calc(-50% + var(--fy))) scale(.7);opacity:.3}}
 .played.best .card{box-shadow:0 0 0 3px #E0B32E,0 6px 14px rgba(0,0,0,.5)}
 .card{border-radius:6px;background:#FBF8F1;box-shadow:0 3px 10px rgba(0,0,0,.45);flex:none;position:relative;overflow:hidden}
 .card svg{display:block;width:100%;height:100%}
 .card.sm{width:50px;height:70px}
 .card.lg{width:100px;height:140px;border-radius:9px}
-.card.back{background:none}
+.card.back.back-pat{background:repeating-linear-gradient(45deg,transparent 0 7px,rgba(255,255,255,.55) 7px 8.5px),repeating-linear-gradient(-45deg,transparent 0 7px,rgba(255,255,255,.55) 7px 8.5px),#D63A3F}
 .card.back::before{content:"";position:absolute;inset:0;border-radius:inherit}
 .card.back.back-pat{border-width:5px}
 .dock{position:relative;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -863,15 +868,18 @@ function newHand(isAzi){
  G.seats.forEach(p=>{if(p&&p.inHand)p.hand=deck.splice(0,3)});
  G.trumpCard=deck.shift();G.trumpS=G.trumpCard.s;G.shoha=G.trumpCard.r==="A";G.dealAt=Date.now();hist(`— ${isAzi?"Переигровка Ази":"Новая раздача"}. Козырь: ${RL(G.trumpCard.r)} ${SUITNAME[G.trumpS]}${G.shoha?" (Шоха на трассе)":""}`);
  G.seats.forEach(p=>{if(p&&p.hand)p.hand.sort((a,b)=>cval(a)-cval(b)||a.s.localeCompare(b.s))});
- sfx("card");
- G.phase="bet";G.acted=new Set();
+ G.seats.forEach(p=>{if(p)p.shown=0});G.trumpShown=false;G.lastDealt=null;G.phase="deal";G.acted=new Set();G.turn=-1;
  const first=G.lastWinner>=0&&occ(G.lastWinner)?nextIdx(G.lastWinner,inHand):nextIdx(G.dealer,inHand);
- G.firstBettor=first;G.turn=first;G.turnStart=Date.now();
- renderTable();later(stepTurn,600)}
+ G.firstBettor=first;
+ const order=[];for(let r=0;r<3;r++){let k=G.dealer;for(let c=0;c<G.n;c++){k=(k+1)%G.n;if(occ(k)&&occ(k).inHand)order.push(k)}}
+ renderTable();
+ let t=700;order.forEach(k=>{later(()=>{const p=occ(k);if(!p)return;p.shown++;G.lastDealt={seat:k,idx:p.shown-1};sfx("card");renderTable()},t);t+=240});
+ later(()=>{G.trumpShown=true;G.trumpFlip=true;G.lastDealt=null;sfx("card");renderTable();G.trumpFlip=false},t+300);
+ later(()=>{if(G.phase!=="deal")return;G.phase="bet";G.turn=first;G.turnStart=Date.now();stepTurn()},t+1500)}
 
 function stepTurn(){if(!G||view!=="table")return;G.turnStart=Date.now();
- if(G.phase==="bet"){const p=occ(G.turn);if(p.bot){const w=rnd(900,2200)+(toCall(G.turn)>0?rnd(200,1400):0);G.botWait=w/1000;const t=G.turn;later(()=>botBet(t),w)}else{sfx("turn");armTimer()}}
- else if(G.phase==="play"){const p=occ(G.turn);if(p.bot){const w=rnd(700,1700);G.botWait=w/1000;const t=G.turn;later(()=>botPlay(t),w)}else{sfx("turn");armTimer()}}
+ if(G.phase==="bet"){const p=occ(G.turn);if(p.bot){const w=rnd(1300,2700)+(toCall(G.turn)>0?rnd(300,1600):0)+(Math.random()<.1?rnd(1200,3000):0);G.botWait=w/1000;const t=G.turn;later(()=>botBet(t),w)}else{sfx("turn");armTimer()}}
+ else if(G.phase==="play"){const p=occ(G.turn);if(p.bot){const w=rnd(1100,2300)+(G.trick.length?0:rnd(200,700));G.botWait=w/1000;const t=G.turn;later(()=>botPlay(t),w)}else{sfx("turn");armTimer()}}
  renderTable()}
 let myTimer=null;const TURN_S=25;
 function armTimer(){clearTimeout(myTimer);G.turnStart=Date.now();myTimer=setTimeout(()=>{if(!G||G.turn!==0)return;
@@ -897,13 +905,13 @@ function betAction(i,act,target){if(G.phase!=="bet"||G.turn!==i)return;if(i===0)
  else if(act==="call"){const c=toCall(i);pay(i,c);setBadge(i,p.allIn?"Ва-банк":c>0?"Уравнял":"Дальше",p.allIn?"b-raise":"b-call")}
  else if(act==="raise"){const mx=maxTarget(i);let t=clamp(target||minRaise(),Math.min(minRaise(),mx),mx);pay(i,t-p.bet);
   if(p.bet>G.curBet){G.curBet=p.bet;G.raises++;G.lastRaiser=i;G.acted=new Set()}
-  setBadge(i,p.allIn?"Ва-банк":"Поднял","b-raise")}
+  setBadge(i,p.allIn?"Ва-банк":"Поднял","b-raise");if(p.bot&&Math.random()<.14)emote(i,pick(["Тексерейік!","Блеф па?","Поехали","Сәттілік!","Ойлан, ойлан…"]))}
  G.acted.add(i);hist(`${p.me?"Вы":p.name}: ${(p.badge||"").toLowerCase()}${p.rp?` · ${full(p.rp)} в раунде`:""}`);
  if(liveCount()===1){const w=G.seats.findIndex((q,k)=>inHand(k));return winHand(w,"Все сбросили карты")}
  const live=G.seats.map((q,k)=>k).filter(canAct);
  const done=live.every(k=>G.acted.has(k)&&occ(k).bet>=G.curBet);
  const nx=nextIdx(i,canAct);
- if(done||nx<0){G.turn=-1;G.collect=true;renderTable();return later(()=>{G.collect=false;startPlay()},450)}
+ if(done||nx<0){G.turn=-1;G.collect=true;renderTable();return later(()=>{G.collect=false;startPlay()},850)}
  G.turn=nx;G.turnStart=Date.now();stepTurn()}
 function handStrength(i){const h=occ(i).hand;let s=0;h.forEach(c=>{const pw=power(c);if(c.s===G.trumpS)s+=1+(pw>=100?1.6:pw/8);else s+=pw===8?.9:pw===7?.45:pw===6?.2:0});return s}
 function botBet(i){if(!G||i<0||G.phase!=="bet"||G.turn!==i||!occ(i))return;const p=occ(i);const tc=toCall(i);
@@ -934,13 +942,14 @@ function playCard(i,c){if(G.phase!=="play"||G.turn!==i)return;const p=occ(i);
  if(i===0)clearTimeout(myTimer);
  p.hand=p.hand.filter(x=>x.id!==c.id);G.trick.push({seat:i,card:c});G.lastPlayed=c.id;sfx("card");setTimeout(()=>{if(G&&G.lastPlayed===c.id)G.lastPlayed=null},450);
  const live=G.seats.map((q,k)=>k).filter(inHand);
- if(G.trick.length>=live.length){G.turn=-1;renderTable();later(resolveTrick,1000);return}
+ if(G.trick.length>=live.length){G.turn=-1;renderTable();later(resolveTrick,1700);return}
  G.turn=nextIdx(i,k=>inHand(k)&&!G.trick.some(t=>t.seat===k));stepTurn()}
 function resolveTrick(){const b=bestOfTrick();const w=occ(b.seat);w.tricks++;G.tricksDone++;G.seats.forEach((q,k)=>{if(q&&q.badge==="Раунд")setBadge(k,"","")});setBadge(b.seat,"Раунд","b-azi");hist(`${b.seat===0?"Вы берёте":w.name+" берёт"} взятку: ${RL(b.card.r)} ${SUITNAME[b.card.s]}`);
  G.log=b.seat===0?"Вы взяли взятку":`${w.name} берёт взятку`;
- if(w.tricks>=2){renderTable();return later(()=>winHand(b.seat,"Две взятки"),700)}
- if(G.tricksDone>=3){renderTable();return later(azi,700)}
- G.trick=[];G.lastPlayed=null;G.turn=b.seat;G.leader=b.seat;stepTurn()}
+ G.sweep=b.seat;renderTable();sfx("chip");
+ if(w.tricks>=2){return later(()=>{G.sweep=null;G.trick=[];winHand(b.seat,"Две взятки")},1200)}
+ if(G.tricksDone>=3){return later(()=>{G.sweep=null;G.trick=[];azi()},1200)}
+ later(()=>{G.sweep=null;G.trick=[];G.lastPlayed=null;G.turn=b.seat;G.leader=b.seat;stepTurn()},1200)}
 function winHand(w,why){clearTimeout(myTimer);G.phase="end";G.turn=-1;G.raiseUI=null;const p=occ(w);let pot=G.pot;
  if(p.allIn){const cw=p.contrib||0;G.seats.forEach((q,k)=>{if(!q||k===w)return;const extra=(q.contrib||0)-cw;if(extra>0&&pot-extra>0){pot-=extra;if(q.me){S.coins+=extra;G.myIn-=extra}else q.bal+=extra}})}
  if(p.me){S.coins+=pot;S.stats.wins++;S.stats.best=Math.max(S.stats.best,pot);const net=pot-G.myIn;bumpTour(net);addXP(25);sfx("win");}
@@ -949,7 +958,7 @@ function winHand(w,why){clearTimeout(myTimer);G.phase="end";G.turn=-1;G.raiseUI=
  if(occ(0).inHand||G.myIn)addXP(10);
  setBadge(w,"Банк","b-win");G.lastWinner=w;
  G.banner={t:p.me?"Вы забрали банк!":`${p.name} забирает банк`,s:`${full(pot)} фишек · ${why}`};
- G.potFly={to:w,amt:pot};G.pot=0;hist(`${p.me?"Вы забираете":p.name+" забирает"} банк ${full(pot)} (${why})`);save();renderTable();later(()=>{if(view==="table")newHand(false)},3200)}
+ G.potFly={to:w,amt:pot};G.pot=0;hist(`${p.me?"Вы забираете":p.name+" забирает"} банк ${full(pot)} (${why})`);save();renderTable();later(()=>{if(view==="table")newHand(false)},5500)}
 function azi(){hist(`Ази! Банк ${full(G.pot)} остаётся на столе`);G.phase="azi";G.turn=-1;S.stats.azi++;save();sfx("turn");
  const half=Math.ceil(G.pot/2),fullP=G.pot;
  G.seats.forEach((p,i)=>{if(!p)return;p.aziCost=null;
@@ -963,9 +972,9 @@ function azi(){hist(`Ази! Банк ${full(G.pot)} остаётся на ст�
   if(p.aziCost===0){p.join=true;return}
   const ratio=p.aziCost/Math.max(1,p.bal);p.join=p.bal>=p.aziCost+G.ante*4&&Math.random()<(p.aziCost===fullP?.25:.5)*(ratio<.15?1.2:ratio<.35?.7:.2)});
  const me=occ(0);
- if(me.aziCost===null||me.aziCost===undefined){me.join=false;later(finishAzi,1800)}
- else if(me.aziCost===0){me.join=true;later(finishAzi,1800)}
- else later(()=>aziAsk(me.aziCost),900)}
+ if(me.aziCost===null||me.aziCost===undefined){me.join=false;later(finishAzi,2800)}
+ else if(me.aziCost===0){me.join=true;later(finishAzi,2800)}
+ else later(()=>aziAsk(me.aziCost),1800)}
 function aziAsk(cost){const ok=S.coins>=cost+G.ante*3;
  openModal(`${sheetHead("Ази!","Банк остаётся на столе")}<div class="panel" style="align-items:center;text-align:center"><div class="eyebrow">Банк</div><div class="offer-big num" style="justify-content:center">${big(COIN)}${full(G.pot)}</div>
  <div class="sub">${occ(0).folded?"Вы сбросили карты — вход за полный банк.":"Вы доиграли без взяток — вход за половину банка."}</div></div>
@@ -976,7 +985,7 @@ function finishAzi(){if(!G||G.phase!=="azi")return;
  const ins=G.seats.map((p,i)=>i).filter(i=>occ(i)&&occ(i).inHand);
  if(ins.length===1)return winHand(ins[0],"Остался один в Ази");
  G.banner={t:"Переигровка Ази",s:`Играют ${ins.length} · банк ${full(G.pot)}`};renderTable();
- later(()=>newHand(true),1500)}
+ later(()=>newHand(true),2400)}
 function brokeSheet(){const st=G.st;
  openModal(`${sheetHead("Не хватает фишек",`Для стола «${st.name}» нужно минимум ${full(G.ante*4)} на раздачу`)}
  <button class="btn btn-gold btn-block" data-act="bonus">Забрать бонус</button><button class="btn btn-dark btn-block" data-act="shop-coins">В магазин</button><button class="btn btn-dark btn-block" data-act="leave">Выйти из-за стола</button>`,{onClose:()=>{if(G&&G.phase==="broke"&&S.coins>=G.ante*4)later(()=>{if(G&&G.phase==="broke")newHand(false)},300)}})}
@@ -991,38 +1000,41 @@ function hist(t){if(!G)return;(G.hist=G.hist||[]).push(t);if(G.hist.length>60)G.
 function seatPos(i){return POS6[LAYOUT[G.n][i]]}
 function renderTable(){const root=$("#tbl");if(!root||!G)return;
  const ar=$("#arena");const aw=ar?ar.clientWidth:Math.min(520,innerWidth),ah=ar?ar.clientHeight:innerHeight-220;
- const me=occ(0);const myTurn=G.turn===0;const dealing=G.dealAt&&Date.now()-G.dealAt<650;
+ const me=occ(0);const myTurn=G.turn===0;const dealing=false;
  const seatsH=G.seats.map((p,i)=>{const [x,y]=seatPos(i);
   if(!p)return `<div class="seat" style="left:${x}%;top:${y}%;opacity:.45"><div class="av-wrap"><span class="ava" style="display:grid;place-items:center;color:var(--muted);font-weight:800;font-size:22px;border:3px dashed #4A4F5C">+</span></div><span class="nm">свободно</span></div>`;
   const turn=G.turn===i;const out=!p.inHand&&G.phase!=="idle";
   const em=G.emotes[i]&&G.emotes[i].until>Date.now()?`<div class="bubble ${y<20?"side":x<25?"bl":x>75?"br":""}">${esc(G.emotes[i].txt)}</div>`:"";
   const ring=turn?`<svg class="ring" viewBox="0 0 88 88"><circle cx="44" cy="44" r="42" style="animation-duration:${p.bot?(G.botWait||2):TURN_S}s;animation-delay:-${(Date.now()-G.turnStart)/1000}s"/></svg>`:"";
   const dx=(50-x)/100*aw,dy=(48-y)/100*ah;
-  const backs=(!p.me&&p.hand&&p.hand.length&&p.inHand&&!p.folded)?`<div class="backs">${p.hand.map((_,k)=>`<i class="back-pat" style="--k:${k};--dx:${dx}px;--dy:${dy}px;animation-delay:${dealing?(k*G.n+i)*40:0}ms"></i>`).join("")}</div>`:"";
+  const cnt=G.phase==="deal"?(p.shown||0):(p.hand?p.hand.length:0);
+  const backs=(!p.me&&cnt&&p.inHand&&!p.folded)?`<div class="backs">${Array.from({length:cnt},(_,k)=>`<i class="back-pat ${G.lastDealt&&G.lastDealt.seat===i&&G.lastDealt.idx===k?"dealt":""}" style="--k:${k};--dx:${dx}px;--dy:${dy}px"></i>`).join("")}</div>`:"";
   const lv=p.me?S.level:p.lvl;
   return `<div class="seat ${p.me?"me":""} ${turn?"turn":""} ${p.folded?"folded":""} ${out?"out":""} ${dealing?"deal":""}" style="left:${x}%;top:${y}%" data-seat="${i}">
    ${em}<div class="av-wrap">${backs}<button class="ava" data-act="seat" data-i="${i}" aria-label="${esc(p.me?"Вы":p.name)}">${avatarSVG(p.av,p.hat)}</button>${ring}
    ${p.badge?`<span class="badge ${p.bcls}">${p.badge}</span>`:`<span class="lv ${lv>=40?"hi":""} num">${lv}</span>`}</div>
    <span class="nm">${p.me?`Вы <span style="color:#9097A6;font-weight:700" class="num">${fmt(S.coins)}</span>`:esc(p.name)}</span>${p.me?"":`<span class="bl num">${fmt(p.bal)}</span>`}
    <div class="tricks">${Array.from({length:p.tricks||0},()=>"<i></i>").join("")}</div></div>`}).join("");
+ const dl=occ(G.dealer)&&G.phase!=="idle"?(()=>{const [x,y]=seatPos(G.dealer);return `<div class="dealer-btn" style="left:calc(${50+(x-50)*.7}% + ${x<50?26:-26}px);top:${48+(y-48)*.7}%">D</div>`})():"";
  const showBets=G.phase==="bet"||G.collect;
  const bets=showBets?G.seats.map((p,i)=>{if(!p||!p.rp)return"";const [x,y]=seatPos(i);const bx=50+(x-50)*.5,by=48+(y-48)*.5;const cx=(50-bx)/100*aw,cy=(48-by)/100*ah;
   return `<div class="betchip num ${G.collect?"collect":""}" style="left:${bx}%;top:${by}%;--cx:${cx}px;--cy:${cy}px">${COIN}${fmt(p.rp)}</div>`}).join(""):"";
  const best=G.trick.length?bestOfTrick().seat:-1;
+ const sw=G.sweep!=null?seatPos(G.sweep):null;const swx=sw?(sw[0]-50)/100*aw:0,swy=sw?(sw[1]-48)/100*ah:0;
  const played=G.trick.map((t,k)=>{const [x,y]=seatPos(t.seat);const vx=(x-50)/100*aw,vy=(y-48)/100*ah,l=Math.hypot(vx,vy)||1;const ox=vx/l*Math.min(100,aw*.26),oy=vy/l*(vy<0?Math.min(132,ah*.24):Math.min(112,ah*.2));const fresh=t.card.id===G.lastPlayed;
-  return `<div class="played ${fresh?"fresh":""} ${t.seat===best&&G.trick.length>1?"best":""}" style="left:calc(50% + ${ox}px);top:calc(48% + ${oy}px);--rot:${((k*37)%11)-5}deg;--fx:${vx-ox}px;--fy:${vy-oy}px;z-index:${4+k}">${cardHTML(t.card,"sm")}</div>`}).join("");
- const trump=G.trumpCard&&G.phase!=="idle"&&G.phase!=="broke";
+  return `<div class="played ${fresh?"fresh":""} ${sw?"sweep":""} ${t.seat===best&&G.trick.length>1?"best":""}" style="left:calc(50% + ${ox}px);top:calc(48% + ${oy}px);--rot:${((k*37)%11)-5}deg;--fx:${vx-ox}px;--fy:${vy-oy}px;--wx:${swx-ox}px;--wy:${swy-oy}px;z-index:${4+k}">${cardHTML(t.card,"sm")}</div>`}).join("");
+ const trump=G.trumpCard&&G.phase!=="idle"&&G.phase!=="broke"&&(G.phase!=="deal"||G.trumpShown);
  const potShown=G.potFly?G.potFly.amt:(showBets?G.pot-G.seats.reduce((a,p)=>a+(p&&p.rp||0),0)+(G.collect?G.seats.reduce((a,p)=>a+(p&&p.rp||0),0)*0:0):G.pot);
  let potCls="",potVars="";if(G.potFly){const [x,y]=seatPos(G.potFly.to);potCls="fly";potVars=`--tx:${(x-50)/100*aw}px;--ty:${(y-48)/100*ah+60}px`}
- const center=`<div class="center">${trump?`<div class="trump"><small>козырь</small>${cardHTML(G.trumpCard,"sm")}</div>${G.shoha?`<span class="shoha">Шоха на трассе: 6 старшая</span>`:""}`:""}
+ const center=`<div class="center">${trump?`<div class="trump"><small>козырь</small>${cardHTML(G.trumpCard,"sm"+(G.trumpFlip?" flipc":""))}</div>${G.shoha?`<span class="shoha">Шоха на трассе: 6 старшая</span>`:""}`:G.phase==="deal"?`<div class="trump"><small>колода</small><div class="card sm back back-pat deck"></div></div>`:""}
   <div class="pot num ${potCls}" style="${potVars}">${COIN}${fmt(potShown)}</div>${G.aziN?`<span class="aziN">Ази ×${G.aziN}</span>`:""}</div>`;
  /* dock */
  const L=myTurn&&G.phase==="play"?legal(me.hand).map(c=>c.id):[];
- const blind=G.phase==="bet"&&me.inHand&&!me.folded&&!G.looked;
+ const blind=(G.phase==="bet"||G.phase==="deal")&&me.inHand&&!me.folded&&!G.looked;
  const n=me.hand?me.hand.length:0;const fanR=k=>`--r:${(k-(n-1)/2)*9}deg;--ty:${Math.abs(k-(n-1)/2)*10}px`;
- const dvars=`--dx:0px;--dy:${-ah*.4}px`;
+ const dvars=`--dx:0px;--dy:${-(ah*.5+110)}px`;
  let hand="";
- if(blind)hand=me.hand.map((c,k)=>`<button data-act="look" style="${fanR(k)}" aria-label="Открыть карты"><div class="card lg back back-pat ${dealing?"deal-me":""}" style="${dvars};animation-delay:${k*G.n*40}ms"></div></button>`).join("")+`<span class="blind-tip">В тёмную · ставки вдвое дешевле · нажмите, чтобы открыть</span>`;
+ if(blind){const cnt=G.phase==="deal"?(me.shown||0):me.hand.length;hand=Array.from({length:cnt},(_,k)=>`<button data-act="look" style="${fanR(k)}" aria-label="Открыть карты"><div class="card lg back back-pat ${G.lastDealt&&G.lastDealt.seat===0&&G.lastDealt.idx===k?"dealt":""}" style="${dvars}"></div></button>`).join("")+(G.phase==="bet"?`<span class="blind-tip">В тёмную · ставки вдвое дешевле · нажмите, чтобы открыть</span>`:"")}
  else if(me.hand&&me.inHand&&!me.folded)hand=me.hand.map((c,k)=>{const lg=L.includes(c.id);return `<button data-act="play" data-id="${c.id}" style="${fanR(k)}" class="${myTurn&&G.phase==="play"?(lg?"legal":"illegal"):""} ${G.flip?"flip":""}" ${myTurn&&G.phase==="play"&&lg?"":"disabled"} aria-label="Сыграть карту">${cardHTML(c,"lg")}</button>`}).join("");
  else if(me.folded&&me.hand)hand=me.hand.map((c,k)=>`<div class="card lg back back-pat" style="${fanR(k)};opacity:.35"></div>`).join("");
  let bottom;
@@ -1045,7 +1057,7 @@ function renderTable(){const root=$("#tbl");if(!root||!G)return;
    <button data-act="sound" aria-label="Звук">${S.sound?I.sound:I.mute}</button></nav>`}
  root.innerHTML=`<div class="arena" id="arena"><div class="felt"></div>
   <div class="room-pill num">Комната #${G.roomNo}<small>${G.st.name} · ставка ${fmt(G.ante)}${G.phase==="bet"&&G.curBet?` · торг ${fmt(G.curBet)}`:""}</small></div>
-  ${center}${bets}${played}${seatsH}${myTurn&&G.phase==="bet"&&G.raiseUI?sliderHTML():""}
+  ${center}${dl}${bets}${played}${seatsH}${myTurn&&G.phase==="bet"&&G.raiseUI?sliderHTML():""}
   ${G.banner?`<div class="banner"><h3>${esc(G.banner.t)}</h3><p class="num">${esc(G.banner.s)}</p></div>`:""}</div>
  <div class="dock"><div class="hand">${hand}</div>${bottom}</div>`;
  bindSlider();G.flip=false}
@@ -1113,7 +1125,7 @@ document.addEventListener("click",e=>{
   case "shop-coins":leaveTable();shopTab="coins";go("shop");break;
   case "shop-items":leaveTable();shopTab="items";go("shop");break;
   case "bet":{const k=a.dataset.a;if(k==="raise"){if(!G.raiseUI){G.raiseUI={idx:0};renderTable();sfx("tick")}else{const lad=raiseLadder(0);betAction(0,"raise",lad[G.raiseUI.idx])}}else betAction(0,k);break}
-  case "look":if(G&&!G.looked){G.looked=true;G.flip=true;G.raiseUI=null;sfx("card");renderTable()}break;
+  case "look":if(G&&!G.looked&&G.phase==="bet"){G.looked=true;G.flip=true;G.raiseUI=null;sfx("card");renderTable()}break;
   case "play":{const c=occ(0).hand.find(x=>x.id===a.dataset.id);if(c)playCard(0,c);break}
   case "chat":chatSheet();break;
   case "history":historySheet();break;
