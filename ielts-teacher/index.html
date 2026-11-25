@@ -360,6 +360,7 @@ textarea.field{min-height:160px;resize:vertical;line-height:1.55}
     <div class="brand"><span class="logo" id="logoChar"></span><div>Беркут<small>IELTS · English</small></div></div>
     <nav class="tabs tabs-top" aria-label="Разделы" id="tabsTop"></nav>
     <div class="stats">
+      <button class="pill" type="button" id="profBtn" title="Сменить ученика" style="border:0;cursor:pointer"></button>
       <span class="pill" title="Дней подряд"><svg viewBox="0 0 24 24" fill="var(--coral)"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-6 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg><span id="stStreak">0</span></span>
       <span class="pill hide-sm" title="Опыт"><span id="stXp">0</span>&nbsp;XP</span>
       <span class="pill" title="Текущий уровень по плану" id="stLevel">A2</span>
@@ -400,7 +401,7 @@ const I={
 };
 
 /* ---------- year plan (bilingual) ---------- */
-const MONTHS=[
+const ADULT_MONTHS=[
  {cefr:"A2",fl:"FL010",ratio:30,
   title:{ru:"Взлёт: фундамент",en:"Take-off: foundations"},
   grammar:{ru:"to be, Present Simple и Continuous, артикли a/an/the, порядок слов",en:"to be, Present Simple & Continuous, articles a/an/the, word order"},
@@ -502,6 +503,7 @@ const MISSIONS=[
 ];
 const TALK_TARGET=6;
 const CHAT_MODES=[
+ {id:"blitz",ru:"Блиц: как будет…?",brief:"Быстрый блиц как в шоу: спрашивай «Эй, а ну-ка скажи, как будет <русское слово> по-английски?» — по одному слову за раз (слова дня, тема юнита, авиация, бизнес, бытовые слова). На ответ — бурная реакция: правильно — восторг; неправильно — смешно пародируй его вариант и произношение (например «груша — это грюша?!»), дай правильное слово с подсказкой, как читается русскими буквами, и сразу следующий вопрос. Иногда вместо слова — короткая фраза."},
  {id:"free",ru:"Свободный разговор",brief:"Свободный разговор на любые темы, интересные ученику (авиация, дизайн, SMM, жизнь). Ты — дружелюбный собеседник-учитель."},
  {id:"atc",ru:"Радиообмен ATC",brief:"Ролевая игра: ты — диспетчер (ATC), ученик — пилот. Используй стандартную фразеологию ИКАО (простую для уровня ученика). Проверяй readback, исправляй фразеологию. Начни с вызова на рулении в аэропорту."},
  {id:"ceo",ru:"Переговоры с CEO",brief:"Ролевая игра: ты — CEO крупной компании, ученик — дизайнер/SMM-специалист, который предлагает свои услуги. Будь вежливым, но требовательным: торгуйся о цене, сроках, результатах. После роли кратко скажи, какие фразы звучали бы солиднее."},
@@ -511,17 +513,19 @@ const CHAT_MODES=[
 ];
 
 /* ---------- state ---------- */
-const LS_KEY="berkut.v1";
+let PROFILE=(()=>{try{return JSON.parse(localStorage.getItem("berkut.active"))||"me"}catch(e){return "me"}})();
+let LS_KEY=PROFILE==="me"?"berkut.v1":"berkut.v1."+PROFILE;
 const todayKey=()=>dkey(new Date());
 function dkey(d){const z=n=>String(n).padStart(2,"0");return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())}
 function defaultState(){return{profile:{startDate:todayKey(),monthOverride:null,xp:0,streak:0,lastActive:"",days:{},bands:[],persona:"savage",hw:null,games:{},char:"berkut",charChosen:false,onboarded:false,ob:{}},notebook:{words:[],mistakes:[]}}}
 let S=defaultState();
-let chatState={mode:"free",turns:[]};
+let chatState={mode:"blitz",turns:[]};
 let planLang="ru";
 const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
-(function loadLocal(){const v=ls.get(LS_KEY);if(v&&v.profile){S={profile:{...defaultState().profile,...v.profile},notebook:{...defaultState().notebook,...v.notebook}}}
+function loadLocal(){S=defaultState();chatState={mode:"blitz",turns:[]};const v=ls.get(LS_KEY);if(v&&v.profile){S={profile:{...defaultState().profile,...v.profile},notebook:{...defaultState().notebook,...v.notebook}}}
  const c=ls.get(LS_KEY+".chat");if(c&&Array.isArray(c.turns))chatState=c;
- const pl=ls.get(LS_KEY+".planLang");if(pl)planLang=pl})();
+ const pl=ls.get(LS_KEY+".planLang");if(pl)planLang=pl}
+loadLocal();
 
 /* ---------- capabilities ---------- */
 const cap={sample:null,db:null,user:null,tts:null,dict:null,uid:null};
@@ -529,21 +533,26 @@ const use=n=>(window.claude&&typeof window.claude.use==="function")?window.claud
 use("sample").then(s=>{cap.sample=s;rerenderIfAiView()});
 use("tts").then(t=>{cap.tts=t});
 use("dictation").then(d=>{cap.dict=d;if(d)bindDictation()});
-(async()=>{
-  const [db,user]=await Promise.all([use("db"),use("user")]);
-  if(!db||!user)return;
+let remoteReady=null;
+async function loadRemote(){
+  if(!remoteReady)remoteReady=(async()=>{const [db,user]=await Promise.all([use("db"),use("user")]);if(!db||!user)return false;const id=await user.id();if(!id)return false;cap.db=db;cap.uid=id;
+    try{const pr=await db.doc("data/users/"+id+"/profiles").get();if(pr.exists&&Array.isArray(pr.data().list)){const loc=getProfiles();const rem=pr.data().list;const merged=[...rem];loc.forEach(x=>{if(!merged.some(y=>y.id===x.id))merged.push(x)});ls.set("berkut.profiles",JSON.parse(JSON.stringify(merged)))}}catch(e){}
+    return true})().catch(()=>false);
+  if(!await remoteReady)return;
+  const db=cap.db,prof=PROFILE;
   try{
-    const id=await user.id();if(!id)return;
-    cap.db=db;cap.uid=id;
     const [p,n]=await Promise.all([db.doc(docPath("profile")).get(),db.doc(docPath("notebook")).get()]);
+    if(prof!==PROFILE)return;
     if(p.exists){const d=p.data();S.profile={...defaultState().profile,...JSON.parse(JSON.stringify(d))}}
     if(n.exists){const d=n.data();S.notebook={...defaultState().notebook,...JSON.parse(JSON.stringify(d))}}
     if(!p.exists)queueSave("profile");
     if(!n.exists&&(S.notebook.words.length||S.notebook.mistakes.length))queueSave("notebook");
+    if(prof!==PROFILE)return;
     ls.set(LS_KEY,S);render();
-  }catch(e){cap.db=null}
-})();
-function docPath(name){return "data/users/"+cap.uid+"/"+name}
+  }catch(e){}
+}
+loadRemote();
+function docPath(name){return "data/users/"+cap.uid+"/"+(PROFILE==="me"?name:PROFILE+"_"+name)}
 const saveTimers={},saving={},dirty={};
 function persist(...which){ls.set(LS_KEY,S);which.forEach(queueSave)}
 function queueSave(name){if(!cap.db)return;clearTimeout(saveTimers[name]);saveTimers[name]=setTimeout(()=>flush(name),900)}
@@ -601,6 +610,7 @@ function booksFor(dI){
   return{mu,review,muDay:dI%2,mt:MURPHY[mu-1],cu,cuDay,ct:CULLEN[cu-1],awl:dI>=90?Math.min(10,1+Math.floor((dI-90)/30)):null};
 }
 function todayBooks(){
+  if(isKid()){const m=curMonth(),mn=+((S.profile.ob||{}).minutes||30);return{kid:true,dI:dayIndex(),words:mn<=15?8:10,awl:null,ct:{t:m.title.ru,topics:m.vocab.ru,p:m.ielts.ru},mu:0,mt:m.grammar.ru,muDay:0,test:null}}
   const dI=dayIndex(),b=booksFor(dI);const mn=+((S.profile.ob||{}).minutes||60);
   b.dI=dI;b.words=mn<=15?10:mn<=30?12:15;
   const wd=new Date().getDay();b.test=null;
@@ -659,8 +669,10 @@ function monthIndex(){
   return Math.max(0,Math.min(11,Math.floor(days/30.4)));
 }
 function weekInMonth(){const start=new Date(S.profile.startDate+"T00:00:00");const days=Math.floor((Date.now()-start)/864e5);return Math.min(4,Math.floor((days%30.4)/7)+1)}
-const curMonth=()=>MONTHS[monthIndex()];
+function MS(){return isKid()?KID_MONTHS:ADULT_MONTHS}
+const curMonth=()=>MS()[monthIndex()];
 function teacherContext(){
+  if(isKid())return kidContext();
   const m=curMonth(),i=monthIndex();
   return `Ты — личный ИИ-учитель английского языка и подготовки к IELTS. Ты говоришь на двух языках: русском и английском.
 Ученик: 18 лет, родной язык — русский. Сейчас уровень по плану ${m.cefr} (старт с A1–A2). Цель: C1 и IELTS 7.0+ до 20 лет, свободно разговаривать с людьми.
@@ -687,7 +699,7 @@ function touchStreak(){
   S.profile.streak=(S.profile.lastActive===dkey(y))?S.profile.streak+1:1;S.profile.lastActive=t;
 }
 function liveStreak(){const t=todayKey(),y=new Date();y.setDate(y.getDate()-1);return(S.profile.lastActive===t||S.profile.lastActive===dkey(y))?S.profile.streak:0}
-function updateStats(){$("#stStreak").textContent=liveStreak();$("#stXp").textContent=S.profile.xp;$("#stLevel").textContent=curMonth().cefr}
+function updateStats(){const pb=$("#profBtn");if(pb)pb.textContent=profileName()+" ▾";const sm=document.querySelector(".brand small");if(sm)sm.textContent=isKid()?"English · 7 класс":"IELTS · English";$("#stStreak").textContent=liveStreak();$("#stXp").textContent=S.profile.xp;$("#stLevel").textContent=curMonth().cefr}
 function estBand(){const b=S.profile.bands;if(!b.length)return null;const last=b.slice(-3);return Math.round(last.reduce((a,x)=>a+x.band,0)/last.length*2)/2}
 
 /* ---------- dom utils ---------- */
@@ -787,7 +799,7 @@ function openMission(id){
   stopSpeak();
   const el=h(`<section class="view"></section>`);lesson={id,el};
   const ms=MISSIONS.find(x=>x.id===id);
-  const head=h(`<div class="lesson-head"><button class="btn ghost" type="button">${I.back} Назад</button><div><div class="eyebrow">${esc(ms.en)}</div><h2 style="font-size:20px">${esc(ms.ru)}</h2></div></div>`);
+  const head=h(`<div class="lesson-head"><button class="btn ghost" type="button">${I.back} Назад</button><div><div class="eyebrow">${esc(ms.en)}</div><h2 style="font-size:20px">${esc(missionName(ms))}</h2></div></div>`);
   head.querySelector("button").onclick=()=>go("today");
   const body=h(`<div class="card"></div>`);el.append(head,body);
   render();window.scrollTo({top:0});
@@ -809,7 +821,7 @@ async function lessonWords(body){
   const prompt=`${teacherContext()}
 
 Задание: составь РОВНО ${bk.words} новых слов или выражений на сегодня.
-Микс: ${bk.awl?`${bk.words-8} по теме юнита «${bk.ct.t}» (${bk.ct.topics}), 4 из Academic Word List sublist ${bk.awl}`:`${bk.words-4} по теме юнита «${bk.ct.t}» (${bk.ct.topics})`}, 2 профессиональных (${m.pro.ru}), 2 полезных фразы для переговоров с руководителями.
+Микс: ${bk.kid?`${bk.words-2} по теме месяца «${m.vocab.ru}» и 2 полезные фразы для общения с ровесниками — всё для школьницы 7 класса, простые и нужные слова`:bk.awl?`${bk.words-8} по теме юнита «${bk.ct.t}» (${bk.ct.topics}), 4 из Academic Word List sublist ${bk.awl}`:`${bk.words-4} по теме юнита «${bk.ct.t}» (${bk.ct.topics})`}${bk.kid?"":`, 2 профессиональных (${m.pro.ru}), 2 полезных фразы для переговоров с руководителями`}.
 Уровень ${m.cefr}: слова должны быть посильными, но новыми. Не повторяй уже выученные: ${known||"(пока нет)"}.
 Пример — короткое естественное предложение из жизни пилота, дизайнера или SMM.
 Ответь только JSON: {"words":[{"en":"слово","ru":"перевод","ipa":"/транскрипция/","example":"English sentence","example_ru":"перевод примера"}]}`;
@@ -873,8 +885,8 @@ async function lessonGrammar(body,opts={}){
   const m=curMonth(),bk=todayBooks();
   const prompt=opts.prompt||`${teacherContext()}
 
-Задание: урок грамматики строго по English Grammar in Use, Unit ${bk.mu} «${bk.mt}»${bk.review?" (повтор пройденного юнита)":""}. ${bk.muDay?"Сегодня второй день юнита: короткое напоминание правила и более сложные задания, смешанные с соседними юнитами.":"Сегодня первый день юнита: объясни правило с нуля."} Ученик параллельно делает этот юнит в книге — твои задания должны быть СВОИМИ (не копируй упражнения книги).
-Объяснение — по-русски, просто, как для уровня ${m.cefr}. Все примеры и предложения в заданиях — из жизни пилота, дизайнера, SMM и деловых переговоров.
+Задание: ${bk.kid?`урок грамматики для школьницы 7 класса на тему «${bk.mt}» (тема месяца). Выбери ОДНУ часть темы под неделю ${weekInMonth()}. Объясняй очень просто и весело.`:`урок грамматики строго по English Grammar in Use, Unit ${bk.mu} «${bk.mt}»`}${bk.kid?"":(bk.review?" (повтор пройденного юнита)":"")+". "+(bk.muDay?"Сегодня второй день юнита: короткое напоминание правила и более сложные задания, смешанные с соседними юнитами.":"Сегодня первый день юнита: объясни правило с нуля.")+" Ученик параллельно делает этот юнит в книге — твои задания должны быть СВОИМИ (не копируй упражнения книги)."}
+Объяснение — по-русски, просто, как для уровня ${m.cefr}. Все примеры и предложения в заданиях — ${bk.kid?"из жизни школьницы: школа, друзья, хобби, животные, мультики":"из жизни пилота, дизайнера, SMM и деловых переговоров"}.
 8 заданий: 5 типа "mc" (4 варианта) и 3 типа "gap" (одно-два слова, в скобках подсказка-глагол). В "gap" поле answer — массив всех допустимых ответов.
 Ответь только JSON: {"topic":"название темы","explain_ru":"3–6 предложений","pattern":"формула, например: I/You/We + have + V3","examples":[{"en":"","ru":""}],"items":[{"type":"mc","q":"вопрос","options":["","","",""],"answer":0,"why_ru":"почему"},{"type":"gap","q":"She ___ (fly) to Almaty yesterday.","answer":["flew"],"why_ru":""}]}`;
   const data=await loadLesson(body,opts.key||"grammar",prompt,opts.label||"Учитель готовит урок грамматики…",d=>d&&Array.isArray(d.items)&&d.items.length>=3);
@@ -884,7 +896,7 @@ async function lessonGrammar(body,opts={}){
     body.innerHTML="";
     if(qi===-1){
       const ex=h(`<div class="view explain"><div><div class="eyebrow">Тема</div><h2 style="margin-top:2px"></h2></div><div class="expl"></div>${data.pattern?'<div class="pattern"></div>':""}<ul class="ex-list"></ul><div><button class="btn primary" type="button">Начать упражнения (${items.length})</button></div></div>`);
-      ex.querySelector("h2").textContent=opts.prompt?(data.topic||"Работа над ошибками"):`Unit ${bk.mu}: ${bk.mt}`;if(!opts.prompt)ex.querySelector(".eyebrow").textContent="English Grammar in Use · Murphy";ex.querySelector(".expl").innerHTML=md(data.explain_ru||"");
+      ex.querySelector("h2").textContent=opts.prompt||bk.kid?(data.topic||"Грамматика"):`Unit ${bk.mu}: ${bk.mt}`;if(!opts.prompt&&!bk.kid)ex.querySelector(".eyebrow").textContent="English Grammar in Use · Murphy";ex.querySelector(".expl").innerHTML=md(data.explain_ru||"");
       if(data.pattern)ex.querySelector(".pattern").textContent=data.pattern;
       (data.examples||[]).slice(0,4).forEach(e=>{const li=h(`<li><span></span><small></small></li>`);li.querySelector("span").textContent=e.en;li.querySelector("small").textContent=e.ru;li.prepend(Object.assign(h(`<button class="mini" type="button" aria-label="Слушать">${I.speaker}</button>`),{onclick:()=>speak(e.en)}));ex.querySelector(".ex-list").append(li)});
       ex.querySelector(".btn").onclick=()=>{qi=0;draw()};body.append(ex);return;
@@ -924,11 +936,11 @@ async function lessonListen(body){
   const words=monthIndex()<3?"70–100":monthIndex()<7?"120–170":"180–250";
   const prompt=reading?`${teacherContext()}
 
-Задание: чтение в формате IELTS (${bk.ct.p}). Напиши текст (${monthIndex()<3?"100–150":monthIndex()<7?"180–250":"280–380"} слов, уровень ${m.cefr}) по теме юнита «${bk.ct.t}» (${bk.ct.topics}), с грамматикой Unit ${bk.mu} «${bk.mt}» и словами дня.
+Задание: чтение в формате IELTS (${bk.ct.p}). Напиши текст (${monthIndex()<3?"100–150":monthIndex()<7?"180–250":"280–380"} слов, уровень ${m.cefr}) по теме «${bk.ct.t}» (${bk.ct.topics}), с грамматикой ${bk.kid?"«"+bk.mt+"»":`Unit ${bk.mu} «${bk.mt}»`} и словами дня.
 Затем 5 вопросов на английском: 3 типа TRUE/FALSE/NOT GIVEN (options ровно ["TRUE","FALSE","NOT GIVEN"]) и 2 с 4 вариантами ответа.
 Ответь только JSON: {"title":"","text":"","translation_ru":"","questions":[{"q":"","options":["TRUE","FALSE","NOT GIVEN"],"answer":0}]}`:`${teacherContext()}
 
-Задание: аудирование в формате IELTS${/Listening/.test(bk.ct.p)?` (${bk.ct.p})`:""}. Напиши короткий текст (${words} слов, уровень ${m.cefr}) по теме юнита «${bk.ct.t}» (${bk.ct.topics}) — монолог или диалог, можно с героями-пилотами, дизайнерами или на деловой встрече; используй грамматику Unit ${bk.mu} «${bk.mt}». Если диалог — помечай реплики «A:» и «B:».
+Задание: аудирование в формате IELTS${/Listening/.test(bk.ct.p)?` (${bk.ct.p})`:""}. Напиши короткий текст (${words} слов, уровень ${m.cefr}) по теме юнита «${bk.ct.t}» (${bk.ct.topics}) — монолог или диалог, ${bk.kid?`про школьников и их жизнь; используй грамматику «${bk.mt}»`:`можно с героями-пилотами, дизайнерами или на деловой встрече; используй грамматику Unit ${bk.mu} «${bk.mt}»`}. Если диалог — помечай реплики «A:» и «B:».
 Затем 4 вопроса с 4 вариантами ответа (на английском), проверяющих понимание деталей, как в IELTS Listening.
 Ответь только JSON: {"title":"","text":"","translation_ru":"","questions":[{"q":"","options":["","","",""],"answer":0}]}`;
   const data=await loadLesson(body,"listen",prompt,reading?"Учитель готовит текст…":"Учитель записывает аудио…",d=>d&&d.text&&Array.isArray(d.questions)&&d.questions.length>=2);
@@ -961,11 +973,12 @@ async function lessonListen(body){
 async function lessonIelts(body){
   const m=curMonth(),i=monthIndex(),bk=todayBooks(),up=bk.ct.p||"";
   const writing=/Writing/.test(up)?true:/Speaking/.test(up)?false:isWritingDay();
-  const kind=/Writing Task 1/.test(up)&&i>=3?"Writing Task 1":/Writing Task 2/.test(up)&&i>=3?"Writing Task 2":/Speaking/.test(up)&&i>=3?"Speaking Part 2 (cue card)":writing?(i<3?"Mini writing (short paragraph)":i<5?"Writing: formal letter/email":i<8?"Writing Task 1":"Writing Task 2"):(i<3?"Speaking Part 1":i<7?"Speaking Part 2 (cue card)":"Speaking Part 2 + Part 3");
-  const len=writing?(i<3?"60–90":i<5?"120–150":i<8?"150+":"250+"):(i<3?"4–6 предложений на каждый вопрос":"1–2 минуты речи");
+  const kid=!!bk.kid;
+  const kind=kid?(writing?(i<5?"A2 Key Writing: короткое сообщение другу (25+ слов)":"A2 Key Writing: письмо или история (35+ слов)"):"A2 Key Speaking: ответы о себе"):/Writing Task 1/.test(up)&&i>=3?"Writing Task 1":/Writing Task 2/.test(up)&&i>=3?"Writing Task 2":/Speaking/.test(up)&&i>=3?"Speaking Part 2 (cue card)":writing?(i<3?"Mini writing (short paragraph)":i<5?"Writing: formal letter/email":i<8?"Writing Task 1":"Writing Task 2"):(i<3?"Speaking Part 1":i<7?"Speaking Part 2 (cue card)":"Speaking Part 2 + Part 3");
+  const len=kid?(writing?(i<5?"25–40 слов":"35–60 слов"):"3–4 предложения на каждый вопрос"):writing?(i<3?"60–90":i<5?"120–150":i<8?"150+":"250+"):(i<3?"4–6 предложений на каждый вопрос":"1–2 минуты речи");
   const prompt=`${teacherContext()}
 
-Задание: дай одно IELTS-задание формата «${kind}» по теме юнита «${bk.ct.t}» (${bk.ct.topics}) из Cambridge Vocabulary for IELTS — так ученик применит слова юнита. Тема реалистичная для IELTS, можно с уклоном в интересы ученика (авиация, дизайн, соцсети, переговоры). Объём ответа: ${len}.
+Задание: ${kid?`дай одно задание формата «${kind}» в стиле Cambridge A2 Key для школьницы 7 класса, по теме месяца «${bk.ct.t}» (${bk.ct.topics}). Весело и понятно.`:`дай одно IELTS-задание формата «${kind}» по теме юнита «${bk.ct.t}» (${bk.ct.topics}) из Cambridge Vocabulary for IELTS — так ученик применит слова юнита. Тема реалистичная для IELTS, можно с уклоном в интересы ученика (авиация, дизайн, соцсети, переговоры).`} Объём ответа: ${len}.
 Если это Task 1 — опиши данные графика/таблицы словами в самом задании (картинок нет). Если Speaking Part 2 — дай карточку с 4 пунктами «You should say».
 Ответь только JSON: {"kind":"${kind}","prompt":"текст задания на английском","prompt_ru":"перевод задания","tips_ru":["2–3 совета по выполнению"],"useful":["4–6 полезных фраз на английском"]}`;
   const task=await loadLesson(body,"ielts",prompt,"Учитель выбирает задание IELTS…",d=>d&&d.prompt);
@@ -992,7 +1005,7 @@ async function lessonIelts(body){
     gradeBtn.disabled=true;out.innerHTML=thinking("Экзаменатор проверяет…");
     const gp=`${teacherContext()}
 
-Ты — строгий, но доброжелательный экзаменатор IELTS. Оцени ответ ученика по официальным критериям IELTS (${writing?"Task Achievement/Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy":"Fluency & Coherence, Lexical Resource, Grammatical Range & Accuracy, Pronunciation (оцени по тексту осторожно)"}). Ставь реалистичные баллы с шагом 0.5, не завышай.
+${kid?"Ты — добрый учитель английского. Оцени ответ школьницы по школьной 5-балльной шкале (поле band — оценка от 2 до 5, можно 4.5), критерии — содержание, слова, грамматика, связность. Хвали за удачное.":"Ты — строгий, но доброжелательный экзаменатор IELTS. Оцени ответ ученика по официальным критериям IELTS"} (${writing?"Task Achievement/Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy":"Fluency & Coherence, Lexical Resource, Grammatical Range & Accuracy, Pronunciation (оцени по тексту осторожно)"}). Ставь реалистичные баллы с шагом 0.5, не завышай.
 Задание (${task.kind||kind}): ${task.prompt}
 Ответ ученика:
 """${ans}"""
@@ -1002,7 +1015,7 @@ corrections — до 8 самых важных ошибок.`;
       const r=await askJson(gp);
       const band=Math.max(0,Math.min(9,Number(r.band)||0));
       out.innerHTML="";
-      const res=h(`<div class="view"><div class="band"><span class="big mono">${band.toFixed(1)}</span><div><div class="eyebrow">Примерный band</div><div class="sm"></div></div></div><div class="crit"></div><div class="fixes view" style="gap:8px"></div><details class="note"><summary style="cursor:pointer;font-weight:600">Улучшенная версия</summary><div class="imp" style="white-space:pre-wrap;margin-top:8px"></div><button class="mini" type="button" style="margin-top:6px">${I.speaker} Слушать</button></details><ul class="tips2" style="margin:0;padding-left:18px"></ul><div class="row"><button class="btn primary" type="button" data-a="home">К миссиям</button></div></div>`);
+      const res=h(`<div class="view"><div class="band"><span class="big mono">${band.toFixed(1)}</span><div><div class="eyebrow">${kid?"Оценка из 5":"Примерный band"}</div><div class="sm"></div></div></div><div class="crit"></div><div class="fixes view" style="gap:8px"></div><details class="note"><summary style="cursor:pointer;font-weight:600">Улучшенная версия</summary><div class="imp" style="white-space:pre-wrap;margin-top:8px"></div><button class="mini" type="button" style="margin-top:6px">${I.speaker} Слушать</button></details><ul class="tips2" style="margin:0;padding-left:18px"></ul><div class="row"><button class="btn primary" type="button" data-a="home">К миссиям</button></div></div>`);
       res.querySelector(".sm").textContent=r.summary_ru||"";
       (r.criteria||[]).forEach(c=>{const d=h(`<div><b></b><span></span></div>`);d.querySelector("b").textContent=Number(c.band).toFixed(1);d.querySelector("span").textContent=c.name;res.querySelector(".crit").append(d)});
       (r.corrections||[]).forEach(c=>res.querySelector(".fixes").append(fixEl(c.wrong,c.right,c.why_ru)));
@@ -1010,7 +1023,7 @@ corrections — до 8 самых важных ошибок.`;
       (r.next_tips_ru||[]).forEach(t=>{const li=document.createElement("li");li.textContent=t;res.querySelector(".tips2").append(li)});
       res.querySelector('[data-a="home"]').onclick=()=>go("today");
       out.append(res);
-      if(band>0){S.profile.bands.push({band,date:todayKey(),kind:task.kind||kind});if(S.profile.bands.length>60)S.profile.bands=S.profile.bands.slice(-60)}
+      if(band>0&&!kid){S.profile.bands.push({band,date:todayKey(),kind:task.kind||kind});if(S.profile.bands.length>60)S.profile.bands=S.profile.bands.slice(-60)}
       addMistakes(r.corrections||[]);
       if(!award("ielts",30))persist("profile");
       ls.del(draftKey);
@@ -1025,20 +1038,20 @@ function fixEl(wrong,right,why){const d=h(`<div class="fix"><span><s></s> → <i
 function viewPlan(app){
   const L=planLang,cur=monthIndex();
   const t=(ru,en)=>L==="ru"?ru:en;
-  const head=h(`<section class="card"><div class="row" style="justify-content:space-between;align-items:flex-start"><div style="min-width:0;flex:1 1 300px"><div class="eyebrow">${t("План на год","One-year flight plan")} · A2 → C1 · IELTS 7.0+</div><h2 style="margin-top:4px;font-size:22px">${t("Маршрут: от взлёта до FL070","Route: from take-off to FL070")}</h2>
-    <p class="muted" style="margin:8px 0 0;max-width:62ch">${t("12 месяцев по 60–90 минут в день. Каждый месяц: грамматика, слова, профессиональный английский (авиация, дизайн/SMM, переговоры) и один модуль IELTS. Контрольная точка в конце месяца. Это интенсивный темп: C1 за год реален только при ежедневной практике без пропусков.","12 months, 60–90 minutes a day. Each month: grammar, vocabulary, job English (aviation, design/SMM, negotiation) and one IELTS module, with a checkpoint at the end. This is an intensive pace: C1 in a year only works with daily practice.")}</p></div>
+  const head=h(`<section class="card"><div class="row" style="justify-content:space-between;align-items:flex-start"><div style="min-width:0;flex:1 1 300px"><div class="eyebrow">${isKid()?t("План на учебный год","School-year plan")+" · A1 → B1 · A2 Key":t("План на год","One-year flight plan")+" · A2 → C1 · IELTS 7.0+"}</div><h2 style="margin-top:4px;font-size:22px">${isKid()?t("7 класс: от сентября до августа","Year 7: September to August"):t("Маршрут: от взлёта до FL070","Route: from take-off to FL070")}</h2>
+    <p class="muted" style="margin:8px 0 0;max-width:62ch">${isKid()?t("12 месяцев по 15–45 минут в день: школьная грамматика 7 класса, слова, разговор и подготовка к Cambridge A2 Key. Каждый месяц — своя тема и маленькая цель.","12 months, 15–45 minutes a day: year-7 grammar, vocabulary, speaking and A2 Key preparation."):t("12 месяцев по 60–90 минут в день. Каждый месяц: грамматика, слова, профессиональный английский (авиация, дизайн/SMM, переговоры) и один модуль IELTS. Контрольная точка в конце месяца. Это интенсивный темп: C1 за год реален только при ежедневной практике без пропусков.","12 months, 60–90 minutes a day. Each month: grammar, vocabulary, job English (aviation, design/SMM, negotiation) and one IELTS module, with a checkpoint at the end. This is an intensive pace: C1 in a year only works with daily practice.")}</p></div>
     <div class="seg" role="group" aria-label="Язык плана"><button type="button" data-l="ru" aria-pressed="${L==="ru"}">RU</button><button type="button" data-l="en" aria-pressed="${L==="en"}">EN</button></div></div>
-    <div class="row" style="margin-top:14px"><label for="monthSel" class="muted" style="font-size:13px">${t("Я сейчас на месяце","I'm currently in month")}</label><select id="monthSel" class="field" style="width:auto;padding:7px 10px">${MONTHS.map((m,i)=>`<option value="${i}" ${i===cur?"selected":""}>${i+1} · ${m.cefr}</option>`).join("")}</select><button class="btn ghost" type="button" data-a="auto">${t("По календарю","Follow the calendar")}</button></div></section>`);
+    <div class="row" style="margin-top:14px"><label for="monthSel" class="muted" style="font-size:13px">${t("Я сейчас на месяце","I'm currently in month")}</label><select id="monthSel" class="field" style="width:auto;padding:7px 10px">${MS().map((m,i)=>`<option value="${i}" ${i===cur?"selected":""}>${i+1} · ${m.cefr}</option>`).join("")}</select><button class="btn ghost" type="button" data-a="auto">${t("По календарю","Follow the calendar")}</button></div></section>`);
   head.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{planLang=b.dataset.l;ls.set(LS_KEY+".planLang",planLang);render()});
   head.querySelector("#monthSel").onchange=e=>{const k=Number(e.target.value);const sd=new Date();sd.setDate(sd.getDate()-Math.ceil(k*30.5));S.profile.startDate=dkey(sd);S.profile.monthOverride=null;persist("profile");render()};
   head.querySelector('[data-a="auto"]').onclick=()=>{S.profile.monthOverride=null;persist("profile");render()};
   app.append(head);
   const list=h(`<section class="months"></section>`);
-  MONTHS.forEach((m,i)=>{
+  MS().forEach((m,i)=>{
     const d=h(`<details class="month ${i===cur?"now":i<cur?"past":""}" ${i===cur?"open":""}><summary><span class="fl">${m.fl}</span><span style="min-width:0"><b></b><br><span class="cefr"></span></span><span class="cefr">${i<cur?t("пройдено","done"):i===cur?t("сейчас","now"):""}</span></summary><div class="body"></div></details>`);
     d.querySelector("b").textContent=`${t("Месяц","Month")} ${i+1}: ${m.title[L]}`;
     d.querySelector(".cefr").textContent=`${m.cefr} · ${t("английский в уроках","English in lessons")} ${m.ratio}%`;
-    const rows=[[t("По книгам","Books"),monthBooks(i)],[t("Грамматика","Grammar"),m.grammar[L]],[t("Слова","Vocabulary"),m.vocab[L]],[t("Профессия","Job English"),m.pro[L]],["IELTS",m.ielts[L]],[t("Контрольная точка","Checkpoint"),m.milestone[L]]];
+    const rows=[...(isKid()?[]:[[t("По книгам","Books"),monthBooks(i)]]),[t("Грамматика","Grammar"),m.grammar[L]],[t("Слова","Vocabulary"),m.vocab[L]],[isKid()?t("Практика","Practice"):t("Профессия","Job English"),m.pro[L]],[isKid()?"A2 Key":"IELTS",m.ielts[L]],[t("Контрольная точка","Checkpoint"),m.milestone[L]]];
     rows.forEach(([k,v])=>{const r=h(`<div><b></b><span></span></div>`);r.querySelector("b").textContent=k;r.querySelector("span").textContent=v;d.querySelector(".body").append(r)});
     list.append(d);
   });
@@ -1047,7 +1060,7 @@ function viewPlan(app){
     <div class="card"><h3>${t("Год 2 (19–20 лет)","Year 2 (age 19–20)")}</h3><p class="muted" style="margin:8px 0 0">${t("Закрепить C1 и поднять IELTS до 7.5+. Авиационный английский ИКАО Level 5 (Extended). Переговоры и выступления только на английском. Читать книги и смотреть фильмы без субтитров.","Lock in C1 and push IELTS to 7.5+. ICAO aviation English Level 5 (Extended). Negotiations and presentations in English only. Books and films without subtitles.")}</p></div></section>`);
   ROUTINE.forEach(([tm,ru,en])=>{const r=h(`<div><span class="mono muted"></span><span></span></div>`);r.querySelector(".mono").textContent=tm;r.lastChild.textContent=L==="ru"?ru:en;day.querySelector(".routine").append(r)});
   app.append(day);
-  app.append(booksSection());
+  if(!isKid())app.append(booksSection());
 }
 
 /* ---------- PROGRESS ---------- */
@@ -1098,6 +1111,109 @@ ${list}
   lessonGrammar(body,{prompt,key:"review."+S.notebook.mistakes.length,label:"Учитель разбирает твои ошибки…",mission:false,noSave:true});
 }
 
+/* ---------- profiles (me + sister) ---------- */
+function isKid(){return S.profile.kind==="kid"}
+function getProfiles(){const p=ls.get("berkut.profiles");return Array.isArray(p)&&p.length?p:[{id:"me",name:"Я",kind:"adult"}]}
+function saveProfiles(list){ls.set("berkut.profiles",list);if(cap.db&&cap.uid){cap.db.doc("data/users/"+cap.uid+"/profiles").set({list:JSON.parse(JSON.stringify(list))}).catch(()=>{})}}
+function profileName(){const p=getProfiles().find(x=>x.id===PROFILE);return(isKid()&&S.profile.ob&&S.profile.ob.name)||(p&&p.name)||"Я"}
+async function switchProfile(id,kind){
+  try{leaveTalk()}catch(e){}
+  for(const n of Object.keys(saveTimers)){clearTimeout(saveTimers[n]);if(cap.db)await flush(n)}
+  PROFILE=id;ls.set("berkut.active",id);LS_KEY=PROFILE==="me"?"berkut.v1":"berkut.v1."+PROFILE;
+  loadLocal();
+  if(kind&&!ls.get(LS_KEY)){S.profile.kind=kind;if(kind==="kid"){S.profile.char="zefir";S.profile.persona="kind";chatState={mode:"blitz",turns:[]}}persist("profile")}
+  clearTimeout(incomingTimer);obStep=0;lesson=null;talkPicker=false;talkT0=0;incomingShownThisLoad=false;route="today";
+  document.querySelector("#logoChar")&&(document.querySelector("#logoChar").dataset.c="");
+  render();window.scrollTo({top:0});loadRemote();
+}
+function showProfiles(){
+  const list=getProfiles();
+  const ov=h(`<div class="overlay" role="dialog" aria-modal="true" aria-label="Кто учится"><div class="card" style="width:min(420px,100%);display:grid;gap:12px"><div class="row" style="justify-content:space-between"><h2>Кто учится?</h2><button class="btn ghost" type="button" data-a="x">Закрыть</button></div><div class="missions pl"></div></div></div>`);
+  list.forEach(p=>{
+    const st=ls.get(p.id==="me"?"berkut.v1":"berkut.v1."+p.id);const pr=st&&st.profile||{};
+    const nm=(p.kind==="kid"&&pr.ob&&pr.ob.name)||p.name;
+    const b=h(`<button class="mission" type="button" style="grid-template-columns:56px 1fr auto"><span class="mw" style="width:56px"></span><span><b></b><span class="sub"></span></span><span class="xp">${p.id===PROFILE?"сейчас":"войти"}</span></button>`);
+    b.querySelector("b").textContent=nm;b.querySelector(".sub").textContent=(p.kind==="kid"?"Школьная программа · 7 класс":"IELTS · A2 → C1")+(pr.placement?" · уровень "+pr.placement.level:"");
+    b.querySelector(".mw").innerHTML=mascotSVG(pr.char||(p.kind==="kid"?"zefir":"berkut"),"m-static");
+    b.onclick=()=>{ov.remove();if(p.id!==PROFILE)switchProfile(p.id)};ov.querySelector(".pl").append(b);
+  });
+  if(!list.some(p=>p.kind==="kid")){const a=h(`<button class="btn primary big" type="button">+ Добавить сестрёнку (7 класс)</button>`);a.onclick=()=>{const id="sis";const l=getProfiles();l.push({id,name:"Сестрёнка",kind:"kid"});saveProfiles(l);ov.remove();switchProfile(id,"kid")};ov.querySelector(".card").append(a)}
+  ov.querySelector('[data-a="x"]').onclick=()=>ov.remove();ov.onclick=e=>{if(e.target===ov)ov.remove()};
+  document.body.append(ov);
+}
+
+/* ---------- kid program: 7th grade, school year ---------- */
+const KID_MONTHS=[
+ {cefr:"A1+",fl:"СЕН",ratio:35,title:{ru:"Снова в школу",en:"Back to school"},grammar:{ru:"to be, have got, Present Simple",en:"to be, have got, Present Simple"},vocab:{ru:"Школа, предметы, расписание, семья",en:"School, subjects, timetable, family"},pro:{ru:"Рассказать о себе и своём дне",en:"Talking about yourself and your day"},ielts:{ru:"A2 Key Reading: короткие объявления",en:"A2 Key Reading: short notices"},milestone:{ru:"Рассказать о себе 1 минуту",en:"Talk about yourself for 1 minute"}},
+ {cefr:"A2",fl:"ОКТ",ratio:40,title:{ru:"Хобби и свободное время",en:"Hobbies and free time"},grammar:{ru:"Present Continuous и Present Simple",en:"Present Continuous vs Present Simple"},vocab:{ru:"Хобби, спорт, музыка, игры",en:"Hobbies, sport, music, games"},pro:{ru:"Описать, чем занимаешься после школы",en:"Describe what you do after school"},ielts:{ru:"A2 Key Listening: короткие диалоги",en:"A2 Key Listening: short dialogues"},milestone:{ru:"Рассказать о своих увлечениях",en:"Talk about your hobbies"}},
+ {cefr:"A2",fl:"НОЯ",ratio:45,title:{ru:"Каникулы и путешествия",en:"Holidays and travel"},grammar:{ru:"Past Simple: правильные и неправильные глаголы",en:"Past Simple: regular and irregular verbs"},vocab:{ru:"Путешествия, транспорт, отдых",en:"Travel, transport, holidays"},pro:{ru:"Рассказать, как провела каникулы",en:"Tell about your holidays"},ielts:{ru:"A2 Key Writing: короткое сообщение (25+ слов)",en:"A2 Key Writing: short message (25+ words)"},milestone:{ru:"История про каникулы",en:"A holiday story"}},
+ {cefr:"A2",fl:"ДЕК",ratio:50,title:{ru:"Зима и праздники",en:"Winter and celebrations"},grammar:{ru:"Past Continuous и Past Simple",en:"Past Continuous and Past Simple"},vocab:{ru:"Погода, времена года, праздники, Новый год",en:"Weather, seasons, celebrations"},pro:{ru:"Рассказать, что случилось",en:"Tell what happened"},ielts:{ru:"A2 Key Speaking: вопросы о себе",en:"A2 Key Speaking: questions about you"},milestone:{ru:"Рассказать историю «Что случилось»",en:"Tell a ‘what happened’ story"}},
+ {cefr:"A2",fl:"ЯНВ",ratio:55,title:{ru:"Животные и природа",en:"Animals and nature"},grammar:{ru:"Сравнительная и превосходная степень",en:"Comparatives and superlatives"},vocab:{ru:"Животные, природа, города",en:"Animals, nature, places"},pro:{ru:"Сравнить двух животных или два города",en:"Compare two animals or cities"},ielts:{ru:"A2 Key Reading: текст и вопросы",en:"A2 Key Reading: text and questions"},milestone:{ru:"Сравнение без ошибок",en:"Compare without mistakes"}},
+ {cefr:"A2",fl:"ФЕВ",ratio:60,title:{ru:"Будущее и мечты",en:"Future and dreams"},grammar:{ru:"Будущее: will и be going to",en:"Future: will and be going to"},vocab:{ru:"Профессии, технологии, планы",en:"Jobs, technology, plans"},pro:{ru:"Рассказать о планах и мечтах",en:"Talk about plans and dreams"},ielts:{ru:"A2 Key Writing: письмо другу (35+ слов)",en:"A2 Key Writing: email to a friend (35+ words)"},milestone:{ru:"Письмо другу о планах",en:"An email about your plans"}},
+ {cefr:"A2+",fl:"МАР",ratio:65,title:{ru:"Фильмы, музыка, опыт",en:"Films, music, experiences"},grammar:{ru:"Present Perfect: ever, never, just, already, yet",en:"Present Perfect: ever, never, just, already, yet"},vocab:{ru:"Кино, музыка, соцсети",en:"Films, music, social media"},pro:{ru:"Интервью «Have you ever…?»",en:"‘Have you ever…?’ interview"},ielts:{ru:"A2 Key Listening",en:"A2 Key Listening"},milestone:{ru:"Взять интервью у учителя",en:"Interview your teacher"}},
+ {cefr:"A2+",fl:"АПР",ratio:70,title:{ru:"Здоровье и правила",en:"Health and rules"},grammar:{ru:"can, must, have to, should",en:"can, must, have to, should"},vocab:{ru:"Здоровье, еда, спорт, правила",en:"Health, food, sport, rules"},pro:{ru:"Дать совет другу",en:"Give a friend advice"},ielts:{ru:"A2 Key Speaking: обсуждение с партнёром",en:"A2 Key Speaking: discussion"},milestone:{ru:"Дать 5 советов по-английски",en:"Give 5 pieces of advice"}},
+ {cefr:"A2+",fl:"МАЙ",ratio:75,title:{ru:"Магазины и деньги",en:"Shopping and money"},grammar:{ru:"Исчисляемые и неисчисляемые, some/any, much/many",en:"Countable/uncountable, some/any, much/many"},vocab:{ru:"Покупки, еда, деньги",en:"Shopping, food, money"},pro:{ru:"Купить что-то в магазине",en:"Buy something in a shop"},ielts:{ru:"Пробный A2 Key",en:"Mock A2 Key"},milestone:{ru:"Пробный экзамен A2 Key",en:"Mock A2 Key exam"}},
+ {cefr:"B1−",fl:"ИЮН",ratio:80,title:{ru:"Лето: природа и планета",en:"Summer: our planet"},grammar:{ru:"First conditional (if + will)",en:"First conditional"},vocab:{ru:"Экология, природа, лето",en:"Environment, summer"},pro:{ru:"Мультфильмы на английском с субтитрами",en:"Cartoons in English with subtitles"},ielts:{ru:"Чтение коротких книг",en:"Graded readers"},milestone:{ru:"Посмотреть мультфильм на английском",en:"Watch a cartoon in English"}},
+ {cefr:"B1−",fl:"ИЮЛ",ratio:85,title:{ru:"Страны и культуры",en:"Countries and cultures"},grammar:{ru:"used to, who/which/where",en:"used to, relative clauses"},vocab:{ru:"Страны, культура, путешествия",en:"Countries, culture, travel"},pro:{ru:"Рассказ о стране мечты",en:"Your dream country"},ielts:{ru:"Speaking: рассказ 2 минуты",en:"Speaking: 2-minute story"},milestone:{ru:"Рассказ 2 минуты без остановок",en:"2-minute talk"}},
+ {cefr:"B1",fl:"АВГ",ratio:90,title:{ru:"Финиш: готова к 8 классу",en:"Ready for year 8"},grammar:{ru:"Passive (знакомство) и повторение года",en:"Passive intro and year review"},vocab:{ru:"Повторение всех слов года",en:"Year review"},pro:{ru:"Свободный разговор 5 минут",en:"5-minute free conversation"},ielts:{ru:"A2 Key целиком",en:"Full A2 Key"},milestone:{ru:"Уверенный A2, старт B1 Preliminary",en:"Confident A2, start B1 Preliminary"}},
+];
+const LV_MONTH_KID={A1:0,A2:2,B1:9,B2:11,C1:11};
+const KID_CHAT_MODES=[
+ {id:"blitz",ru:"Блиц: как будет…?",brief:"Весёлый блиц: спрашивай «Как будет <русское слово> по-английски?» — по одному слову за раз, из слов дня и темы месяца (школа, животные, еда, хобби). Правильно — бурно радуйся, ошибка — смешно (по-доброму!) удивись, дай правильное слово с подсказкой, как читается, и сразу следующий вопрос."},
+ {id:"free",ru:"Просто поболтать",brief:"Дружеская болтовня про школу, друзей, хобби, животных, мультики, музыку, игры."},
+ {id:"school",ru:"Про школу",brief:"Разговор про школу: предметы, расписание, учителя, друзья, что было сегодня."},
+ {id:"cafe",ru:"Ролевая: кафе и магазин",brief:"Ролевая игра: ты — продавец в кафе или магазине в Лондоне, ученица — покупатель. Простые фразы, вежливость, цены."},
+ {id:"ket",ru:"Экзамен A2 Key",brief:"Ты — экзаменатор Cambridge A2 Key Speaking. Простые вопросы о ней (имя, школа, хобби, семья), по одному. В конце — добрый отзыв."},
+ {id:"explain",ru:"Объясни правило",brief:"Ученица спрашивает про правила и слова. Объясняй очень просто, по-русски, с примерами из школьной жизни, потом 2 мини-задания."},
+];
+const KID_OB_STEPS=[
+ {id:"name",type:"name",title:"Как тебя зовут?",sub:"Учитель будет обращаться к тебе по имени"},
+ {id:"placement",type:"placement",title:"",sub:""},
+ {id:"level",title:"Как у тебя с английским?",sub:"Честно — так план будет точнее",opts:[["A1","A1","Знаю немного","Простые слова и фразы"],["A2","A2","Нормально","Понимаю учебник, говорю с трудом"],["B1","B1","Хорошо","Могу общаться, но с ошибками"]],lv:true},
+ {id:"worry",title:"Что сложнее всего?",sub:"Над этим поработаем больше",opts:[["grammar","🤯","Грамматика и времена",""],["words","📚","Запоминать слова",""],["speak","😶","Говорить",""],["listen","🎧","Понимать на слух",""],["write","✍️","Писать",""]]},
+ {id:"minutes",title:"Сколько минут в день будешь заниматься?",sub:"Лучше понемногу, но каждый день",opts:[["15","15 минут","Слова и разговор"],["30","30 минут","Слова, грамматика, разговор"],["45","45 минут","Все миссии"]]},
+ {id:"char",type:"chars",title:"Выбери своего учителя",sub:"Он будет звонить, хвалить и помогать с домашкой"},
+];
+function kidContext(){
+  const m=curMonth(),i=monthIndex(),ob=S.profile.ob||{};
+  return `Ты — личный ИИ-учитель английского для школьницы. Говоришь на русском и английском.
+Ученица: ${ob.name||"девочка"}, 13 лет, 7 класс школы, родной язык русский. Уровень по плану ${m.cefr}. Цель: пятёрки по английскому в школе, уверенный A2 → B1 к концу года, сдать Cambridge A2 Key, свободно болтать.
+План на учебный год, месяц ${i+1} из 12 «${m.title.ru}». Грамматика месяца: ${m.grammar.ru}. Слова месяца: ${m.vocab.ru}. Навык месяца: ${m.ielts.ru}.
+Доля английского в твоей речи ≈ ${m.ratio}%: правила объясняй по-русски очень просто, практика — на английском. Короткие предложения, понятные слова.
+СТРОГО: никакого мата, грубости, оскорблений, взрослых тем, романтики, насилия. Шутки только добрые. Хвали за старание, ошибки исправляй мягко и с юмором. Темы: школа, друзья, хобби, животные, мультики, музыка, игры, путешествия, еда.
+${personaLine()}
+Состояние: серия ${liveStreak()} дн. подряд; сегодня выполнено миссий ${(S.profile.days[todayKey()]||{done:[]}).done.length} из ${todayMissions().length}; сложнее всего ей: ${({grammar:"грамматика",words:"запоминать слова",speak:"говорить",listen:"понимать на слух",write:"писать"})[ob.worry]||"—"}.`;
+}
+function schoolCard(){
+  const d=dayRec();d.book=d.book||{};
+  const c=h(`<section class="card"><div class="eyebrow">Школа</div><h2 style="margin-top:4px">Домашка по английскому</h2><p class="muted" style="margin:6px 0 10px;font-weight:600">Напиши или сфотографируй словами, что задали в школе. Учитель объяснит, как делать, и проверит твои ответы — но делать будешь сама 😉</p>
+    <div class="row" style="flex-wrap:nowrap;align-items:flex-end"><textarea class="field" id="schoolHw" style="min-height:100px" placeholder="Например: Spotlight стр. 34, упр. 5 — поставить глаголы в Past Simple: I (go) to the park…"></textarea></div>
+    <div class="row" style="justify-content:space-between;margin-top:10px"><button class="btn" type="button" data-a="done">${d.book.school?"✓ Сделала":"Я сделала домашку · +10 XP"}</button><button class="btn primary" type="button" data-a="ask">Помоги разобраться</button></div><div class="out" style="margin-top:10px"></div></section>`);
+  const ta=c.querySelector("textarea");ta.value=ls.get(LS_KEY+".schoolhw")||"";ta.oninput=()=>ls.set(LS_KEY+".schoolhw",ta.value);c.querySelector(".row").append(micButton(ta));
+  const done=c.querySelector('[data-a="done"]');if(d.book.school)done.disabled=true;
+  done.onclick=()=>{if(d.book.school)return;d.book.school=true;if(!award(null,10))persist("profile");render()};
+  c.querySelector('[data-a="ask"]').onclick=async e=>{const btn=e.currentTarget;const t=ta.value.trim();if(t.length<5){toast("Напиши, что задали");return}
+    btn.disabled=true;const out=c.querySelector(".out");out.innerHTML=thinking("Учитель смотрит задание…");
+    try{const n=h(`<div class="note info" style="white-space:normal"></div>`);let first=true;
+      const {text}=await ask(`${kidContext()}
+
+Ученица прислала школьную домашку по английскому (или свои ответы к ней):
+"""${t}"""
+Помоги ей разобраться: 1) коротко и просто объясни правило, которое тут нужно; 2) покажи, как сделать ПЕРВЫЙ пункт, с объяснением; 3) остальные пункты НЕ решай — дай подсказки. Если она уже написала свои ответы — проверь их, отметь ошибки и объясни. Пиши по-русски, примеры на английском, коротко и весело.`,{cache:false,onText:({text})=>{if(first){out.innerHTML="";out.append(n);first=false}n.innerHTML=md(text)}});
+      if(first){out.innerHTML="";out.append(n)}n.innerHTML=md(text);
+    }catch(err){out.innerHTML="";const p=h(`<p class="note bad"></p>`);p.textContent=errCopy(err);out.append(p)}
+    btn.disabled=false};
+  return c;
+}
+
+/* ---------- test voice & reactions ---------- */
+const TEST_REACT={
+ good:{savage:["Ого, а ты не безнадёжен!","Красава, чёрт возьми!","Неплохо, курсант. Дальше.","Вот это да, угадал или знал?"],strict:["Correct. Дальше.","Верно.","Good. Next."],kind:["Умница!","Правильно, молодец!","Так держать!","Супер!"],buddy:["Изи!","Респект!","Норм, погнали дальше!","Красиво!"]},
+ bad:{savage:["Чего, блин?! Серьёзно?","Мимо. Больно было смотреть.","Ой всё. Дальше давай.","Пельмень, ну ты чего?"],strict:["Неверно. Запомни и дальше.","Ошибка.","Нет. Следующий."],kind:["Ничего страшного!","Почти! Идём дальше.","Не переживай, научимся."],buddy:["Эх, мимо!","Не, не то. Бывает!","Ну почти! Дальше."]},
+ skip:{savage:["Не знаешь? Хоть честно.","Пропустил. Ладно, живи."],strict:["Пропуск. Принято."],kind:["Ничего, это сложный вопрос!"],buddy:["Окей, скип!"]},
+};
+function reactLine(kind){const p=isKid()&&curPersona()==="savage"?"kind":curPersona();const a=(TEST_REACT[kind]||{})[p]||TEST_REACT[kind].kind;return a[Math.floor(Math.random()*a.length)]}
+
 /* ---------- characters ---------- */
 const CHARS={
  berkut:{name:"Капитан Беркут",short:"Беркуту",tag:"Жёсткий · 18+",persona:"savage",color:"#EB5A46",shade:"#C23A27",kind:"bird",line:"Ну чё, курсант? Хватит спать — погнали говорить."},
@@ -1108,7 +1224,8 @@ const CHARS={
 const PERSONAS={
  kind:{brief:"Добрый и терпеливый наставник. Хвалишь за успехи, мягко исправляешь, шутишь по-доброму."},
  strict:{brief:"Строгий лётный инструктор: коротко, по делу, требуешь точности, похвала — редко и только заслуженная. Юмор сухой. Без мата."},
- savage:{brief:"Жёсткий тренер в стиле старого армейского лётного инструктора. Ученик совершеннолетний и сам попросил такой стиль: можно материться и крепко ругаться по-русски (иногда по-английски), особенно когда он ленится, пропускает занятия, не сдаёт домашку или повторяет одну и ту же ошибку. Чем дольше он не может что-то выучить, тем жёстче. Ругай за ошибки и лень, но никогда не оскорбляй его личность, внешность, семью, национальность — мат для эмоций, юмора и мотивации. Когда реально заслужил — хвали от души. Цель одна: чтобы он выучил английский."},
+ savage:{brief:"Жёсткий тренер-хам в стиле старого армейского лётного инструктора и стендап-роаста. Ученик совершеннолетний и сам попросил такой стиль: можно материться и крепко ругаться по-русски (иногда по-английски), особенно когда он ленится, пропускает занятия, не сдаёт домашку или повторяет одну и ту же ошибку. Чем дольше он не может что-то выучить, тем жёстче. Ругай за ошибки и лень, но никогда не оскорбляй его личность, внешность, семью, национальность — мат для эмоций, юмора и мотивации. Подкалывай и обзывай в шутку по ошибкам (пельмень, валенок, дятел, гений, профессор, курсант), пародируй его ошибки и то, как он, наверное, это произнёс («груша — это не „пир“, это pear [пэа]!», «„сенкью“? ты с какого аэродрома?»), матерись смачно и с юмором. Запрещено: национальность и этнические клички, внешность, семья, настоящая травля. Когда реально заслужил — хвали от души. Цель одна: чтобы он выучил английский."},
+ buddy_kid:{brief:"Ты весёлый старший друг: молодёжный сленг (без мата и грубостей), шутки, мемы, поддержка. Исправляешь ошибки по-доброму."},
  buddy:{brief:"Ты свой парень, почти ровесник: общаешься на сленге (русском и английском), шутишь, подкалываешь, можно лёгкий мат. Но всегда исправляешь ошибки и тащишь его к цели, как друг, который реально хочет, чтобы он сдал."},
 };
 const DECLINE={
@@ -1118,8 +1235,8 @@ const DECLINE={
   buddy:"Бро, ты меня скинул? Обидно, вообще-то. Набери, как освободишься.",
 };
 const curChar=()=>CHARS[S.profile.char]||CHARS.berkut;
-const curPersona=()=>curChar().persona;
-function personaLine(){return `Тебя зовут «${curChar().name}». Характер: ${PERSONAS[curPersona()].brief} Говори живо и свободно, как реальный человек, а не учебник: можно сленг, шутки, эмоции.`}
+const curPersona=()=>{const p=curChar().persona;return isKid()?(p==="savage"?"kind":p):p};
+function personaLine(){return `Тебя зовут «${curChar().name}». Характер: ${PERSONAS[isKid()&&curPersona()==="buddy"?"buddy_kid":curPersona()].brief} Говори живо и свободно, как реальный человек, а не учебник: можно сленг, шутки, эмоции.`}
 function daysBetween(a,b){return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/864e5)}
 function studentStatus(){
   const counts={};S.notebook.mistakes.forEach(m=>{const k=norm(m.right);if(k)counts[k]=(counts[k]||0)+1});
@@ -1195,7 +1312,7 @@ function viewToday(app){
   const doneN=list.filter(x=>d.done.includes(x.id)).length;
   const hour=new Date().getHours();const greet=hour<5?"Не спится?":hour<12?"Доброе утро":hour<18?"Привет":"Добрый вечер";
   const hero=h(`<section class="hero-card" style="--c:${c.color}">
-    <div><div class="eyebrow">День ${dayIndex()+1} · месяц ${i+1} · ${esc(m.cefr)} → C1</div><h1></h1><p class="gl"></p>
+    <div><div class="eyebrow">День ${dayIndex()+1} · месяц ${i+1} · ${esc(m.cefr)} → ${isKid()?"B1":"C1"}</div><h1></h1><p class="gl"></p>
       <div class="xpbar"><i style="width:${Math.min(100,d.xp/goal*100)}%"></i></div><div class="xplabel">${d.xp} / ${goal} XP сегодня · ${doneN}/${list.length} миссий</div></div>
     <div class="hero-char"><div class="speech"></div></div>
       <div class="row"><button class="btn white" type="button" data-a="call">${I.phone} Позвонить ${esc(c.short)}</button>${doneN<list.length?`<button class="btn ghost-white" type="button" data-a="next">Продолжить →</button>`:""}</div></section>`);
@@ -1206,18 +1323,18 @@ function viewToday(app){
   hero.querySelector('[data-a="next"]')?.addEventListener("click",()=>{const nx=list.find(x=>!d.done.includes(x.id));if(nx)openMission(nx.id)});
   if(!S.profile.placement)app.append(placementBanner());
   app.append(hero);
-  app.append(bookCard());
+  app.append(isKid()?schoolCard():bookCard());
   const card=h(`<section class="card"><div class="row" style="justify-content:space-between"><h2>Миссии на сегодня</h2><span class="eyebrow">${doneN}/${list.length}</span></div><div class="missions" style="margin-top:14px"></div></section>`);
   const box=card.querySelector(".missions");
   for(const ms of list){
     const done=d.done.includes(ms.id);
     let sub=ms.en+" · "+ms.min;const bk=todayBooks();
     if(ms.id==="words")sub=`${bk.words} новых слов · «${bk.ct.t}»${bk.awl?" + AWL":""} · и повтор старых`;
-    if(ms.id==="grammar")sub=`Grammar in Use · Unit ${bk.mu}: ${bk.mt}`;
+    if(ms.id==="grammar")sub=bk.kid?`Тема месяца: ${bk.mt}`:`Grammar in Use · Unit ${bk.mu}: ${bk.mt}`;
     if(ms.id==="listen"&&/Reading/.test(bk.ct.p)){sub="Reading · True / False / Not Given · "+ms.min}
     if(ms.id==="talk"&&!done)sub=`Голосом или текстом · ${Math.min(d.talk||0,TALK_TARGET)}/${TALK_TARGET} фраз`;
     if(ms.id==="ielts")sub=(/Writing|Speaking/.test(bk.ct.p)&&monthIndex()>=3?bk.ct.p:(isWritingDay()?"Writing":"Speaking"))+" с оценкой band · "+ms.min;
-    const b=h(`<button class="mission ${done?"done":""}" type="button"><span class="ic ${MCOL[ms.id]}">${done?I.check:I[ms.icon]}</span><span><b>${ms.ru}</b><span class="sub"></span></span><span class="xp">${done?"готово":"+"+ms.xp+" XP"}</span></button>`);
+    const b=h(`<button class="mission ${done?"done":""}" type="button"><span class="ic ${MCOL[ms.id]}">${done?I.check:I[ms.icon]}</span><span><b>${missionName(ms)}</b><span class="sub"></span></span><span class="xp">${done?"готово":"+"+ms.xp+" XP"}</span></button>`);
     b.querySelector(".sub").textContent=sub;b.onclick=()=>openMission(ms.id);box.append(b);
   }
   app.append(card);
@@ -1230,6 +1347,7 @@ function ringSVG(frac,color,label,sub){
   return `<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="10"/><circle cx="50" cy="50" r="${r}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C*v} ${C}" transform="rotate(-90 50 50)"/><text x="50" y="${sub?50:56}" text-anchor="middle" font-family="Unbounded,sans-serif" font-weight="800" font-size="18" fill="var(--ink)">${esc(label)}</text>${sub?`<text x="50" y="66" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="800" font-size="10" fill="var(--muted)">${esc(sub)}</text>`:""}</svg>`;
 }
 function targetCard(){
+  if(isKid()){const i=monthIndex();const c=h(`<div class="card"><div class="eyebrow">Цель года</div><div class="target" style="margin-top:10px">${ringSVG((i+1)/12,"var(--purple)",`${i+1}/12`,"месяц")}<div><h2>A2 Key</h2><p class="muted" style="margin:4px 0 10px;font-weight:600;font-size:14px">Пятёрки в школе и экзамен Cambridge A2 Key. Каждый день — шаг к цели.</p><button class="btn" type="button">Открыть план</button></div></div></div>`);c.querySelector("button").onclick=()=>go("plan");return c}
   const ob=S.profile.ob||{},band=estBand(),tgt=ob.band||"7.0",i=monthIndex();
   const c=h(`<div class="card"><div class="eyebrow">Цель IELTS</div><div class="target" style="margin-top:10px">${ringSVG(band?band/9:(i+1)/12,"var(--blue)",band?band.toFixed(1):`${i+1}/12`,band?"сейчас":"месяц")}<div><h2>Band ${esc(tgt)}${tgt==="7.5"?"+":""}</h2><p class="muted" style="margin:4px 0 10px;font-weight:600;font-size:14px"></p><button class="btn" type="button">Открыть план</button></div></div></div>`);
   c.querySelector("p").textContent=band?`Твой средний балл по последним заданиям — ${band.toFixed(1)}. До цели ${Math.max(0,(parseFloat(tgt)-band)).toFixed(1)}.`:"Сделай IELTS-задание — учитель поставит первый балл.";
@@ -1243,7 +1361,7 @@ function maybeIncoming(){
   const d=dayRec();
   if(incomingShownThisLoad||d.callShown||d.done.includes("talk")||!cap.sample)return;
   clearTimeout(incomingTimer);
-  incomingTimer=setTimeout(()=>{if(route!=="today"||lesson||document.querySelector(".overlay"))return;showIncoming()},2500);
+  incomingTimer=setTimeout(()=>{if(route!=="today"||lesson||!S.profile.onboarded||document.querySelector(".overlay"))return;showIncoming()},2500);
 }
 function ringTone(){
   try{const AC=window.AudioContext||window.webkitAudioContext;const ac=new AC();let t=ac.currentTime;
@@ -1271,8 +1389,9 @@ let talkPicker=false,talkCtl=null,talkBusy=false,talkListening=false,talkBuf="",
 let voiceOn=ls.get(LS_KEY+".voice");if(voiceOn==null)voiceOn=true;
 let talkLang=ls.get(LS_KEY+".mic")||(monthIndex()<3?"ru":"en");
 function saveChat(){ls.set(LS_KEY+".chat",chatState)}
+function chatModes(){return isKid()?KID_CHAT_MODES:CHAT_MODES}
 function chatRules(){
-  const mode=CHAT_MODES.find(x=>x.id===chatState.mode)||CHAT_MODES[0];
+  const mode=chatModes().find(x=>x.id===chatState.mode)||chatModes()[0];
   return `${teacherContext()}
 
 Сценарий разговора: ${mode.ru}. ${mode.brief}
@@ -1309,7 +1428,7 @@ function viewTalk(app){
   top.querySelector('[data-a="pick"]').onclick=()=>{leaveTalk();talkPicker=true;render()};
   top.querySelector('[data-a="new"]').onclick=()=>{leaveTalk();chatState.turns=[];chatState.mood="calm";talkT0=0;saveChat();render()};
   const modes=h(`<div class="modes" role="group" aria-label="Сценарий"></div>`);
-  CHAT_MODES.forEach(md2=>{const b=h(`<button class="chip" type="button"></button>`);b.textContent=md2.ru;b.setAttribute("aria-pressed",String(md2.id===chatState.mode));b.onclick=()=>{if(chatState.mode===md2.id)return;leaveTalk();chatState={mode:md2.id,turns:[]};saveChat();render()};modes.append(b)});
+  chatModes().forEach(md2=>{const b=h(`<button class="chip" type="button"></button>`);b.textContent=md2.ru;b.setAttribute("aria-pressed",String(md2.id===chatState.mode));b.onclick=()=>{if(chatState.mode===md2.id)return;leaveTalk();chatState={mode:md2.id,turns:[]};saveChat();render()};modes.append(b)});
   const stage=h(`<section class="stage" style="--c:${c.color}">
     <div class="ctimer mono">00:00 / 10:00</div>
     <div class="stage-char"></div>
@@ -1373,7 +1492,7 @@ function viewTalk(app){
   if(!cap.sample)app.append(h(`<p class="note info">Разговор заработает, когда страница откроется на claude.ai и ты разрешишь ей использовать Claude.</p>`));
   if(autoStart&&cap.sample){autoStart=false;sendTalk("(Ты сам позвонил ученику голосом. Поздоровайся в своём стиле, коротко спроси про уроки и домашку и начни разговор по сценарию.)",true)}
 }
-function modeHint(){return({free:"Говори со мной о чём угодно — я поправлю ошибки.",atc:"Я диспетчер, ты пилот. Отвечай как в эфире: позывной и readback.",ceo:"Я CEO крупной компании. Продай мне свои услуги дизайна и SMM.",client:"Я клиент. Обсудим бриф, сроки и правки.",exam:"Я экзаменатор IELTS Speaking. Отвечай развёрнуто.",explain:"Спрашивай про любое правило — объясню на примерах."}[chatState.mode]||"")}
+function modeHint(){return({blitz:isKid()?"Я спрашиваю слово — ты отвечаешь по-английски. Погнали!":"Эй! Сейчас буду спрашивать, как будет слово по-английски. Ошибёшься — получишь.",school:"Расскажи, как прошёл день в школе!",cafe:"Добро пожаловать в кафе! What would you like?",ket:"Я экзаменатор A2 Key. Отвечай полными предложениями.",free:"Говори со мной о чём угодно — я поправлю ошибки.",atc:"Я диспетчер, ты пилот. Отвечай как в эфире: позывной и readback.",ceo:"Я CEO крупной компании. Продай мне свои услуги дизайна и SMM.",client:"Я клиент. Обсудим бриф, сроки и правки.",exam:"Я экзаменатор IELTS Speaking. Отвечай развёрнуто.",explain:"Спрашивай про любое правило — объясню на примерах."}[chatState.mode]||"")}
 async function speakTeacher(text){if(!text)return;const t=spoken(text);if(!t)return;setStatus("talking");try{await speak(t,monthIndex()<4?0.95:1,null,S.profile.char)}finally{if(!talkBusy&&!talkListening)setStatus("idle")}}
 async function sendTalk(text,hidden){
   chatState.turns.push({role:"user",content:text,hidden});
@@ -1412,7 +1531,7 @@ function viewPicker(app){
 }
 function charCards(onPick,selected){
   const grid=h(`<section class="charcards"></section>`);
-  Object.entries(CHARS).forEach(([id,c])=>{
+  Object.entries(CHARS).filter(([id])=>!(isKid()&&id==="berkut")).forEach(([id,c])=>{
     const b=h(`<button class="charcard" type="button" style="--c:${c.color}"><div><h3></h3><span class="tag"></span><q></q><span class="go">${selected!==undefined?"Выбрать":"Говорить →"}</span></div><div class="mw"></div></button>`);
     b.querySelector("h3").textContent=c.name;b.querySelector(".tag").textContent=c.tag;b.querySelector("q").textContent=c.line;
     if(selected!==undefined)b.setAttribute("aria-pressed",String(selected===id));
@@ -1465,7 +1584,7 @@ const PLACEMENT=[
 ];
 function runPlacement(host,onDone,opts={}){
   const total=PLACEMENT.reduce((a,b)=>a+b.items.length,0);
-  let bi=0,qi=0,cur=0,answered=0;const scores=[];
+  let bi=0,qi=0,cur=0,answered=0,tm=null;const scores=[];
   const intro=()=>{
     host.innerHTML="";
     const v=h(`<div class="view" style="text-align:center;justify-items:center"><div class="mw" style="width:140px"></div><h1>Тест на уровень</h1>
@@ -1480,15 +1599,24 @@ function runPlacement(host,onDone,opts={}){
   const ask1=()=>{
     host.innerHTML="";window.scrollTo({top:0});
     const blk=PLACEMENT[bi],it=blk.items[qi];
-    const v=h(`<div class="view"><div class="row" style="justify-content:space-between"><span class="eyebrow">Вопрос ${answered+1} · уровень ${blk.lv}</span><span class="eyebrow">${answered}/${total}</span></div><div class="goalbar"><i style="width:${answered/total*100}%"></i></div></div>`);
+    const v=h(`<div class="view"><div class="row" style="justify-content:space-between"><span class="eyebrow">Вопрос ${answered+1} · уровень ${blk.lv}</span><span class="row" style="gap:6px"><span class="eyebrow">${answered}/${total}</span><button class="iconbtn" type="button" data-a="snd" aria-label="Голос учителя" aria-pressed="${voiceOn}" style="width:38px;height:38px">${I.speaker}</button></span></div><div class="goalbar"><i style="width:${answered/total*100}%"></i></div><div class="stage" style="--c:${curChar().color};padding:10px;gap:4px"><div class="stage-char" style="width:min(150px,40vw);margin:0"></div><div class="react muted" style="font-weight:800;min-height:1.4em"></div></div></div>`);
+    if(!tm)tm=mascotEl(S.profile.char||"berkut","",true);
+    v.querySelector(".stage-char").append(tm);{let mo=[...mascots].find(x=>x.svg===tm);if(!mo)mo=mountMascot(tm,true);curMascot=mo}
+    v.querySelector('[data-a="snd"]').onclick=e=>{voiceOn=!voiceOn;ls.set(LS_KEY+".voice",voiceOn);e.currentTarget.setAttribute("aria-pressed",String(voiceOn));if(!voiceOn)stopSpeak()};
+    if(voiceOn&&!it.listen)setTimeout(()=>speak(it.q.replace(/_+/g," blank "),.95,"en"),250);
     if(it.listen){const l=h(`<div class="note info"><b>Послушай запись</b><div class="row" style="margin-top:8px"><button class="btn blue" type="button">${I.speaker} Слушать</button><button class="btn ghost" type="button" data-a="tx">Не слышно? Показать текст</button></div><p class="tx" hidden style="margin:8px 0 0"></p></div>`);
       l.querySelector(".tx").textContent=it.listen;l.querySelector(".btn.blue").onclick=()=>speak(it.listen,.9,"en");l.querySelector('[data-a="tx"]').onclick=e=>{l.querySelector(".tx").hidden=false;e.currentTarget.remove()};v.append(l);setTimeout(()=>speak(it.listen,.9,"en"),300)}
     if(it.text){const t=h(`<div class="note"><b>Прочитай текст</b><p style="margin:6px 0 0"></p></div>`);t.querySelector("p").textContent=it.text;v.append(t)}
     const q=h(`<p class="q" style="font-size:20px"></p>`);q.textContent=it.q;v.append(q);
     const box=h(`<div class="opts"></div>`);
-    const pick=ok=>{box.querySelectorAll("button").forEach(b=>b.disabled=true);if(ok)cur++;answered++;setTimeout(next,350)};
+    const pick=async(ok,skip)=>{box.querySelectorAll("button").forEach(b=>b.disabled=true);if(ok)cur++;answered++;
+      const p=curPersona(),m=curMascot;const kind=ok?"good":skip?"skip":"bad";
+      mascotMood(m,ok?(Math.random()<.5?"wow":"happy"):skip?"sad":(p==="savage"||p==="strict"?"angry":"sad"));
+      const line=reactLine(kind);const r=v.querySelector(".react");if(r)r.textContent=line;
+      stopSpeak();if(voiceOn&&(Math.random()<.75||!ok)){await Promise.race([speak(line,1.05,null),new Promise(z=>setTimeout(z,3500))])}else await new Promise(z=>setTimeout(z,650));
+      mascotMood(m,"calm");next()};
     it.o.forEach((o,j)=>{const b=h(`<button class="opt" type="button"></button>`);b.textContent=o;b.onclick=()=>{b.style.borderColor="var(--blue)";b.style.background="var(--blue-soft)";pick(j===it.a)};box.append(b)});
-    const dk=h(`<button class="opt" type="button" style="color:var(--muted)">Не знаю</button>`);dk.onclick=()=>pick(false);box.append(dk);
+    const dk=h(`<button class="opt" type="button" style="color:var(--muted)">Не знаю</button>`);dk.onclick=()=>pick(false,true);box.append(dk);
     v.append(box);host.append(v);
   };
   const next=()=>{
@@ -1538,8 +1666,8 @@ function runPlacement(host,onDone,opts={}){
     setTimeout(()=>curMascot&&mascotFlash(curMascot,"happy",1600),200);
     PLACEMENT.forEach((b,k)=>{const sc=res.scores[k];const r=h(`<div style="display:grid;grid-template-columns:36px 1fr 52px;gap:10px;align-items:center;font-weight:800"><span>${b.lv}</span><div class="goalbar"><i style="width:${sc==null?0:sc/6*100}%;background:${sc==null?"var(--line)":sc>=4?"var(--green)":sc>=3?"var(--yellow)":"var(--bad)"}"></i></div><span class="muted" style="text-align:right">${sc==null?"—":sc+"/6"}</span></div>`);v.querySelector(".lvbars").append(r)});
     if(res.writeIdx!=null){const w=h(`<div class="card"><div class="eyebrow">Письмо · оценка учителя</div><h3 style="margin-top:4px">${LV[res.writeIdx]}</h3><p style="margin:6px 0 0;font-weight:600"></p><div class="fx view" style="gap:8px;margin-top:10px"></div></div>`);w.querySelector("p").textContent=res.writeComment;(res.writeFixes||[]).forEach(f=>w.querySelector(".fx").append(fixEl(f.wrong,f.right,f.why_ru)));v.querySelector(".wr").append(w);if(res.writeFixes?.length)addMistakes(res.writeFixes)}
-    const mi=LV_MONTH[level];
-    v.querySelector(".note.info").textContent=(res.writeIdx!=null&&res.writeIdx<res.testIdx?`Тест показал ${LV[res.testIdx]}, но письмо слабее — поэтому начинаем с ${level}. `:"")+`План начнём с месяца ${mi+1} «${MONTHS[mi].title.ru}». До C1 — ${12-mi} мес. занятий.`;
+    const mi=(isKid()?LV_MONTH_KID:LV_MONTH)[level];
+    v.querySelector(".note.info").textContent=(res.writeIdx!=null&&res.writeIdx<res.testIdx?`Тест показал ${LV[res.testIdx]}, но письмо слабее — поэтому начинаем с ${level}. `:"")+(isKid()?`План начнём с месяца ${mi+1} «${MS()[mi].title.ru}».`:`План начнём с месяца ${mi+1} «${MS()[mi].title.ru}». До C1 — ${12-mi} мес. занятий.`);
     const acts=v.querySelector(".acts");
     if(opts.standalone){
       const a=h(`<button class="btn primary big" type="button">Перестроить план под ${level}</button>`);a.onclick=()=>onDone(res,true);
@@ -1549,7 +1677,7 @@ function runPlacement(host,onDone,opts={}){
   };
   intro();
 }
-function applyLevel(level){const sd=new Date();sd.setDate(sd.getDate()-Math.ceil((LV_MONTH[level]||0)*30.5));S.profile.startDate=dkey(sd);S.profile.monthOverride=null}
+function applyLevel(level){const sd=new Date();sd.setDate(sd.getDate()-Math.ceil(((isKid()?LV_MONTH_KID:LV_MONTH)[level]||0)*30.5));S.profile.startDate=dkey(sd);S.profile.monthOverride=null}
 function openPlacement(){
   stopSpeak();const el=h(`<section class="view"></section>`);lesson={id:"placement",el};
   const head=h(`<div class="lesson-head"><button class="btn ghost" type="button">${I.back} Назад</button></div>`);head.querySelector("button").onclick=()=>go("today");
@@ -1577,7 +1705,7 @@ const OB_STEPS=[
  {id:"char",type:"chars",title:"Выбери своего учителя",sub:"Он будет звонить, проверять домашку и гонять тебя"},
 ];
 let obStep=0;
-function obSteps(){const ob=S.profile.ob||{};return OB_STEPS.filter(s=>!(s.id==="level"&&ob.levelFrom==="test"))}
+function obSteps(){const ob=S.profile.ob||{};return (isKid()?KID_OB_STEPS:OB_STEPS).filter(s=>!(s.id==="level"&&ob.levelFrom==="test"))}
 function viewOnboarding(app){
   const OBS=obSteps();
   const total=OBS.length+2,ob=S.profile.ob||(S.profile.ob={});
@@ -1590,7 +1718,11 @@ function viewOnboarding(app){
   if(obStep<OBS.length){
     const st=OBS[obStep];
     if(st.type!=="placement"){const t=h(`<div><h1></h1><p class="sub"></p></div>`);t.querySelector("h1").textContent=st.title;t.querySelector(".sub").textContent=st.sub;box.append(t)}
-    if(st.type==="placement"){
+    if(st.type==="name"){
+      const f=h(`<form class="view" style="gap:12px"><input class="field" id="kidName" autocomplete="off" placeholder="Имя" style="font-size:20px;padding:16px"><button class="btn primary big" type="submit">Дальше</button></form>`);
+      f.querySelector("input").value=ob.name||"";f.onsubmit=e=>{e.preventDefault();const v=f.querySelector("input").value.trim();if(!v){toast("Напиши имя");return}ob.name=v.slice(0,30);const l=getProfiles();const me=l.find(x=>x.id===PROFILE);if(me){me.name=ob.name;saveProfiles(l)}next()};
+      box.append(f);setTimeout(()=>f.querySelector("input").focus(),50);
+    }else if(st.type==="placement"){
       runPlacement(box,res=>{S.profile.placement={level:res.level,correct:res.correct,asked:res.asked,scores:res.scores,date:res.date};ob.level=res.level;ob.levelFrom="test";next()},{skip:()=>{ob.levelFrom="self";next()}});
     }else if(st.type==="big"){
       st.opts.forEach(o=>{const b=h(`<button class="bigopt" type="button" style="--c:${o.c}"><span class="eyebrow"></span><span class="t"></span><p></p><span class="go"></span><span class="tagb"></span></button>`);
@@ -1624,12 +1756,12 @@ function viewOnboarding(app){
     const tick=now=>{if(!arc.isConnected)return;const p=Math.min(1,(now-t0)/dur);const e=1-Math.pow(1-p,2);arc.setAttribute("stroke-dasharray",`${C*e} 400`);pct.textContent=Math.round(e*100)+"%";msg.textContent=msgs[Math.min(msgs.length-1,Math.floor(p*msgs.length))];if(p<1)requestAnimationFrame(tick);else setTimeout(next,450)};
     requestAnimationFrame(tick);
   }else{
-    const c=curChar();const lvMonth=LV_MONTH[ob.level||"A2"]??0;
-    const v=h(`<div class="view"><div style="text-align:center;display:grid;justify-items:center;gap:6px"><div class="mw" style="width:150px"></div><h1>Твой план готов!</h1><p class="sub" style="margin:0">12 месяцев до C1. Первый урок — прямо сейчас.</p></div>
+    const c=curChar();const lvMonth=(isKid()?LV_MONTH_KID:LV_MONTH)[ob.level||"A2"]??0;
+    const v=h(`<div class="view"><div style="text-align:center;display:grid;justify-items:center;gap:6px"><div class="mw" style="width:150px"></div><h1>${isKid()?esc((ob.name||"")+", твой план готов!"):"Твой план готов!"}</h1><p class="sub" style="margin:0">${isKid()?"Учебный год до уверенного B1. Первый урок — прямо сейчас.":"12 месяцев до C1. Первый урок — прямо сейчас."}</p></div>
       <div class="card summary"></div><button class="btn primary big" type="button">Поехали!</button><button class="btn ghost" type="button" data-a="redo">Пройти опрос заново</button></div>`);
     v.querySelector(".mw").append(mascotEl(S.profile.char,"",true));
     const why={pilot:"Пилот",design:"Дизайн",smm:"SMM",nego:"Переговоры",study:"Учёба"};
-    const rows=[["Уровень сейчас",(ob.level||"A2")+(ob.levelFrom==="test"?" · по тесту":"")],["Цель","C1 · IELTS "+(ob.band||"7.0")],["Экзамен","через ~"+(ob.when||12)+" мес."],["В день",(ob.minutes||60)+" мин · "+todayMissions().length+" миссии"],["Английский для",(ob.why||[]).map(x=>why[x]).join(", ")||"жизни"],["Учитель",c.name],["Старт плана","Месяц "+(lvMonth+1)+": "+MONTHS[lvMonth].title.ru]];
+    const rows=isKid()?[["Уровень сейчас",(ob.level||"A2")+(ob.levelFrom==="test"?" · по тесту":"")],["Цель","пятёрки, A2 → B1, экзамен A2 Key"],["В день",(ob.minutes||30)+" мин · "+todayMissions().length+" миссии"],["Учитель",c.name],["Старт плана","Месяц "+(lvMonth+1)+": "+MS()[lvMonth].title.ru]]:[["Уровень сейчас",(ob.level||"A2")+(ob.levelFrom==="test"?" · по тесту":"")],["Цель","C1 · IELTS "+(ob.band||"7.0")],["Экзамен","через ~"+(ob.when||12)+" мес."],["В день",(ob.minutes||60)+" мин · "+todayMissions().length+" миссии"],["Английский для",(ob.why||[]).map(x=>why[x]).join(", ")||"жизни"],["Учитель",c.name],["Старт плана","Месяц "+(lvMonth+1)+": "+MS()[lvMonth].title.ru]];
     rows.forEach(([k,val])=>{const r=h(`<div><span></span><span></span></div>`);r.children[0].textContent=k;r.children[1].textContent=val;v.querySelector(".summary").append(r)});
     v.querySelector(".btn.primary").onclick=()=>{const sd=new Date();sd.setDate(sd.getDate()-Math.ceil(lvMonth*30.5));S.profile.startDate=dkey(sd);S.profile.monthOverride=null;S.profile.onboarded=true;S.profile.charChosen=true;persist("profile");obStep=0;document.body.classList.remove("ob-on");go("today")};
     v.querySelector('[data-a="redo"]').onclick=()=>{obStep=0;render()};
@@ -1694,7 +1826,7 @@ async function assignHomework(btn,body){
   const last=S.profile.hw?.kind;
   const prompt=`${teacherContext()}
 
-Задай письменную или устную домашнюю работу на завтра (15–20 минут), которая закрепляет English Grammar in Use, Unit ${todayBooks().mu} «${todayBooks().mt}» и тему юнита «${todayBooks().ct.t}»${words?` и сегодняшние слова: ${words}`:""}. Упражнения из самих книг ученик делает отдельно — ты даёшь своё творческое задание на эти правила и слова.
+Задай письменную или устную домашнюю работу на завтра (15–20 минут), которая закрепляет ${isKid()?`тему месяца «${todayBooks().mt}» и «${todayBooks().ct.t}»`:`English Grammar in Use, Unit ${todayBooks().mu} «${todayBooks().mt}» и тему юнита «${todayBooks().ct.t}»`}${words?` и сегодняшние слова: ${words}`:""}. Упражнения из самих книг ученик делает отдельно — ты даёшь своё творческое задание на эти правила и слова.
 Тип: ${last==="write"?'"speak"':last==="speak"?'"write"':'"write" или "speak"'} ("write" — написать текст; "speak" — наговорить ответ в микрофон, он распознается в текст).
 Сделай задание интересным и про жизнь ученика: полёты, дизайн, SMM, переговоры с важными людьми. Объём под уровень ${curMonth().cefr}.
 Ответь только JSON: {"kind":"write","title":"короткое название","task_ru":"задание по-русски, в твоём характере","task_en":"то же по-английски","min_words":60}`;
@@ -1845,8 +1977,10 @@ async function gameSpot(body){
   draw();
 }
 
+function missionName(ms){return isKid()&&ms.id==="ielts"?"Задание A2 Key":ms.ru}
 /* ---------- boot ---------- */
 buildTabs();
+$("#profBtn").onclick=showProfiles;
 {const h0=location.hash.slice(1);if(TABS.some(t=>t.id===h0))route=h0}
 render();
 </script>
