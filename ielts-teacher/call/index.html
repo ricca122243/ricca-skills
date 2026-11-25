@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Звонок · Капитан Беркут</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Nunito:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{--bg:#FBFBFD;--ink:#16162B;--muted:#6C6F84;--line:#E3E5EF;--coral:#EB5A46;--green:#22A861;--bad:#E5484D;--yellow:#F4B63F;--blue-soft:#E4EBFE;--glow:#EB5A46;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:"Nunito",system-ui,sans-serif;overflow:hidden;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
+.app{height:100%;display:grid;grid-template-rows:auto 1fr auto;padding:calc(12px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));max-width:560px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center}
+.timer{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted)}
+.back{color:var(--muted);text-decoration:none;font-weight:800;font-size:14px}
+.center{display:grid;justify-items:center;align-content:center;gap:12px;text-align:center;min-height:0}
+.char{width:min(270px,64vw);filter:drop-shadow(0 0 20px color-mix(in srgb,var(--glow) 55%,transparent)) drop-shadow(0 0 4px color-mix(in srgb,var(--glow) 70%,transparent));transition:filter .4s}
+.char.speaking{animation:glow 1s ease-in-out infinite}
+@keyframes glow{50%{filter:drop-shadow(0 0 34px color-mix(in srgb,var(--glow) 80%,transparent)) drop-shadow(0 0 6px color-mix(in srgb,var(--glow) 90%,transparent))}}
+h1{font-family:"Unbounded",sans-serif;font-size:21px;margin:0}
+.status{font-weight:800;color:var(--muted);font-size:14px}
+.status::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line);margin-right:6px;vertical-align:1px}
+.status.on::before{background:var(--glow);animation:blink .8s infinite}
+@keyframes blink{50%{opacity:.25}}
+.sub{background:#fff;border-radius:20px;padding:12px 16px;box-shadow:0 6px 20px rgba(22,22,43,.08);font-weight:700;font-size:17px;line-height:1.4;max-width:100%;min-height:52px;max-height:24vh;overflow:auto}
+.sub:empty{display:none}
+.you{font-size:14px;color:var(--muted);font-style:italic;font-weight:600;min-height:1.3em;max-width:100%}
+.bottom{display:grid;justify-items:center;gap:10px}
+.callbtn{width:84px;height:84px;border-radius:50%;border:0;display:grid;place-items:center;color:#fff;background:var(--green);box-shadow:0 10px 24px rgba(34,168,97,.4);cursor:pointer;transition:transform .12s}
+.callbtn:active{transform:scale(.94)}
+.callbtn.end{background:var(--bad);box-shadow:0 10px 24px rgba(229,72,77,.4)}
+.callbtn.end svg{transform:rotate(135deg)}
+.callbtn svg{width:34px;height:34px}
+.callbtn:disabled{opacity:.5}
+.hint{font-size:13px;color:var(--muted);font-weight:700;text-align:center;max-width:36ch}
+.err{color:var(--bad)}
+.mic{width:120px;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.mic i{display:block;height:100%;width:0;background:var(--green);transition:width .08s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* mascot */
+.mascot{display:block;overflow:visible;width:100%;height:auto}
+.mascot .m-root{animation:bob 3.2s ease-in-out infinite;transform-origin:100px 190px}
+@keyframes bob{50%{transform:translateY(-5px) scale(1.015,.985)}}
+.mascot .m-eye{transition:transform .1s,opacity .15s}
+.mascot.blink .m-eye{transform:scaleY(.08)}
+.mascot .m-pupil{transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
+.mascot .m-happy,.mascot .m-brow{opacity:0;transition:opacity .2s}
+.mascot[data-state="happy"] .m-happy{opacity:1}
+.mascot[data-state="happy"] .m-eye{opacity:0}
+.mascot[data-state="happy"] .m-root{animation:hop .55s ease 2}
+.mascot[data-state="angry"] .m-brow{opacity:1}
+.mascot[data-state="angry"] .m-root{animation:shake .45s ease 2}
+.mascot[data-state="thinking"] .m-root{animation:think 1.6s ease-in-out infinite}
+.mascot[data-state="listening"] .m-eye{transform:scale(1.14)}
+.mascot[data-state="listening"] .m-root{animation:lean 1.2s ease-in-out infinite}
+.mascot.ringing .m-root{animation:ring .45s ease-in-out infinite}
+.mascot .m-fire,.mascot .m-stars,.mascot .m-sweat,.mascot .m-spark,.mascot .m-sadbrow{opacity:0;transition:opacity .25s}
+.mascot[data-mood="angry"] .m-fire{opacity:1}
+.mascot[data-mood="angry"] .m-brow{opacity:1}
+.mascot .m-fire path{transform-box:fill-box;transform-origin:50% 100%;animation:flick .32s ease-in-out infinite alternate}
+.mascot .m-fire path:nth-child(2n){animation-duration:.27s;animation-delay:-.1s}
+@keyframes flick{0%{transform:scaleY(.82) skewX(-4deg)}100%{transform:scaleY(1.12) skewX(5deg)}}
+.mascot[data-mood="wow"] .m-stars,.mascot[data-mood="wow"] .m-spark{opacity:1}
+.mascot[data-mood="wow"] .m-eye{opacity:0}
+.mascot .m-spark path{transform-box:fill-box;transform-origin:center;animation:twinkle 1s ease-in-out infinite}
+.mascot .m-spark path:nth-child(2){animation-delay:-.4s}.mascot .m-spark path:nth-child(3){animation-delay:-.7s}
+@keyframes twinkle{50%{transform:scale(.4) rotate(45deg);opacity:.4}}
+.mascot .m-stars path{transform-box:fill-box;transform-origin:center;animation:spin 2.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.mascot[data-mood="happy"] .m-happy,.mascot[data-mood="laugh"] .m-happy{opacity:1}
+.mascot[data-mood="happy"] .m-eye,.mascot[data-mood="laugh"] .m-eye{opacity:0}
+.mascot[data-mood="laugh"] .m-root{animation:laugh .28s ease-in-out infinite}
+@keyframes laugh{50%{transform:translateY(-4px) rotate(2deg)}}
+.mascot[data-mood="sad"] .m-sweat,.mascot[data-mood="sad"] .m-sadbrow{opacity:1}
+.mascot[data-mood="sad"] .m-pupil{transform:translate(0,5px)!important}
+.mascot .m-sweat{animation:drip 1.6s ease-in infinite}
+@keyframes drip{0%{transform:translateY(-4px)}100%{transform:translateY(8px)}}
+.mascot.m-static .m-root{animation:none}
+.mascot .m-mouth{transition:d .09s}
+.mascot .m-jaw{transition:transform .09s}
+@keyframes hop{40%{transform:translateY(-16px) scale(.97,1.04)}70%{transform:translateY(0) scale(1.04,.96)}}
+@keyframes shake{20%{transform:translateX(-6px) rotate(-3deg)}60%{transform:translateX(6px) rotate(3deg)}}
+@keyframes think{50%{transform:rotate(-5deg) translateY(-3px)}}
+@keyframes lean{50%{transform:scale(1.03)}}
+@keyframes ring{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+.m-thinkanim .m-pupil{animation:look 1.4s ease-in-out infinite}
+@keyframes look{0%,100%{transform:translate(5px,-5px)}50%{transform:translate(-5px,-5px)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><a class="back" href="https://claude.ai/artifact/EsCN6j1adSujq6eTYMw8wS">← В приложение</a><span class="timer" id="timer">00:00 / 10:00</span></div>
+  <div class="center">
+    <div class="char stage" id="char"></div>
+    <h1>Капитан Беркут</h1>
+    <div class="status" id="status">Нажми зелёную кнопку, чтобы позвонить</div>
+    <div class="sub" id="sub"></div>
+    <div class="you" id="you"></div>
+  </div>
+  <div class="bottom">
+    <div class="mic" id="mic" hidden><i></i></div>
+    <button class="callbtn" id="btn" type="button" aria-label="Позвонить"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11 11 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11 11 0 0 0 .6 3.6 1 1 0 0 1-.25 1z"/></svg></button>
+    <div class="hint" id="hint">Говори обычным голосом. Можно перебивать — он услышит.</div>
+  </div>
+</div>
+<script src="elevenlabs-client-1.36.0.js"></script>
+<script>
+"use strict";
+const AGENT_ID="agent_5301m88ysjknerdvejnwv283j2xd";
+function h(html){const t=document.createElement("template");t.innerHTML=html.trim();return t.content.firstElementChild}
+const CHARS={
+ berkut:{name:"Капитан Беркут",short:"Беркуту",tag:"Жёсткий · 18+",persona:"savage",color:"#EB5A46",shade:"#C23A27",kind:"bird",line:"Ну чё, курсант? Хватит спать — погнали говорить."},
+ sokol:{name:"Инструктор Сокол",short:"Соколу",tag:"Строгий",persona:"strict",color:"#2F5FE8",shade:"#1F43B8",kind:"square",line:"Good morning. Briefing starts now. Готов?"},
+ zefir:{name:"Зефир",short:"Зефиру",tag:"Добрый",persona:"kind",color:"#F4A62A",shade:"#D98A12",kind:"cloud",line:"Привет! Давай просто поболтаем — без стресса."},
+ den:{name:"Дэн",short:"Дэну",tag:"Друг на сленге",persona:"buddy",color:"#9257E0",shade:"#6F38BF",kind:"round",line:"Yo, bro! What's up? Рассказывай, как жизнь."},
+};
+
+const MOUTH={smile:"M78 126 Q100 148 122 126 Q100 137 78 126 Z",o1:"M80 125 Q100 160 120 125 Q100 119 80 125 Z",o2:"M87 127 Q100 145 113 127 Q100 122 87 127 Z",flat:"M82 135 Q100 129 118 135 Q100 138 82 135 Z",wow:"M90 133 Q100 113 110 133 Q100 152 90 133 Z"};
+function mascotSVG(id,cls=""){
+  const c=CHARS[id]||CHARS.berkut,D="#1B1530";
+  let body="",acc="",mouth=`<path class="m-mouth" d="${MOUTH.smile}" fill="#3A1220"/>`;
+  if(c.kind==="bird"){
+    body=`<path d="M80 40 L88 12 L98 36 L108 8 L114 38 L124 18 L124 44 Z" fill="${c.shade}"/><circle cx="100" cy="110" r="80" fill="${c.color}"/><ellipse cx="100" cy="140" rx="52" ry="40" fill="#fff" opacity=".16"/>`;
+    acc=`<rect x="22" y="48" width="156" height="12" rx="6" fill="#5B3A22"/><circle cx="74" cy="54" r="17" fill="#A8DDFF" stroke="#5B3A22" stroke-width="6"/><circle cx="126" cy="54" r="17" fill="#A8DDFF" stroke="#5B3A22" stroke-width="6"/><path d="M66 48 l8 -4" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M118 48 l8 -4" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`;
+    mouth=`<g><path class="m-jaw" d="M88 128 L112 128 L100 150 Z" fill="#D58B1E"/><path d="M80 118 Q100 108 120 118 L100 140 Z" fill="#F7C548"/></g>`;
+  }else if(c.kind==="square"){
+    body=`<rect x="22" y="40" width="156" height="146" rx="46" fill="${c.color}"/>`;
+    acc=`<path d="M38 68 Q100 6 162 68 Z" fill="#17214A"/><path d="M28 64 H172 Q178 74 168 78 H32 Q22 74 28 64 Z" fill="#0F1735"/><circle cx="100" cy="44" r="8" fill="#F4B63F"/><path d="M178 102 Q186 156 132 156" fill="none" stroke="#17214A" stroke-width="5" stroke-linecap="round"/><circle cx="130" cy="156" r="6" fill="#17214A"/>`;
+  }else if(c.kind==="cloud"){
+    body=`<g fill="${c.color}"><circle cx="58" cy="118" r="48"/><circle cx="142" cy="118" r="48"/><circle cx="100" cy="80" r="58"/><circle cx="100" cy="136" r="54"/></g>`;
+    acc=`<ellipse cx="52" cy="126" rx="13" ry="8" fill="#F26A6A" opacity=".5"/><ellipse cx="148" cy="126" rx="13" ry="8" fill="#F26A6A" opacity=".5"/><path d="M92 26 q8 -14 16 0" stroke="${c.shade}" stroke-width="6" fill="none" stroke-linecap="round"/>`;
+  }else{
+    body=`<circle cx="100" cy="112" r="80" fill="${c.color}"/>`;
+    acc=`<path d="M26 110 Q24 22 100 22 Q176 22 174 110" fill="none" stroke="#1E1B2E" stroke-width="11" stroke-linecap="round"/><rect x="10" y="90" width="28" height="48" rx="12" fill="#1E1B2E"/><rect x="162" y="90" width="28" height="48" rx="12" fill="#1E1B2E"/><rect x="16" y="102" width="8" height="24" rx="4" fill="#3EE0C4"/><rect x="176" y="102" width="8" height="24" rx="4" fill="#3EE0C4"/>`;
+  }
+  const eyes=[72,128].map(x=>`<g class="m-eye" style="transform-origin:${x}px 100px"><circle cx="${x}" cy="100" r="19" fill="#fff"/><g class="m-pupil"><circle cx="${x}" cy="101" r="10" fill="${D}"/><circle cx="${x+3.5}" cy="96.5" r="3.4" fill="#fff"/></g></g>`).join("");
+  const extra=`<path class="m-happy" d="M57 106 Q72 88 87 106 M113 106 Q128 88 143 106" fill="none" stroke="${D}" stroke-width="6.5" stroke-linecap="round"/><path class="m-brow" d="M52 72 L88 86 M148 72 L112 86" stroke="${D}" stroke-width="8" stroke-linecap="round" fill="none"/>`;
+  const fy=c.kind==="square"?20:c.kind==="cloud"?28:c.kind==="bird"?12:8;
+  const fire=`<g class="m-fire">${[[62,26,"#FF4D2E"],[82,40,"#FF7A1C"],[100,48,"#FF4D2E"],[118,40,"#FF7A1C"],[138,26,"#FF4D2E"]].map(([x,hh,col])=>`<path d="M${x-15} ${fy+18} Q${x-16} ${fy+18-hh*.55} ${x} ${fy+18-hh} Q${x+3} ${fy+18-hh*.45} ${x+15} ${fy+18} Z" fill="${col}"/>`).join("")}${[[82,22],[100,28],[118,22]].map(([x,hh])=>`<path d="M${x-8} ${fy+18} Q${x-7} ${fy+18-hh*.5} ${x} ${fy+18-hh} Q${x+3} ${fy+18-hh*.4} ${x+8} ${fy+18} Z" fill="#FFD23F"/>`).join("")}</g>`;
+  const star=(x,y,r)=>{let d="";for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5,rr=k%2?r*.45:r;d+=(k?"L":"M")+(x+rr*Math.cos(a)).toFixed(1)+" "+(y+rr*Math.sin(a)).toFixed(1)}return d+"Z"};
+  const stars=`<g class="m-stars"><path d="${star(72,100,17)}" fill="${D}"/><path d="${star(128,100,17)}" fill="${D}"/></g>`;
+  const spark=`<g class="m-spark"><path d="${star(28,58,9)}" fill="#FFC531"/><path d="${star(176,70,7)}" fill="#FFC531"/><path d="${star(168,170,6)}" fill="#FFC531"/></g>`;
+  const sad=`<path class="m-sadbrow" d="M54 84 L86 74 M146 84 L114 74" stroke="${D}" stroke-width="7" stroke-linecap="round" fill="none"/><path class="m-sweat" d="M162 64 Q170 78 162 84 Q154 78 162 64 Z" fill="#7CC8FF"/>`;
+  return `<svg viewBox="0 0 200 200" class="mascot ${cls}" data-char="${id}" data-state="idle" data-mood="calm" aria-hidden="true"><g class="m-root">${fire}${body}${c.kind==="bird"?"":acc}${eyes}${stars}${extra}${sad}${mouth}${c.kind==="bird"?acc:""}${spark}</g></svg>`;
+}
+const mascots=new Set();let curMascot=null;
+function mountMascot(svg,main){if(!svg)return null;const m={svg,state:"idle",talking:false,nextBlink:Date.now()+1500+Math.random()*2500,nextLook:0,pointerAt:0,seen:false,tm:0};mascots.add(m);if(main)curMascot=m;return m}
+function mascotSet(m,state){if(!m)return;m.state=state;m.svg.dataset.state=state;clearTimeout(m.tm);
+  if(!m.talking){const mo=m.svg.querySelector(".m-mouth");if(mo)mo.setAttribute("d",state==="angry"?MOUTH.flat:state==="listening"?MOUTH.wow:state==="happy"?MOUTH.o1:MOUTH.smile);const j=m.svg.querySelector(".m-jaw");if(j)j.style.transform=state==="happy"||state==="listening"?"translateY(6px)":""}
+  if(state==="thinking")mascotLook(m,6,-7);if(state==="listening")mascotLook(m,0,0)}
+function mascotFlash(m,state,ms=1300){if(!m)return;mascotSet(m,state);m.tm=setTimeout(()=>mascotSet(m,"idle"),ms)}
+const MOOD_GLOW={calm:null,wow:"#FF9F1C",angry:"#FF3B30",happy:"#22C55E",laugh:"#FFB800",sad:"#7C5CFF"};
+function mascotMood(m,mood){if(!m)return;mood=MOOD_GLOW.hasOwnProperty(mood)?mood:"calm";m.svg.dataset.mood=mood;const st=m.svg.closest(".stage,.hero-card");if(st&&st.classList.contains("stage"))st.style.setProperty("--glow",MOOD_GLOW[mood]||"var(--c)")}
+function mascotLook(m,x,y){m.svg.querySelectorAll(".m-pupil").forEach(p=>p.style.transform=`translate(${x}px,${y}px)`)}
+function mascotTalk(m,on){if(!m)return;m.talking=on;if(!on){const mo=m.svg.querySelector(".m-mouth");if(mo)mo.setAttribute("d",MOUTH.smile);const j=m.svg.querySelector(".m-jaw");if(j)j.style.transform=""}}
+setInterval(()=>{const now=Date.now();for(const m of mascots){
+  if(!m.svg.isConnected){if(m.seen){mascots.delete(m);if(curMascot===m)curMascot=null}continue}m.seen=true;
+  if(m.talking){const r=Math.random();const mo=m.svg.querySelector(".m-mouth");if(mo)mo.setAttribute("d",r<.4?MOUTH.o1:r<.75?MOUTH.o2:MOUTH.smile);const j=m.svg.querySelector(".m-jaw");if(j)j.style.transform=`translateY(${Math.round(r*10)}px)`}
+  if(now>m.nextBlink){m.svg.classList.add("blink");setTimeout(()=>m.svg.classList.remove("blink"),130);m.nextBlink=now+2200+Math.random()*3200}
+  if(now>m.nextLook&&now-m.pointerAt>2500&&(m.state==="idle")){mascotLook(m,Math.round(Math.random()*12-6),Math.round(Math.random()*8-4));m.nextLook=now+1400+Math.random()*2600}
+}},120);
+document.addEventListener("pointermove",e=>{for(const m of mascots){if(!m.svg.isConnected||m.state!=="idle")continue;const r=m.svg.getBoundingClientRect();if(!r.width)continue;
+  const dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),d=Math.hypot(dx,dy)||1,k=Math.min(1,d/300);mascotLook(m,Math.round(dx/d*7*k),Math.round(dy/d*6*k));m.pointerAt=Date.now()}},{passive:true});
+function mascotEl(id,cls,main){const w=h(`<div>${mascotSVG(id,cls)}</div>`);const svg=w.firstElementChild;mountMascot(svg,main);return svg}
+
+const $=id=>document.getElementById(id);
+const ch=$("char");ch.append(mascotEl("berkut","",true));
+const M=curMascot;
+let conv=null,t0=0,tick=null,raf=0,moodT=0;
+const MOOD_RULES=[[/бля|блин|чего\?|серь[её]зно|мимо|пельмен|валенок|дятел|опять|нет-нет|не то|ой вс[её]|больно/i,"angry"],[/ха-ха|ахах|хаха|смешн|ржу/i,"laugh"],[/красава|отлично|ого|вот это|молод|супер|great|perfect|excellent|well done|правильно|верно|респект/i,"wow"],[/жаль|эх|грустно|разочар/i,"sad"]];
+function moodFor(t){for(const [re,m] of MOOD_RULES)if(re.test(t))return m;return "happy"}
+function setMood(m,ms){mascotMood(M,m);clearTimeout(moodT);if(ms)moodT=setTimeout(()=>mascotMood(M,"calm"),ms)}
+function setStatus(t,on){const s=$("status");s.textContent=t;s.classList.toggle("on",!!on)}
+function fmt(n){return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0")}
+function loop(){
+  if(conv){
+    let v=0,iv=0;try{v=conv.getOutputVolume()||0;iv=conv.getInputVolume()||0}catch(e){}
+    const jaw=M.svg.querySelector(".m-jaw");if(jaw)jaw.style.transform=`translateY(${Math.min(12,Math.round(v*40))}px)`;
+    $("mic").querySelector("i").style.width=Math.min(100,Math.round(iv*260))+"%";
+  }
+  raf=requestAnimationFrame(loop);
+}
+async function start(){
+  const btn=$("btn");btn.disabled=true;setStatus("Соединяю…",true);$("hint").classList.remove("err");
+  try{
+    await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(e){setStatus("Нет доступа к микрофону");$("hint").textContent="Разреши микрофон в настройках браузера и нажми ещё раз.";$("hint").classList.add("err");btn.disabled=false;return}
+  try{
+    conv=await ElevenLabsClient.Conversation.startSession({
+      agentId:AGENT_ID,connectionType:"webrtc",
+      onConnect:()=>{t0=Date.now();tick=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);$("timer").textContent=fmt(Math.min(s,5999))+" / 10:00"},1000);btn.classList.add("end");btn.setAttribute("aria-label","Завершить");btn.disabled=false;$("mic").hidden=false;$("hint").textContent="Говори обычным голосом. Можно перебивать — он услышит."},
+      onDisconnect:()=>{end(true)},
+      onError:(m)=>{setStatus("Ошибка связи");$("hint").textContent=String(m||"Попробуй ещё раз.");$("hint").classList.add("err")},
+      onModeChange:({mode})=>{const sp=mode==="speaking";ch.classList.toggle("speaking",sp);setStatus(sp?"Беркут говорит…":"Слушаю тебя…",true);if(!sp){mascotSet(M,"listening")}else mascotSet(M,"idle")},
+      onMessage:(p)=>{const role=p.role||p.source;const t=String(p.message||"");if(!t)return;
+        if(role==="agent"||role==="ai"){$("sub").textContent=t;setMood(moodFor(t),6000)}
+        else{$("you").textContent="Ты: "+t}}
+    });
+  }catch(e){setStatus("Не получилось позвонить");$("hint").textContent=(e&&e.message)||"Проверь интернет и попробуй ещё раз.";$("hint").classList.add("err");btn.disabled=false;conv=null}
+}
+async function end(fromRemote){
+  const c=conv;conv=null;clearInterval(tick);ch.classList.remove("speaking");$("mic").hidden=true;
+  const btn=$("btn");btn.classList.remove("end");btn.setAttribute("aria-label","Позвонить");btn.disabled=false;
+  setStatus(fromRemote?"Звонок завершён. Нажми, чтобы позвонить снова":"Звонок завершён",false);mascotSet(M,"idle");setMood("calm");
+  const jaw=M.svg.querySelector(".m-jaw");if(jaw)jaw.style.transform="";
+  if(c&&!fromRemote){try{await c.endSession()}catch(e){}}
+}
+$("btn").onclick=()=>{if(conv)end(false);else start()};
+loop();
+</script>
+</body>
+</html>
