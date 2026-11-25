@@ -876,12 +876,13 @@ function micButton(target){
 }
 
 /* ---------- router ---------- */
-const TABS=[{id:"today",ru:"Сегодня",icon:"today"},{id:"teacher",ru:"Говорить",icon:"chat"},{id:"games",ru:"Игры",icon:"games"},{id:"plan",ru:"Путь",icon:"plan"},{id:"progress",ru:"Прогресс",icon:"stats"}];
+const TABS=[{id:"today",ru:"Сегодня",icon:"today"},{id:"teacher",ru:"Говорить",icon:"chat"},{id:"games",ru:"Игры",icon:"games"},{id:"progress",ru:"Прогресс",icon:"stats"}];
 let route="today",lesson=null;
+const ROUTES=[...TABS.map(t=>t.id),"plan"];
 function buildTabs(){for(const host of [$("#tabsTop"),$("#tabsBottom")]){host.innerHTML="";for(const t of TABS){const b=h(`<button class="tab" type="button">${I[t.icon]}<span>${t.ru}</span></button>`);b.dataset.tab=t.id;b.onclick=()=>go(t.id);host.append(b)}}}
 function go(id){if(route==="teacher"&&id!=="teacher"){leaveTalk();endLive();liveMode=false}stopSpeak();talkPicker=false;lesson=null;route=id;if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);render();window.scrollTo({top:0})}
 function render(){
-  document.querySelectorAll(".tab").forEach(b=>{if(b.dataset.tab===route)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
+  document.querySelectorAll(".tab").forEach(b=>{if(b.dataset.tab===(route==="plan"?"progress":route))b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
   updateStats();
   const app=$("#app");app.innerHTML="";
   document.body.classList.toggle("ob-on",!S.profile.onboarded);
@@ -891,7 +892,7 @@ function render(){
   ({today:viewToday,teacher:viewTalk,games:viewGames,plan:viewPlan,progress:viewProgress}[route]||viewToday)(app);
 }
 function rerenderIfAiView(){if(!lesson&&(route==="teacher"||route==="today"))render()}
-window.addEventListener("hashchange",()=>{const id=location.hash.slice(1);if(TABS.some(t=>t.id===id)&&id!==route)go(id)});
+window.addEventListener("hashchange",()=>{const id=location.hash.slice(1);if(ROUTES.includes(id)&&id!==route)go(id)});
 
 const isWritingDay=()=>new Date().getDate()%2===0;
 
@@ -1138,6 +1139,7 @@ function fixEl(wrong,right,why){const d=h(`<div class="fix"><span><s></s> → <i
 
 /* ---------- PLAN ---------- */
 function viewPlan(app){
+  {const bk=h(`<div><button class="btn ghost" type="button">${I.back} Назад в прогресс</button></div>`);bk.querySelector("button").onclick=()=>go("progress");app.append(bk)}
   viewMap(app);
   const L=planLang,cur=monthIndex();
   const t=(ru,en)=>L==="ru"?ru:en;
@@ -1169,7 +1171,9 @@ function viewPlan(app){
 /* ---------- PROGRESS ---------- */
 function viewProgress(app){
   {const msg=checkLeagueWeek();if(msg)toast(msg)}
+  {const pb=h(`<button class="btn primary big" type="button">${I.plan} Мой путь и план на год</button>`);pb.onclick=()=>go("plan");app.append(pb)}
   app.append(leagueCard());
+  if(!isKid()){const duo=h(`<section class="grid2"></section>`);duo.append(targetCard(),hwCard());app.append(duo,mockCard(),bookCard())}
   const band=estBand();const nb=S.notebook;
   const total=Object.values(S.profile.days).filter(d=>d.xp>0).length;
   app.append(h(`<section class="tiles">
@@ -1556,7 +1560,7 @@ function studentStatus(){
   return `Анкета ученика: цель — ${ob.goal==="speak"?"свободная речь":ob.goal==="ielts"?"IELTS":"свободная речь и IELTS"}; нужный балл IELTS ${ob.band||"7.0"}; экзамен через ~${ob.when||12} мес.; занимается ${ob.minutes||60} мин/день; сферы: ${(ob.why||[]).map(x=>why[x]).filter(Boolean).join(", ")||"пилот, дизайн, SMM, переговоры"}; больше всего боится: ${({fail:"завалить экзамен",speak:"говорить с людьми вживую",grammar:"грамматики",time:"что не хватит времени",lazy:"своей лени"})[ob.worry]||"—"}.
 Состояние: серия ${liveStreak()} дн. подряд; сегодня выполнено миссий ${d?d.done.length:0} из ${todayMissions().length}; ${rep.length?"повторяет одни и те же ошибки: "+rep.join(", "):"повторяющихся ошибок пока нет"}; ${overdue?"домашка ПРОСРОЧЕНА на "+overdue+" дн.":hw&&hw.status==="open"?"домашка задана, срок не прошёл":"долгов по домашке нет"}.`;
 }
-function todayMissions(){const mn=+((S.profile.ob||{}).minutes||60);return mn<=15?MISSIONS.filter(m=>["words","talk"].includes(m.id)):mn<=30?MISSIONS.filter(m=>["words","grammar","talk"].includes(m.id)):MISSIONS}
+function todayMissions(){const mn=+((S.profile.ob||{}).minutes||30);return mn<=15?MISSIONS.filter(m=>["words","talk"].includes(m.id)):mn<=30?MISSIONS.filter(m=>["words","grammar","talk"].includes(m.id)):MISSIONS}
 const dailyGoal=()=>todayMissions().reduce((a,m)=>a+m.xp,0);
 
 /* ---------- mascot ---------- */
@@ -1637,11 +1641,10 @@ function viewToday(app){
   if(!isKid()){const b=hero.querySelector('[data-a="call"]');if(STANDALONE){b.innerHTML=`${I.phone} Живой звонок`;b.onclick=openLive}else{const a=h(`<a class="btn white" target="_blank" rel="noopener" style="text-decoration:none">${I.phone} Живой звонок</a>`);a.href=LIVE_AGENT_URL;b.replaceWith(a)}}
   else hero.querySelector('[data-a="call"]').onclick=()=>startCall();
   hero.querySelector('[data-a="next"]')?.addEventListener("click",()=>{const nx=list.find(x=>!d.done.includes(x.id));if(nx)openMission(nx.id)});
-  if(!S.profile.placement)app.append(placementBanner());
   app.append(hero);
+  if(!S.profile.placement)app.append(placementBanner());
   {const msg=checkLeagueWeek();if(msg)setTimeout(()=>toast(msg),600)}
-  if(!isKid())app.append(mockCard());
-  app.append(isKid()?schoolCard():bookCard());
+  if(isKid())app.append(schoolCard());
   const card=h(`<section class="card"><div class="row" style="justify-content:space-between"><h2>Миссии на сегодня</h2><span class="eyebrow">${doneN}/${list.length}</span></div><div class="missions" style="margin-top:14px"></div></section>`);
   const box=card.querySelector(".missions");
   for(const ms of list){
@@ -1653,10 +1656,10 @@ function viewToday(app){
     if(ms.id==="talk"&&!done)sub=`Голосом или текстом · ${Math.min(d.talk||0,TALK_TARGET)}/${TALK_TARGET} фраз`;
     if(ms.id==="ielts")sub=(/Writing|Speaking/.test(bk.ct.p)&&monthIndex()>=3?bk.ct.p:(isWritingDay()?"Writing":"Speaking"))+" с оценкой band · "+ms.min;
     const b=h(`<button class="mission ${done?"done":""}" type="button"><span class="ic ${MCOL[ms.id]}">${done?I.check:I[ms.icon]}</span><span><b>${missionName(ms)}</b><span class="sub"></span></span><span class="xp">${done?"готово":"+"+ms.xp+" XP"}</span></button>`);
-    b.querySelector(".sub").textContent=sub;b.onclick=()=>openMission(ms.id);box.append(b);
+    b.querySelector(".sub").remove();b.onclick=()=>openMission(ms.id);box.append(b);
   }
   app.append(card);
-  const duo=h(`<section class="grid2"></section>`);duo.append(hwCard(),targetCard());app.append(duo);
+  if(S.profile.hw)app.append(hwCard());
   maybeIncoming();
   if(!cap.sample)app.append(h(`<p class="note info">Учитель оживёт, когда страница откроется на claude.ai. При первом задании нажми «Разрешить», чтобы он мог отвечать.</p>`));
 }
@@ -2096,7 +2099,8 @@ const OB_STEPS=[
  {id:"char",type:"chars",title:"Выбери своего учителя",sub:"Он будет звонить, проверять домашку и гонять тебя"},
 ];
 let obStep=0;
-function obSteps(){const ob=S.profile.ob||{};return (isKid()?KID_OB_STEPS:OB_STEPS).filter(s=>!(s.id==="level"&&ob.levelFrom==="test"))}
+const OB_SIMPLE=["goal","placement","level"];
+function obSteps(){const ob=S.profile.ob||{};return (isKid()?KID_OB_STEPS:OB_STEPS.filter(s=>OB_SIMPLE.includes(s.id))).filter(s=>!(s.id==="level"&&ob.levelFrom==="test"))}
 function viewOnboarding(app){
   const OBS=obSteps();
   const total=OBS.length+2,ob=S.profile.ob||(S.profile.ob={});
@@ -2372,6 +2376,6 @@ function missionName(ms){return isKid()&&ms.id==="ielts"?"Задание A2 Key"
 /* ---------- boot ---------- */
 buildTabs();
 $("#profBtn").onclick=showProfiles;
-{const h0=location.hash.slice(1);if(TABS.some(t=>t.id===h0))route=h0;else if(h0==="live"&&STANDALONE){route="teacher";liveMode=true}}
+{const h0=location.hash.slice(1);if(ROUTES.includes(h0))route=h0;else if(h0==="live"&&STANDALONE){route="teacher";liveMode=true}}
 render();
 </script>
