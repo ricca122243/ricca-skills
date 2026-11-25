@@ -269,6 +269,7 @@ textarea.field{min-height:160px;resize:vertical;line-height:1.55}
 .ring{--c:var(--coral);background:var(--c);color:#fff;border-radius:30px;padding:28px 24px;text-align:center;width:min(360px,100%);display:grid;gap:8px;justify-items:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}
 .ring .eyebrow{color:rgba(255,255,255,.85)}
 .ring .mascot{width:170px}
+.callbtn{width:84px;height:84px;border-radius:50%;border:0;display:grid;place-items:center;color:#fff;background:#22A861;box-shadow:0 10px 24px rgba(34,168,97,.4);transition:transform .12s}.callbtn:active{transform:scale(.94)}.callbtn svg{width:34px;height:34px}.callbtn.end{background:#E5484D;box-shadow:0 10px 24px rgba(229,72,77,.4)}.callbtn.end svg{transform:rotate(135deg)}.callbtn:disabled{opacity:.5}
 .callbtns{display:flex;gap:40px;justify-content:center;align-items:flex-start;margin-top:10px}
 .callbtns label{display:grid;justify-items:center;gap:6px;font-size:13px;font-weight:800}
 .round{width:68px;height:68px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;color:#fff}
@@ -400,6 +401,53 @@ textarea.field{min-height:160px;resize:vertical;line-height:1.55}
 <main class="wrap"><div id="app" class="view"></div></main>
 <nav class="tabbar tabs" aria-label="Разделы" id="tabsBottom"></nav>
 
+<script>
+/* Standalone mode (own website): provide the same window.claude API the app uses on claude.ai. */
+(function(){
+  if(window.claude&&typeof window.claude.use==="function")return;
+  function mapErr(e,status){if(e&&e.name==="AbortError")return{code:"cancelled",message:"cancelled"};if(status===429)return{code:"rate_limited",message:"rate limited"};return{code:"upstream_error",message:String(e&&e.message||e||status)}}
+  async function sample(input,opts){
+    opts=opts||{};const messages=typeof input==="string"?[{role:"user",content:input}]:input;
+    let r;try{r=await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages,tier:opts.modelTier||"default"}),signal:opts.signal})}catch(e){throw mapErr(e)}
+    if(!r.ok||!r.body){let t="";try{t=await r.text()}catch(e){}throw mapErr(new Error(t||("HTTP "+r.status)),r.status)}
+    const rd=r.body.getReader(),dec=new TextDecoder();let text="";
+    try{for(;;){const {done,value}=await rd.read();if(done)break;const delta=dec.decode(value,{stream:true});if(!delta)continue;text+=delta;if(opts.onText)opts.onText({text,delta})}}catch(e){const er=mapErr(e);er.text=text;throw er}
+    if(text.includes("[[ERROR]]"))throw{code:"upstream_error",message:text,text:text.split("[[ERROR]]")[0]};
+    if(!text.trim())throw{code:"empty_completion",message:"empty"};
+    return{text,truncated:false};
+  }
+  sample.json=async function(input,opts){
+    const add="\n\nОтветь ТОЛЬКО валидным JSON, без пояснений и без ```.";
+    const inp=typeof input==="string"?input+add:input.map((m,i)=>i===input.length-1?{role:m.role,content:m.content+add}:m);
+    const {text}=await sample(inp,Object.assign({},opts,{onText:null}));
+    let t=text.trim().replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"");
+    const a=t.search(/[\[{]/),b=Math.max(t.lastIndexOf("}"),t.lastIndexOf("]"));if(a>=0&&b>a)t=t.slice(a,b+1);
+    try{return JSON.parse(t)}catch(e){throw{code:"invalid_json",message:"invalid json",text}}
+  };
+  sample.limits=async()=>({images:false});
+  function dictation(){
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return null;
+    let rec=null,state="idle",stopRes=null;const fin=[],par=[],st=[];
+    const emit=(arr,v)=>arr.forEach(f=>{try{f(v)}catch(e){}});
+    return{
+      start(o){o=o||{};return new Promise((res,rej)=>{
+        if(rec){res();return}
+        rec=new SR();const L=o.language||"en";rec.lang=L==="ru"?"ru-RU":L==="en"?"en-US":L;rec.continuous=true;rec.interimResults=true;let started=false;
+        rec.onstart=()=>{started=true;state="listening";emit(st,{state});res()};
+        rec.onresult=e=>{let interim="";for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)emit(fin,{text:" "+r[0].transcript.trim()});else interim+=r[0].transcript}emit(par,{text:interim})};
+        rec.onerror=e=>{if(!started)rej({code:(e.error==="not-allowed"||e.error==="service-not-allowed")?"not_granted":"unavailable"})};
+        rec.onend=()=>{rec=null;state="idle";emit(par,{text:""});emit(st,{state:"idle",reason:"stopped"});if(stopRes){stopRes();stopRes=null}};
+        try{rec.start()}catch(err){rec=null;rej({code:"unavailable"})}
+      })},
+      stop(){return new Promise(r=>{if(!rec){r();return}stopRes=r;try{rec.stop()}catch(e){r()}})},
+      active(){return state!=="idle"},
+      onPartial(f){par.push(f);return()=>{}},onFinal(f){fin.push(f);return()=>{}},onState(f){st.push(f);return()=>{}}
+    };
+  }
+  const dict=dictation();
+  window.claude={__standalone:true,use:async n=>n==="sample"?sample:n==="dictation"?dict:null};
+})();
+</script>
 <script>
 "use strict";
 /* ---------- icons ---------- */
@@ -744,13 +792,16 @@ const thinking=(label="Учитель готовит задание…")=>`<div 
 function errCopy(e){const c=e&&e.code;return({
   not_granted:"Ты не разрешил странице обращаться к Claude. Обнови страницу и нажми «Разрешить», чтобы учитель работал.",
   rate_limited:"Слишком много запросов подряд. Подожди минуту и нажми «Ещё раз».",
-  unavailable:"ИИ-учитель доступен, когда страница открыта на claude.ai (вход в аккаунт).",
+  unavailable:window.claude&&window.claude.__standalone?"Учитель сейчас недоступен. Проверь интернет и нажми «Ещё раз».":"ИИ-учитель доступен, когда страница открыта на claude.ai (вход в аккаунт).",
+  timeout:"Учитель слишком долго думает. Нажми «Ещё раз».",
+  upstream_error:"Учитель не ответил. Проверь интернет и нажми «Ещё раз».",
   invalid_json:"Ответ пришёл в неверном формате. Нажми «Ещё раз».",
   sampling_disabled:"Обращения к Claude отключены в настройках организации.",
   session_expired:"Сессия истекла. Обнови страницу.",
 }[c]||"Не получилось связаться с учителем. Нажми «Ещё раз».")}
-async function ask(input,opts={}){if(!cap.sample)throw{code:"unavailable"};return cap.sample(input,opts)}
-async function askJson(input,opts={}){if(!cap.sample)throw{code:"unavailable"};return cap.sample.json(input,opts)}
+function withTimeout(p,ms){let t;return Promise.race([p.finally(()=>clearTimeout(t)),new Promise((_,rej)=>{t=setTimeout(()=>rej({code:"timeout"}),ms)})])}
+async function ask(input,opts={}){if(!cap.sample)throw{code:"unavailable"};return withTimeout(cap.sample(input,opts),150000)}
+async function askJson(input,opts={}){if(!cap.sample)throw{code:"unavailable"};return withTimeout(cap.sample.json(input,opts),150000)}
 
 /* ---------- speech ---------- */
 const VOICE={berkut:{tts:"rounded",pitch:.72,rate:.97},sokol:{tts:"glassy",pitch:.92,rate:1},zefir:{tts:"airy",pitch:1.4,rate:.97},den:{tts:"buttery",pitch:1.12,rate:1.06}};
@@ -814,7 +865,7 @@ function micButton(target){
 const TABS=[{id:"today",ru:"Сегодня",icon:"today"},{id:"teacher",ru:"Говорить",icon:"chat"},{id:"games",ru:"Игры",icon:"games"},{id:"plan",ru:"Путь",icon:"plan"},{id:"progress",ru:"Прогресс",icon:"stats"}];
 let route="today",lesson=null;
 function buildTabs(){for(const host of [$("#tabsTop"),$("#tabsBottom")]){host.innerHTML="";for(const t of TABS){const b=h(`<button class="tab" type="button">${I[t.icon]}<span>${t.ru}</span></button>`);b.dataset.tab=t.id;b.onclick=()=>go(t.id);host.append(b)}}}
-function go(id){if(route==="teacher"&&id!=="teacher")leaveTalk();stopSpeak();talkPicker=false;lesson=null;route=id;if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);render();window.scrollTo({top:0})}
+function go(id){if(route==="teacher"&&id!=="teacher"){leaveTalk();endLive();liveMode=false}stopSpeak();talkPicker=false;lesson=null;route=id;if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);render();window.scrollTo({top:0})}
 function render(){
   document.querySelectorAll(".tab").forEach(b=>{if(b.dataset.tab===route)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
   updateStats();
@@ -1562,7 +1613,7 @@ function viewToday(app){
   hero.querySelector("h1").textContent=greet+"!";hero.querySelector(".gl").textContent=greetLine(doneN,list.length);
   hero.querySelector(".speech").textContent=c.line;
   {const ms=mascotEl(S.profile.char,"",true);talkTap(ms);hero.querySelector(".hero-char").prepend(ms);mascotMood(curMascot,doneN>=list.length?"wow":doneN===0&&hour>=17?(curPersona()==="kind"?"sad":"angry"):doneN>0?"happy":"calm")}
-  if(!isKid()){const b=hero.querySelector('[data-a="call"]');const a=h(`<a class="btn white" target="_blank" rel="noopener" style="text-decoration:none">${I.phone} Живой звонок</a>`);a.href=LIVE_AGENT_URL;b.replaceWith(a)}
+  if(!isKid()){const b=hero.querySelector('[data-a="call"]');if(STANDALONE){b.innerHTML=`${I.phone} Живой звонок`;b.onclick=openLive}else{const a=h(`<a class="btn white" target="_blank" rel="noopener" style="text-decoration:none">${I.phone} Живой звонок</a>`);a.href=LIVE_AGENT_URL;b.replaceWith(a)}}
   else hero.querySelector('[data-a="call"]').onclick=()=>startCall();
   hero.querySelector('[data-a="next"]')?.addEventListener("click",()=>{const nx=list.find(x=>!d.done.includes(x.id));if(nx)openMission(nx.id)});
   if(!S.profile.placement)app.append(placementBanner());
@@ -1628,13 +1679,65 @@ function showIncoming(){
 function startCall(){S.profile.charChosen=true;talkPicker=false;chatState.turns=[];chatState.mood="calm";talkT0=0;autoStart=true;saveChat();go("teacher")}
 
 /* ---------- LIVE VOICE CALL (ElevenLabs agent) ---------- */
-const LIVE_AGENT_URL="https://elevenlabs.io/app/talk-to?agent_id=agent_5301m88ysjknerdvejnwv283j2xd";
+const LIVE_AGENT_ID="agent_5301m88ysjknerdvejnwv283j2xd";
+const LIVE_AGENT_URL="https://elevenlabs.io/app/talk-to?agent_id="+LIVE_AGENT_ID;
+const STANDALONE=!!(window.claude&&window.claude.__standalone);
+let liveMode=false,live=null;
+function loadElevenClient(){return new Promise((res,rej)=>{if(window.ElevenLabsClient)return res(window.ElevenLabsClient);const s=document.createElement("script");s.src="call/elevenlabs-client-1.36.0.js";s.onload=()=>res(window.ElevenLabsClient);s.onerror=()=>rej(new Error("load"));document.head.append(s)})}
+function openLive(){if(!STANDALONE)return;liveMode=true;go("teacher")}
 function liveCallCard(){
-  const c=h(`<section class="hero-card" style="--c:#16162B;grid-template-columns:1fr 104px"><div><div class="eyebrow">Живой звонок · голос ElevenLabs</div><h2 style="margin-top:6px">Позвони Капитану Беркуту</h2><p>Говоришь голосом — он слышит, отвечает, подкалывает и гоняет блицем «как будет…?». До 10 минут за звонок.</p></div><div class="hero-char mw"></div><div class="row"><a class="btn white" target="_blank" rel="noopener" style="text-decoration:none">${I.phone} Позвонить голосом</a></div><p class="muted" style="grid-column:1/-1;margin:0;font-size:12px;color:rgba(255,255,255,.7)!important">Откроется страница ElevenLabs: нажми кнопку звонка и разреши микрофон.</p></section>`);
-  c.querySelector("a").href=LIVE_AGENT_URL;
+  const c=h(`<section class="hero-card" style="--c:#16162B;grid-template-columns:1fr 104px"><div><div class="eyebrow">Живой звонок · голос ElevenLabs</div><h2 style="margin-top:6px">Позвони Капитану Беркуту</h2><p>Говоришь голосом — он слышит, отвечает, подкалывает и гоняет блицем «как будет…?». До 10 минут за звонок.</p></div><div class="hero-char mw"></div><div class="row"><a class="btn white" target="_blank" rel="noopener" style="text-decoration:none">${I.phone} Позвонить голосом</a></div></section>`);
+  const a=c.querySelector("a");
+  if(STANDALONE){a.removeAttribute("target");a.href="#teacher";a.onclick=e=>{e.preventDefault();openLive()}}
+  else{a.href=LIVE_AGENT_URL;c.append(h(`<p style="grid-column:1/-1;margin:0;font-size:12px;color:rgba(255,255,255,.7)">Откроется страница ElevenLabs: нажми кнопку звонка и разреши микрофон.</p>`))}
   c.querySelector(".mw").append(mascotEl("berkut",""));
-  c.querySelector("a").addEventListener("click",()=>{const d=dayRec();d.live=(d.live||0)+1;persist("profile")});
   return c;
+}
+const LIVE_MOODS=[[/бля|блин|чего\?|серь[её]зно|мимо|пельмен|валенок|дятел|опять|не то|ой вс[её]|больно/i,"angry"],[/ха-ха|ахах|хаха|смешн|ржу/i,"laugh"],[/красава|отлично|ого|вот это|молод|супер|great|perfect|excellent|well done|правильно|верно|респект/i,"wow"],[/жаль|эх|грустно|разочар/i,"sad"]];
+function liveMood(t){for(const [re,m] of LIVE_MOODS)if(re.test(t))return m;return "happy"}
+function viewLive(app){
+  const c=CHARS.berkut;
+  const top=h(`<div class="row" style="justify-content:space-between;flex-wrap:nowrap"><button class="btn ghost" type="button">${I.back} Выйти из звонка</button><span class="pill">Живой звонок</span></div>`);
+  top.querySelector("button").onclick=()=>{endLive();liveMode=false;render()};
+  const st=h(`<section class="stage" style="--c:${c.color}">
+    <div class="ctimer mono">00:00 / 10:00</div>
+    <div class="stage-char"></div>
+    <div class="stage-name"><b>${esc(c.name)}</b><span class="pill status" data-s="idle">Нажми зелёную кнопку</span></div>
+    <div class="bubble"><div class="b-text">Готов? Жми на звонок — и погнали говорить. Можно перебивать, он услышит.</div></div>
+    <div class="you muted"></div>
+    <div class="ctrls"><button class="callbtn" type="button" aria-label="Позвонить">${I.phone}</button></div>
+    <div class="miclabel muted">Разреши микрофон, когда браузер спросит</div>
+  </section>`);
+  const ms=mascotEl("berkut","",true);st.querySelector(".stage-char").append(ms);
+  st.querySelector(".callbtn").onclick=()=>{live?endLive():startLive()};
+  app.append(top,st);
+  if(live&&live.conv)liveUi("connected");
+}
+function liveEl(sel){return document.querySelector(".stage "+sel)}
+function liveStatus(s,t){const el=liveEl(".status");if(el){el.dataset.s=s;el.textContent=t}liveEl(".stage-char")?.classList.toggle("speaking",s==="talking")}
+function liveUi(state){const b=liveEl(".callbtn");if(!b)return;b.classList.toggle("end",state==="connected");b.disabled=state==="connecting";b.setAttribute("aria-label",state==="connected"?"Завершить":"Позвонить");const l=liveEl(".miclabel");if(l)l.textContent=state==="connected"?"Говори обычным голосом. Красная кнопка — завершить.":"Разреши микрофон, когда браузер спросит"}
+async function startLive(){
+  liveUi("connecting");liveStatus("thinking","Соединяю…");
+  try{await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){liveStatus("idle","Нет доступа к микрофону");const t=liveEl(".b-text");if(t)t.textContent="Разреши микрофон в настройках браузера для этого сайта и нажми ещё раз.";liveUi("idle");return}
+  try{
+    const EL=await loadElevenClient();
+    live={t0:0,raf:0};
+    live.conv=await EL.Conversation.startSession({agentId:LIVE_AGENT_ID,connectionType:"webrtc",
+      onConnect:()=>{live.t0=Date.now();talkT0=live.t0;liveUi("connected");liveStatus("listening","Слушаю тебя…");const d=dayRec();d.live=(d.live||0)+1;persist("profile")},
+      onDisconnect:()=>{endLive(true)},
+      onError:(m)=>{const t=liveEl(".b-text");if(t)t.textContent="Связь прервалась: "+String(m||"")},
+      onModeChange:({mode})=>{if(mode==="speaking"){liveStatus("talking","Беркут говорит…");if(curMascot)mascotSet(curMascot,"idle")}else{liveStatus("listening","Слушаю тебя…");if(curMascot)mascotSet(curMascot,"listening")}},
+      onMessage:(p)=>{const role=p.role||p.source,t=String(p.message||"");if(!t)return;
+        if(role==="agent"||role==="ai"){const b=liveEl(".b-text");if(b)b.textContent=t;if(curMascot){mascotMood(curMascot,liveMood(t));clearTimeout(live&&live.mt);if(live)live.mt=setTimeout(()=>curMascot&&mascotMood(curMascot,"calm"),6000)}}
+        else{const y=liveEl(".you");if(y)y.textContent="Ты: "+t;const d=dayRec();d.talk=(d.talk||0)+1;if(d.talk>=TALK_TARGET&&!d.done.includes("talk"))award("talk",25);else persist("profile")}}
+    });
+    const loop=()=>{if(!live||!live.conv)return;let v=0;try{v=live.conv.getOutputVolume()||0}catch(e){}const j=curMascot&&curMascot.svg.querySelector(".m-jaw");if(j)j.style.transform=`translateY(${Math.min(12,Math.round(v*40))}px)`;live.raf=requestAnimationFrame(loop)};loop();
+  }catch(e){live=null;liveUi("idle");liveStatus("idle","Не получилось позвонить");const t=liveEl(".b-text");if(t)t.textContent="Проверь интернет и нажми ещё раз. ("+((e&&e.message)||"ошибка")+")"}
+}
+function endLive(remote){
+  const l=live;live=null;talkT0=0;if(!l)return;cancelAnimationFrame(l.raf);clearTimeout(l.mt);
+  if(!remote&&l.conv){try{l.conv.endSession()}catch(e){}}
+  liveUi("idle");liveStatus("idle","Звонок завершён");if(curMascot){mascotMood(curMascot,"calm");const j=curMascot.svg.querySelector(".m-jaw");if(j)j.style.transform=""}
 }
 
 /* ---------- TALK ---------- */
@@ -1678,6 +1781,7 @@ function setStatus(s){const el=document.querySelector(".stage .status");if(el){e
   if(curMascot&&curMascot.svg.closest(".stage")){if(s==="talking"){mascotSet(curMascot,"idle");mascotTalk(curMascot,true)}else{mascotTalk(curMascot,false);if(s!=="idle"||curMascot.state==="listening"||curMascot.state==="thinking")mascotSet(curMascot,s)}}}
 function setBubble(text){const b=document.querySelector(".stage .b-text");if(b)b.innerHTML=md(text)}
 function viewTalk(app){
+  if(liveMode)return viewLive(app);
   if(talkPicker||!S.profile.charChosen)return viewPicker(app);
   const c=curChar();
   const top=h(`<div class="row" style="justify-content:space-between;flex-wrap:nowrap"><button class="btn ghost" type="button" data-a="pick">${I.back} Учителя</button><button class="btn ghost" type="button" data-a="new">${I.refresh} Заново</button></div>`);
