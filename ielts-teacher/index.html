@@ -1705,6 +1705,15 @@ const LIVE_AGENT_URL="https://berkut-english.netlify.app/#live";
 const STANDALONE=!!(window.claude&&window.claude.__standalone);
 let liveMode=false,live=null;
 function loadElevenClient(){return new Promise((res,rej)=>{if(window.ElevenLabsClient)return res(window.ElevenLabsClient);const s=document.createElement("script");s.src="call/elevenlabs-client-1.36.0.js";s.onload=()=>res(window.ElevenLabsClient);s.onerror=()=>rej(new Error("load"));document.head.append(s)})}
+const LIVE_POOL=[["взлётная полоса","runway"],["шасси","landing gear"],["турбулентность","turbulence"],["диспетчер","air traffic controller"],["топливо","fuel"],["экипаж","crew"],["задержка рейса","flight delay"],["кабина пилота","cockpit"],["встречный ветер","headwind"],["уход на второй круг","go-around"],["высота","altitude"],["аварийная посадка","emergency landing"],["срок сдачи","deadline"],["правки","revisions"],["макет","mockup"],["шрифт","typeface"],["подписчики","followers"],["охват","reach"],["вовлечённость","engagement"],["подпись к посту","caption"],["скидка","discount"],["предложение","proposal"],["договор","contract"],["бюджет","budget"],["по рукам!","it's a deal"],["я вам перезвоню","I'll get back to you"],["компромисс","compromise"],["сковородка","frying pan"],["будильник","alarm clock"],["шнурки","shoelaces"],["зонт","umbrella"],["счёт в ресторане","the bill"],["зубная щётка","toothbrush"],["стирка","laundry"],["сосед","neighbour"],["похмелье","hangover"],["холодильник","fridge"],["аренда","rent"],["продукты","groceries"],["огурец","cucumber"],["лук","onion"],["груша","pear"],["суп","soup"],["смущённый","embarrassed"],["вымотанный","exhausted"],["ревнивый","jealous"],["гордый","proud"],["бесит","annoying"],["мне лень","I can't be bothered"],["решай сам","it's up to you"],["да ну нафиг!","no way"],["забей","never mind"],["полетел (прошедшее)","flew"],["поймал","caught"],["выбрал","chose"],["научил","taught"],["купил","bought"],["подумал","thought"],["забыл","forgot"]];
+const LIVE_HELLO=["Ну здравствуй, курсант! Капитан Беркут на связи.","О, явился, не запылился! Беркут на проводе.","Так-так, кто это у нас? Неужели будущий пилот с английским уровня «моя твоя не понимать»?","Курсант, подъём! Капитан Беркут в эфире, и сегодня я тебя не пощажу.","Ну что, лингвист, готов позориться? Беркут на связи.","Ёпт, ты всё-таки позвонил! Уважаю. Капитан Беркут слушает.","Здорово, юнга! Двадцать лет в небе, а такого ученика, как ты, ещё не встречал.","Беркут на связи. Пристегни ремни, курсант, будет турбулентно."];
+const LIVE_ASK=["А ну-ка скажи: как будет «%» по-английски?","Разминка: как будет «%»? Время пошло!","Первый вопрос, и не облажайся: «%» по-английски?","Ну-ка, мозг на взлёт: как будет «%»?","Давай проверим, что у тебя в голове: «%» — это?"];
+function livePick(a){return a[Math.floor(Math.random()*a.length)]}
+function liveVars(){
+  const mine=shuffle(S.notebook.words.slice(-40)).slice(0,5).map(w=>[String(w.ru),String(w.en)]);
+  const set=shuffle(LIVE_POOL).slice(0,10);const all=[...mine,...set];const first=all[0];
+  return {opener:livePick(LIVE_HELLO)+" "+livePick(LIVE_ASK).replace("%",first[0]),word_set:all.map(([ru,en])=>`${en} (${ru})`).join(", ")};
+}
 function openLive(){if(!STANDALONE)return;liveMode=true;go("teacher")}
 function liveCallCard(){
   const c=h(`<section class="hero-card" style="--c:#16162B;grid-template-columns:1fr 104px"><div><div class="eyebrow">Живой звонок · голос ElevenLabs</div><h2 style="margin-top:6px">Позвони Капитану Беркуту</h2><p>Говоришь голосом — он слышит, отвечает, подкалывает и гоняет блицем «как будет…?». До 10 минут за звонок.</p></div><div class="hero-char mw"></div><div class="row"><a class="btn white" target="_blank" rel="noopener" style="text-decoration:none">${I.phone} Позвонить голосом</a></div></section>`);
@@ -1743,7 +1752,7 @@ async function startLive(){
   try{
     const EL=await loadElevenClient();
     live={t0:0,raf:0};
-    live.conv=await EL.Conversation.startSession({agentId:LIVE_AGENT_ID,connectionType:"webrtc",
+    live.conv=await EL.Conversation.startSession({agentId:LIVE_AGENT_ID,connectionType:"webrtc",dynamicVariables:liveVars(),
       onConnect:()=>{live.t0=Date.now();talkT0=live.t0;liveUi("connected");liveStatus("listening","Слушаю тебя…");const d=dayRec();d.live=(d.live||0)+1;persist("profile")},
       onDisconnect:()=>{endLive(true)},
       onError:(m)=>{const t=liveEl(".b-text");if(t)t.textContent="Связь прервалась: "+String(m||"")},
