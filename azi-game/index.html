@@ -260,14 +260,28 @@ h2{font-size:19px;font-weight:700}
 .card.back{background:repeating-linear-gradient(45deg,#8E1C22 0 5px,#B0262D 5px 10px);border:3px solid var(--card)}
 
 .dock{padding-block:6px 8px;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg,transparent,rgba(5,8,15,.85) 30%)}
-.hand{display:flex;justify-content:center;gap:10px;min-height:104px;align-items:flex-end}
-.hand button{transition:transform .15s,filter .15s;border-radius:9px}
-.hand button.legal{transform:translateY(-8px)}
+.hand{display:flex;justify-content:center;gap:0;min-height:112px;align-items:flex-end;position:relative}
+.hand>button{transition:transform .15s,filter .15s;border-radius:9px;margin:0 -7px;transform:rotate(var(--r,0deg)) translateY(var(--ty,0px));transform-origin:50% 120%}
+.hand>button.legal{--ty:-12px}
+.hand>button.flip .card{animation:flipin .35s ease-out}
+@keyframes flipin{from{transform:rotateY(90deg)}}
+.blind-tip{position:absolute;left:50%;top:-4px;transform:translateX(-50%);background:rgba(10,17,32,.9);border:1px solid var(--line);color:#C9D2E6;font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap;pointer-events:none;z-index:2}
 .hand button.legal .card{box-shadow:0 0 0 2px var(--gold),0 10px 18px rgba(0,0,0,.45)}
 .hand button.illegal{filter:brightness(.5)}
 .hand button[disabled]{cursor:default}
-.actions{display:grid;grid-template-columns:1fr 1.2fr 1.2fr;gap:8px;min-height:50px}
-.actions .btn{padding:12px 8px;font-size:14px}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;min-height:58px;position:relative;z-index:6}
+.actions .btn{padding:8px 6px;font-size:14px;flex-direction:column;gap:0;line-height:1.1;min-height:58px;border-radius:16px;text-transform:uppercase;letter-spacing:.03em}
+.actions .bv{font:800 19px/1.1 var(--f-display);text-transform:none;letter-spacing:0}
+.actions .bl1{font-size:12.5px;font-weight:800}
+.btn-fold{background:#8A3B22;color:#FFE9DE;box-shadow:0 2px 0 #5A220F}
+.btn-call{background:#2F6FD6;color:#fff;box-shadow:0 2px 0 #1C4A99}
+.btn-raise{background:linear-gradient(180deg,#FFD067,var(--gold) 55%,var(--gold-2));color:var(--gold-ink);box-shadow:0 2px 0 #8A5B05}
+.rslider{position:absolute;right:max(10px,env(safe-area-inset-right,0px));bottom:6px;z-index:20;width:62px;height:min(300px,72%);background:rgba(17,27,46,.96);border:1px solid var(--line);border-radius:22px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;touch-action:none;box-shadow:0 14px 30px rgba(0,0,0,.5);animation:fade .15s}
+.rs-cap{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.rs-track{position:relative;flex:1;width:8px;border-radius:4px;background:var(--surface-3);cursor:ns-resize}
+.rs-track::before{content:"";position:absolute;inset:-6px -22px}
+.rs-fill{position:absolute;left:0;right:0;bottom:0;border-radius:4px;background:linear-gradient(0deg,var(--gold-2),var(--gold))}
+.rs-knob{position:absolute;left:50%;width:34px;height:34px;border-radius:50%;background:#fff;transform:translate(-50%,50%);box-shadow:0 3px 10px rgba(0,0,0,.5);border:3px solid var(--gold)}
 .status-line{text-align:center;font-weight:800;font-size:14px;color:#C9D2E6;min-height:50px;display:flex;align-items:center;justify-content:center;padding:0 10px}
 .tools{display:flex;justify-content:space-around;padding-bottom:2px}
 .banner{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);z-index:30;background:linear-gradient(180deg,#24314F,#141D32);border:1px solid var(--gold);border-radius:18px;padding:16px 22px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.6);animation:fade .25s;min-width:220px;max-width:86%}
@@ -638,7 +652,7 @@ function profileSheet(){const all=[...FREE_AV,...PREM_AV.filter(a=>S.ownedAv.inc
 function rulesSheet(){openModal(`${sheetHead("Правила Ази")}<div class="prose">
  <h4>Колода и раздача</h4><p>27 карт: три масти (♠ ♥ ♣), от шестёрки до туза. За столом 2–6 игроков. Каждый вносит анте в банк и получает 3 карты. Следующая карта открывается — её масть козырная.</p>
  <h4>Шоха на трассе</h4><p>Если открытый козырь — туз, шестёрка козырной масти становится самой старшей картой в игре.</p>
- <h4>Торговля</h4><p>Первым говорит игрок слева от сдающего. Можно сбросить карты (Пас), уравнять ставку или поднять на одно анте. За раздачу — не больше трёх повышений на всех. Кто поднял последним, тот ходит первым. Если все сбросили — оставшийся забирает банк.</p>
+ <h4>Торговля</h4><p>Карты приходят рубашкой вверх. Первым говорит игрок слева от сдающего: бросить, уравнять или поднять. Повышение — минимум вдвое от текущей ставки, вверх до ва-банка. Кто поднял последним, тот ходит первым. Если все бросили — оставшийся забирает банк.</p><h4>В тёмную</h4><p>Пока вы не открыли свои карты, ставки за вас вдвое дешевле: ставка «не глядя» считается двойной. Открыть карты можно в любой момент, перед розыгрышем они открываются сами.</p><h4>Ва-банк</h4><p>Если монет не хватает, можно пойти ва-банк. Выиграв, игрок забирает из банка столько, сколько сам смог поставить; лишнее возвращается остальным.</p>
  <h4>Розыгрыш</h4><ul><li>Первый ход — любой картой.</li><li>Остальные обязаны класть ту же масть, даже младшую. Нет масти — козырь. Нет козыря — любую карту.</li><li>Взятку берёт старший козырь, а без козырей — старшая карта масти хода. Взявший ходит следующим.</li></ul>
  <h4>Победа</h4><p>Кто первым взял 2 взятки из 3 — забирает весь банк.</p>
  <h4>Ази</h4><p>Если никто не взял две взятки, объявляется «Ази»: банк остаётся на столе и разыгрывается заново. Игроки с одной взяткой играют бесплатно. Кто доиграл без взяток — входит за половину банка. Кто сбросил карты — за полный банк.</p>
@@ -742,18 +756,18 @@ function botsShuffle(){/* bots leave/join between hands */
  if(G.seats.filter((p,i)=>p&&i>0).length===0){const i=empty[0]||1;G.seats[i]=mkBot(G.ante,G.used)}}
 
 function newHand(isAzi){
- G.banner=null;G.trick=[];G.lastPlayed=null;G.tricksDone=0;G.raises=0;G.curBet=0;G.lastRaiser=-1;
+ G.banner=null;G.trick=[];G.lastPlayed=null;G.tricksDone=0;G.raises=0;G.curBet=0;G.lastRaiser=-1;G.looked=false;G.raiseUI=null;
  if(!isAzi){
   G.aziN=0;G.pot=0;G.myIn=0;botsShuffle();
   const me=occ(0);me.name=S.name;me.av=myAv();me.hat=S.hat;
   if(S.coins<G.ante*4){G.phase="broke";renderTable();brokeSheet();return}
   G.dealer=nextIdx(G.dealer,i=>!!occ(i));
-  G.seats.forEach((p,i)=>{if(!p)return;p.inHand=true;p.folded=false;p.allIn=false;p.tricks=0;p.bet=0;p.hand=[];setBadge(i,"","");
-   const a=G.ante;if(p.me){S.coins-=a;G.myIn+=a;save()}else p.bal-=a;G.pot+=a});
+  G.seats.forEach((p,i)=>{if(!p)return;p.inHand=true;p.folded=false;p.allIn=false;p.tricks=0;p.bet=0;p.rp=0;p.contrib=0;p.hand=[];setBadge(i,"","");
+   const a=G.ante;if(p.me){S.coins-=a;G.myIn+=a;save()}else p.bal-=a;p.contrib=a;G.pot+=a});
   S.stats.hands++;save();sfx("chip");
  }else{
   G.aziN++;
-  G.seats.forEach((p,i)=>{if(!p)return;p.tricks=0;p.bet=0;p.hand=[];p.folded=false;p.allIn=false;if(!p.inHand)setBadge(i,"Ждёт","b-wait");else setBadge(i,"","")});
+  G.seats.forEach((p,i)=>{if(!p)return;p.tricks=0;p.bet=0;p.rp=0;p.hand=[];p.folded=false;p.allIn=false;if(!p.inHand)setBadge(i,"Ждёт","b-wait");else setBadge(i,"","")});
  }
  const deck=newDeck();
  G.seats.forEach(p=>{if(p&&p.inHand)p.hand=deck.splice(0,3)});
@@ -771,34 +785,50 @@ function stepTurn(){if(!G||view!=="table")return;
  renderTable()}
 let myTimer=null;const TURN_S=25;
 function armTimer(){clearTimeout(myTimer);G.turnStart=Date.now();myTimer=setTimeout(()=>{if(!G||G.turn!==0)return;
- if(G.phase==="bet")betAction(0,G.curBet-occ(0).bet>0?"fold":"call");
+ if(G.phase==="bet")betAction(0,toCall(0)>0?"fold":"call");
  else if(G.phase==="play"){const L=legal(occ(0).hand).sort((a,b)=>cval(a)-cval(b));playCard(0,L[0])}},TURN_S*1000)}
 
-function toCall(i){return G.curBet-occ(i).bet}
-function canRaise(i){const p=occ(i);const need=G.curBet+G.step-p.bet;return G.raises<3&&(p.me?S.coins:p.bal)>=need}
-function pay(i,amt){const p=occ(i);if(amt<=0)return;const have=p.me?S.coins:p.bal;if(have<=amt)p.allIn=true;if(p.me){amt=Math.min(amt,S.coins);S.coins-=amt;G.myIn+=amt;save()}else{amt=Math.min(amt,p.bal);p.bal-=amt}p.bet+=amt;G.pot+=amt;sfx("chip")}
-function betAction(i,act){if(G.phase!=="bet"||G.turn!==i)return;if(i===0)clearTimeout(myTimer);const p=occ(i);
+/* Торговля. Ставки считаются в «зрячих» единицах (bet). Кто играет в тёмную (не смотрел карты), платит половину. */
+const isBlind=i=>!!occ(i).me&&!G.looked;
+const haveOf=i=>occ(i).me?S.coins:occ(i).bal;
+const costOf=(i,eff)=>isBlind(i)?Math.ceil(eff/2):eff;
+function toCall(i){return Math.max(0,G.curBet-occ(i).bet)}
+function minRaise(){return G.curBet?G.curBet*2:G.ante}
+function maxTarget(i){return occ(i).bet+(isBlind(i)?haveOf(i)*2:haveOf(i))}
+function canRaise(i){return maxTarget(i)>G.curBet}
+function raiseLadder(i){const mn=minRaise(),mx=maxTarget(i);if(mx<=G.curBet)return[];if(mx<=mn)return[mx];const v=[];for(let x=mn;x<mx&&v.length<14;x*=2)v.push(x);v.push(mx);return v}
+function pay(i,eff){const p=occ(i);if(eff<=0)return;let act=costOf(i,eff);const have=haveOf(i);
+ if(act>=have){act=have;p.allIn=true;eff=isBlind(i)?act*2:act}
+ if(p.me){S.coins-=act;G.myIn+=act;save()}else p.bal-=act;
+ p.bet+=eff;p.rp=(p.rp||0)+act;p.contrib=(p.contrib||0)+act;G.pot+=act;sfx("chip")}
+const canAct=k=>inHand(k)&&!occ(k).allIn;
+function betAction(i,act,target){if(G.phase!=="bet"||G.turn!==i)return;if(i===0){clearTimeout(myTimer);G.raiseUI=null}const p=occ(i);
  if(act==="fold"){p.folded=true;setBadge(i,"Пас","b-fold");if(p.bot&&Math.random()<.2)emote(i,pick(["Не моя карта","Пас","Удачи"]))}
- else if(act==="call"){const c=toCall(i);pay(i,c);setBadge(i,c>0?"Уравнял":"Дальше","b-call")}
- else if(act==="raise"){const nb=G.curBet+G.step;pay(i,nb-p.bet);G.curBet=nb;G.raises++;G.lastRaiser=i;G.acted=new Set();setBadge(i,"Поднял","b-raise")}
+ else if(act==="call"){const c=toCall(i);pay(i,c);setBadge(i,p.allIn?"Ва-банк":c>0?"Уравнял":"Дальше",p.allIn?"b-raise":"b-call")}
+ else if(act==="raise"){const mx=maxTarget(i);let t=clamp(target||minRaise(),Math.min(minRaise(),mx),mx);pay(i,t-p.bet);
+  if(p.bet>G.curBet){G.curBet=p.bet;G.raises++;G.lastRaiser=i;G.acted=new Set()}
+  setBadge(i,p.allIn?"Ва-банк":"Поднял","b-raise")}
  G.acted.add(i);
  if(liveCount()===1){const w=G.seats.findIndex((q,k)=>inHand(k));return winHand(w,"Все сбросили карты")}
- const live=G.seats.map((q,k)=>k).filter(inHand);
- const done=live.every(k=>G.acted.has(k)&&(occ(k).bet===G.curBet||occ(k).allIn));
- if(done){return startPlay()}
- G.turn=nextIdx(i,k=>inHand(k));G.turnStart=Date.now();stepTurn()}
+ const live=G.seats.map((q,k)=>k).filter(canAct);
+ const done=live.every(k=>G.acted.has(k)&&occ(k).bet>=G.curBet);
+ const nx=nextIdx(i,canAct);
+ if(done||nx<0){return startPlay()}
+ G.turn=nx;G.turnStart=Date.now();stepTurn()}
 function handStrength(i){const h=occ(i).hand;let s=0;h.forEach(c=>{const pw=power(c);if(c.s===G.trumpS)s+=1+(pw>=100?1.6:pw/8);else s+=pw===8?.9:pw===7?.45:pw===6?.2:0});return s}
 function botBet(i){if(G.phase!=="bet"||G.turn!==i)return;const p=occ(i);const tc=toCall(i);
  const s=handStrength(i)*p.agg+rnd(-.45,.45)+(G.aziN?.3:0);
- let act;
- if(s>2.5&&canRaise(i)&&Math.random()<.75)act="raise";
- else if(tc===0)act=(s>1.9&&canRaise(i)&&Math.random()<.35)?"raise":"call";
- else if(s>1.15||(tc<=G.ante&&s>.75)||(G.aziN&&s>.6))act=(p.bal>=tc)?"call":"fold";
- else act="fold";
- betAction(i,act)}
-function startPlay(){G.phase="play";G.seats.forEach((p,i)=>{if(p&&inHand(i)&&p.badge!=="Пас")setBadge(i,"","")});
+ const press=tc/Math.max(1,p.bal+p.bet);
+ const lad=raiseLadder(i);const pickT=()=>lad[Math.min(lad.length-1,s>3.1&&Math.random()<.35?1:0)];
+ const wantRaise=(s>2.4&&Math.random()<.7-G.raises*.09)||(s>3.1&&Math.random()<.45);
+ if(wantRaise&&lad.length&&press<.5&&costOf(i,pickT()-p.bet)<p.bal*.6)return betAction(i,"raise",pickT());
+ if(tc===0)return betAction(i,(s>1.8&&lad.length&&Math.random()<.3)?"raise":"call",lad[0]);
+ const need=1.05+press*3+G.raises*.08;
+ if(s>need||(tc<=G.ante*2&&s>.8)||(G.aziN&&s>.7&&press<.2))return betAction(i,"call");
+ betAction(i,"fold")}
+function startPlay(){G.phase="play";G.looked=true;G.raiseUI=null;G.seats.forEach((p,i)=>{if(p&&inHand(i)&&p.badge!=="Пас"&&p.badge!=="Ва-банк")setBadge(i,"","")});
  G.leader=G.lastRaiser>=0&&inHand(G.lastRaiser)?G.lastRaiser:(inHand(G.firstBettor)?G.firstBettor:nextIdx(G.firstBettor,inHand));
- G.turn=G.leader;G.trick=[];G.curBet=0;G.seats.forEach(p=>{if(p)p.bet=0});
+ G.turn=G.leader;G.trick=[];G.curBet=0;G.seats.forEach(p=>{if(p){p.bet=0;p.rp=0}});
  G.log=`${G.turn===0?"Ваш ход":occ(G.turn).name+" ходит первым"}`;stepTurn()}
 function botPlay(i){if(G.phase!=="play"||G.turn!==i)return;const p=occ(i);const L=legal(p.hand).sort((a,b)=>cval(a)-cval(b));let c;
  if(!G.trick.length){const top=L[L.length-1];
@@ -820,7 +850,8 @@ function resolveTrick(){const b=bestOfTrick();const w=occ(b.seat);w.tricks++;G.t
  if(w.tricks>=2){renderTable();return later(()=>winHand(b.seat,"Две взятки"),700)}
  if(G.tricksDone>=3){renderTable();return later(azi,700)}
  G.trick=[];G.lastPlayed=null;G.turn=b.seat;G.leader=b.seat;stepTurn()}
-function winHand(w,why){clearTimeout(myTimer);G.phase="end";G.turn=-1;const p=occ(w);const pot=G.pot;
+function winHand(w,why){clearTimeout(myTimer);G.phase="end";G.turn=-1;G.raiseUI=null;const p=occ(w);let pot=G.pot;
+ if(p.allIn){const cw=p.contrib||0;G.seats.forEach((q,k)=>{if(!q||k===w)return;const extra=(q.contrib||0)-cw;if(extra>0&&pot-extra>0){pot-=extra;if(q.me){S.coins+=extra;G.myIn-=extra}else q.bal+=extra}})}
  if(p.me){S.coins+=pot;S.stats.wins++;S.stats.best=Math.max(S.stats.best,pot);const net=pot-G.myIn;bumpTour(net);addXP(25);sfx("win");}
  else{p.bal+=pot;sfx(G.myIn?"lose":"chip");if(Math.random()<.45)emote(w,pick(["Ха-ха!","Бәрекелді!","Рахмет!","Козырь мой"]))}
  if(G.myIn&&!p.me)bumpTour(0);
@@ -850,7 +881,7 @@ function aziAsk(cost){const ok=S.coins>=cost+G.ante*3;
  <button class="btn btn-gold btn-block" data-act="azi-join" ${ok?"":"disabled"}>Войти за ${full(cost)}</button><button class="btn btn-dark btn-block" data-act="azi-skip">Пропустить</button>${ok?"":`<p class="note">Не хватает монет для входа.</p>`}`,{onClose:()=>{occ(0).join=false;finishAzi()}})}
 function finishAzi(){if(!G||G.phase!=="azi")return;
  G.seats.forEach((p,i)=>{if(!p)return;if(p.aziCost===null||p.aziCost===undefined){p.inHand=false;return}
-  if(p.join){if(p.aziCost>0){pay(i,p.aziCost);p.bet=0}p.inHand=true}else p.inHand=false;p.join=false});
+  if(p.join){if(p.aziCost>0){const was=G.looked;G.looked=true;pay(i,p.aziCost);G.looked=was;p.bet=0;p.rp=0}p.inHand=true}else p.inHand=false;p.join=false});
  const ins=G.seats.map((p,i)=>i).filter(i=>occ(i)&&occ(i).inHand);
  if(ins.length===1)return winHand(ins[0],"Остался один в Ази");
  G.banner={t:"Переигровка Ази",s:`Играют ${ins.length} · банк ${full(G.pot)}`};renderTable();
@@ -877,22 +908,26 @@ function renderTable(){const root=$("#tbl");if(!root||!G)return;
    ${p.badge?`<span class="badge ${p.bcls}">${p.badge}</span>`:""}
    <span class="nm">${p.me?"Вы":esc(p.name)}</span><span class="bl num">${COIN.replace('class="ic"','class="ic" style="width:12px;height:12px"')}${fmt(p.me?S.coins:p.bal)}</span>
    <div class="tricks">${Array.from({length:p.tricks||0},()=>"<i></i>").join("")}</div></div>`}).join("");
- const bets=G.phase==="bet"?G.seats.map((p,i)=>{if(!p||!p.bet)return"";const [x,y]=seatPos(i);const bx=50+(x-50)*.55,by=44+(y-44)*.55;return `<div class="betchip num" style="left:${bx}%;top:${by}%">${COIN.replace('class="ic"','class="ic" style="width:16px;height:16px"')}${fmt(p.bet)}</div>`}).join(""):"";
+ const bets=G.phase==="bet"?G.seats.map((p,i)=>{if(!p||!p.rp)return"";const [x,y]=seatPos(i);const bx=50+(x-50)*.55,by=44+(y-44)*.55;return `<div class="betchip num" style="left:${bx}%;top:${by}%">${COIN.replace('class="ic"','class="ic" style="width:16px;height:16px"')}${fmt(p.rp)}</div>`}).join(""):"";
  const best=G.trick.length?bestOfTrick().seat:-1;
  const played=G.trick.map((t,k)=>{const [x,y]=seatPos(t.seat);const px=50+(x-50)*.55,py=44+(y-44)*(y>44?.55:.5);const fresh=t.card.id===G.lastPlayed;
   return `<div class="played ${fresh?"fresh":""} ${t.seat===best&&G.trick.length>1?"best":""}" style="left:${px}%;top:${py}%;--rot:${(k-1)*6}deg;--fx:${(x-px)*3}px;--fy:${(y-py)*4}px;z-index:${4+k}">${cardHTML(t.card)}</div>`}).join("");
  const trump=G.trumpCard&&G.phase!=="idle"&&G.phase!=="broke";
  const center=`<div class="center">${trump?`<div class="trump-box"><div class="trump-lbl">Козырь<b>${suitOf(G.trumpCard).sym}</b></div>${cardHTML(G.trumpCard)}</div>${G.shoha?`<span class="shoha">Шоха на трассе: 6${suitOf(G.trumpCard).sym} старшая</span>`:""}`:""}
-  <div class="pot num">${COIN}${full(G.pot)}</div>${G.aziN?`<span class="pill pill-red">Ази ×${G.aziN}</span>`:""}</div>`;
+  <div class="pot num">${COIN}${full(G.phase==="bet"?G.pot-G.seats.reduce((a,p)=>a+(p&&p.rp||0),0):G.pot)}</div>${G.aziN?`<span class="pill pill-red">Ази ×${G.aziN}</span>`:""}</div>`;
  // dock
  const L=myTurn&&G.phase==="play"?legal(me.hand).map(c=>c.id):[];
- const hand=(me.hand&&me.inHand&&!me.folded)?me.hand.map(c=>{const lg=L.includes(c.id);return `<button data-act="play" data-id="${c.id}" class="${myTurn&&G.phase==="play"?(lg?"legal":"illegal"):""}" ${myTurn&&G.phase==="play"&&lg?"":"disabled"} aria-label="Сыграть карту">${cardHTML(c,"lg hand")}</button>`}).join(""):
+ const blind=G.phase==="bet"&&me.inHand&&!me.folded&&!G.looked;
+ const fanR=k=>`--r:${(k-1)*7}deg;--ty:${k===1?0:6}px`;
+ const hand=blind?me.hand.map((c,k)=>`<button data-act="look" style="${fanR(k)}" aria-label="Открыть карты"><div class="card lg back"></div></button>`).join("")+`<span class="blind-tip">В тёмную · ставки вдвое дешевле · нажмите, чтобы открыть</span>`:
+ (me.hand&&me.inHand&&!me.folded)?me.hand.map((c,k)=>{const lg=L.includes(c.id);return `<button data-act="play" data-id="${c.id}" style="${fanR(k)}" class="${myTurn&&G.phase==="play"?(lg?"legal":"illegal"):""} ${G.flip?"flip":""}" ${myTurn&&G.phase==="play"&&lg?"":"disabled"} aria-label="Сыграть карту">${cardHTML(c,"lg hand")}</button>`}).join(""):
   (me.folded&&me.hand?me.hand.map(()=>`<div class="card lg back" style="opacity:.4"></div>`).join(""):"");
  let actions;
- if(myTurn&&G.phase==="bet"){const tc=toCall(0);actions=`<div class="actions">
-   <button class="btn btn-dark" data-act="bet" data-a="fold">Пас</button>
-   <button class="btn btn-dark" data-act="bet" data-a="call" style="border-color:#3E78E0">${tc>0?`Уравнять ${fmt(tc)}`:"Дальше"}</button>
-   <button class="btn btn-gold" data-act="bet" data-a="raise" ${canRaise(0)?"":"disabled"}>Поднять +${fmt(G.step)}</button></div>`}
+ if(myTurn&&G.phase==="bet"){const tc=toCall(0);const cc=Math.min(costOf(0,tc),S.coins);const allInCall=costOf(0,tc)>=S.coins&&tc>0;
+  actions=`<div class="actions">
+   <button class="btn btn-fold" data-act="bet" data-a="fold"><span class="bl1">Бросить</span></button>
+   <button class="btn btn-call" data-act="bet" data-a="call">${tc>0?`<span class="bv num">${fmt(cc)}</span><span class="bl1">${allInCall?"Ва-банк":"Уравнять"}</span>`:`<span class="bl1">Дальше</span>`}</button>
+   <button class="btn btn-raise" data-act="bet" data-a="raise" id="raiseBtn" ${canRaise(0)&&!allInCall?"":"disabled"}>${raiseBtnInner()}</button></div>`}
  else{let msg="";
   if(G.phase==="bet")msg=me.folded?"Вы сбросили карты":"Торговля · ходит "+(occ(G.turn)?.name||"");
   else if(G.phase==="play")msg=myTurn?"Ваш ход — выберите карту":(me.inHand&&!me.folded?G.log||"Розыгрыш":"Вы наблюдаете за розыгрышем");
@@ -902,14 +937,27 @@ function renderTable(){const root=$("#tbl");if(!root||!G)return;
   else msg="Раздаём карты…";
   if(myTurn&&G.phase==="play")msg+=G.trick.length?` · масть хода ${suitOf(G.trick[0].card).sym}`:"";
   actions=`<div class="status-line">${msg}</div>`}
- const raisesInfo=G.phase==="bet"?` · повышений ${G.raises}/3`:"";
+ const raisesInfo=G.phase==="bet"&&G.curBet?` · ставка ${full(G.curBet)}`:"";
  root.innerHTML=`<div class="t-top"><button class="icon-btn" data-act="leave" aria-label="Выйти из-за стола">${BACK}</button>
   <div class="ttl"><b>${G.st.name} · Стол №${G.roomNo}</b><small class="num">Анте ${full(G.ante)}${raisesInfo}</small></div>
   <button class="icon-btn" data-act="rules" aria-label="Правила">${I.book}</button></div>
- <div class="arena"><div class="felt"><div class="felt-logo">АЗИ</div></div>${center}${bets}${played}${seatsH}
+ <div class="arena"><div class="felt"><div class="felt-logo">АЗИ</div></div>${center}${bets}${played}${seatsH}${myTurn&&G.phase==="bet"&&G.raiseUI?sliderHTML():""}
   ${G.banner?`<div class="banner"><h3>${esc(G.banner.t)}</h3><p class="num">${esc(G.banner.s)}</p></div>`:""}</div>
  <div class="dock"><div class="hand">${hand}</div>${actions}
-  <div class="tools"><button class="icon-btn" data-act="chat" aria-label="Фразы">${I.chat}</button><button class="icon-btn" data-act="throwhelp" aria-label="Закидушки"><span style="font-size:20px">🍅</span><span class="cnt num">${(S.items.tomato||0)+(S.items.egg||0)+(S.items.rose||0)}</span></button><button class="icon-btn" data-act="sound" aria-label="Звук">${S.sound?I.sound:I.mute}</button></div></div>`}
+  <div class="tools"><button class="icon-btn" data-act="chat" aria-label="Фразы">${I.chat}</button><button class="icon-btn" data-act="throwhelp" aria-label="Закидушки"><span style="font-size:20px">🍅</span><span class="cnt num">${(S.items.tomato||0)+(S.items.egg||0)+(S.items.rose||0)}</span></button><button class="icon-btn" data-act="sound" aria-label="Звук">${S.sound?I.sound:I.mute}</button></div></div>`;
+ bindSlider();G.flip=false}
+function raiseBtnInner(){if(!G.raiseUI)return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg><span class="bl1">Поднять</span>`;
+ const lad=raiseLadder(0);const t=lad[G.raiseUI.idx];const c=costOf(0,t-occ(0).bet);return `<span class="bv num">${fmt(c)}</span><span class="bl1">${t>=maxTarget(0)?"Ва-банк":"Поднять"}</span>`}
+function sliderHTML(){const lad=raiseLadder(0);const n=lad.length;const pct=n>1?G.raiseUI.idx/(n-1)*100:100;
+ return `<div class="rslider" role="slider" aria-label="Сумма повышения" aria-valuemin="0" aria-valuemax="${n-1}" aria-valuenow="${G.raiseUI.idx}" tabindex="0" id="rsl">
+  <span class="rs-cap">Ва-банк</span><div class="rs-track" id="rsTrack"><div class="rs-fill" style="height:${pct}%"></div><div class="rs-knob" style="bottom:${pct}%"></div></div><span class="rs-cap">×2</span></div>`}
+function setRaiseIdx(k){const lad=raiseLadder(0);if(!G.raiseUI||!lad.length)return;k=clamp(k,0,lad.length-1);if(k===G.raiseUI.idx)return;G.raiseUI.idx=k;sfx("tick");
+ const n=lad.length,pct=n>1?k/(n-1)*100:100;const f=$("#rsl .rs-fill"),kn=$("#rsl .rs-knob");if(f)f.style.height=pct+"%";if(kn)kn.style.bottom=pct+"%";$("#rsl").setAttribute("aria-valuenow",k);
+ const b=$("#raiseBtn");if(b)b.innerHTML=raiseBtnInner()}
+function bindSlider(){const tr=$("#rsTrack"),sl=$("#rsl");if(!tr)return;
+ const at=e=>{const r=tr.getBoundingClientRect();const ratio=1-(e.clientY-r.top)/r.height;const n=raiseLadder(0).length;setRaiseIdx(Math.round(clamp(ratio,0,1)*(n-1)))};
+ sl.addEventListener("pointerdown",e=>{e.preventDefault();sl.setPointerCapture(e.pointerId);at(e);const mv=ev=>at(ev);const up=()=>{sl.removeEventListener("pointermove",mv);sl.removeEventListener("pointerup",up);sl.removeEventListener("pointercancel",up)};sl.addEventListener("pointermove",mv);sl.addEventListener("pointerup",up);sl.addEventListener("pointercancel",up)});
+ sl.addEventListener("keydown",e=>{if(e.key==="ArrowUp"||e.key==="ArrowRight"){setRaiseIdx(G.raiseUI.idx+1);e.preventDefault()}if(e.key==="ArrowDown"||e.key==="ArrowLeft"){setRaiseIdx(G.raiseUI.idx-1);e.preventDefault()}})}
 function chatSheet(){openModal(`${sheetHead("Фразы за столом")}<div class="phrases">${PHRASES.map(p=>`<button data-act="say" data-t="${esc(p)}">${esc(p)}</button>`).join("")}</div>`)}
 function seatSheet(i){const p=occ(i);if(!p)return;if(p.me){profileSheet();return}
  openModal(`${sheetHead(esc(p.name),"Баланс за столом: "+full(p.bal))}<div class="row" style="justify-content:center"><div class="ava" style="width:88px;height:88px">${avatarSVG(p.av,p.hat)}</div></div>
@@ -952,7 +1000,8 @@ document.addEventListener("click",e=>{
   case "leave":if(view==="table")leaveTable();break;
   case "shop-coins":leaveTable();shopTab="coins";go("shop");break;
   case "shop-items":leaveTable();shopTab="items";go("shop");break;
-  case "bet":betAction(0,a.dataset.a);break;
+  case "bet":{const k=a.dataset.a;if(k==="raise"){if(!G.raiseUI){G.raiseUI={idx:0};renderTable();sfx("tick")}else{const lad=raiseLadder(0);betAction(0,"raise",lad[G.raiseUI.idx])}}else betAction(0,k);break}
+  case "look":if(G&&!G.looked){G.looked=true;G.flip=true;G.raiseUI=null;sfx("card");renderTable()}break;
   case "play":{const c=occ(0).hand.find(x=>x.id===a.dataset.id);if(c)playCard(0,c);break}
   case "chat":chatSheet();break;
   case "say":closeModal(true);emote(0,a.dataset.t);if(Math.random()<.5){const others=G.seats.map((p,i)=>i).filter(i=>i>0&&occ(i));if(others.length)later(()=>emote(pick(others),pick(["Ха-ха!","Сәлем!","Рахмет!","Посмотрим"])),900)}break;
