@@ -1,0 +1,55 @@
+{
+  "_note": "Настройки голосового агента «Капитан Беркут» в ElevenLabs. Промпт лежит рядом в berkut-prompt.md. Ключей и секретов здесь нет.",
+  "name": "Капитан Беркут — учитель английского",
+  "agent": {
+    "language": "ru",
+    "first_message": "{{opener}}",
+    "dynamic_variable_placeholders": {
+      "opener": "Ну здравствуй, курсант! Капитан Беркут на связи. Проверим, ты пилот или пельмень с крылышками. А ну-ка скажи: как будет «взлётная полоса» по-английски?",
+      "word_set": "runway, deadline, frying pan, it's a deal, turbulence, caption, umbrella, I'll get back to you, flew, landing gear, budget, hangover"
+    },
+    "llm": "claude-haiku-5-5",
+    "temperature": 0.9,
+    "reasoning_effort": "none",
+    "timezone": "Asia/Almaty",
+    "cascade_timeout_seconds": 3,
+    "ignore_default_personality": true
+  },
+  "tts": {
+    "model_id": "eleven_v4_turbo",
+    "voice_id": "IKne3meq5aSn9XLyUdCD",
+    "voice_name": "Charlie",
+    "speed": 0.9,
+    "stability": 0.35,
+    "similarity_boost": 0.8,
+    "expressive_mode": true,
+    "suggested_audio_tags": ["laughs", "shouts", "sarcastic", "sighs", "excited", "whispers", "mocking"]
+  },
+  "turn": {
+    "turn_eagerness": "eager",
+    "speculative_turn": true,
+    "turn_timeout": 7,
+    "soft_timeout": { "timeout_seconds": 1.2, "messages": ["Так-так…", "Ну-у, курсант…"], "randomize": true, "max_per_generation": 2, "disable_until_first_user_message": true },
+    "noisy_environment_message": "Слышь, курсант, у тебя там шумно, я нихрена не слышу. Отойди в тихое место."
+  },
+  "conversation": { "max_duration_seconds": 600 },
+  "auth": { "enable_auth": false },
+  "widget": {
+    "avatar": { "type": "image", "url": "https://raw.githubusercontent.com/ricca122243/ricca-skills/claude/relaxed-gates-hi19zv/ielts-teacher/berkut-avatar.png" },
+    "btn_color": "#EB5A46",
+    "focus_color": "#EB5A46",
+    "shareable_page_text": "Капитан Беркут · живой звонок по английскому",
+    "shareable_page_show_terms": false,
+    "text_contents": {
+      "main_label": "Позвони Капитану Беркуту",
+      "start_call": "Позвонить",
+      "new_call": "Позвонить ещё",
+      "end_call": "Завершить",
+      "mute_microphone": "Выключить микрофон",
+      "listening_status": "Слушаю тебя…",
+      "speaking_status": "Беркут говорит…",
+      "connecting_status": "Соединяю…",
+      "input_placeholder": "Напиши сообщение…"
+    }
+  }
+}
