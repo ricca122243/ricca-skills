@@ -1855,6 +1855,11 @@ function viewLive(app){
 function liveEl(sel){return document.querySelector(".stage "+sel)}
 function liveStatus(s,t){const el=liveEl(".status");if(el){el.dataset.s=s;el.textContent=t}liveEl(".stage-char")?.classList.toggle("speaking",s==="talking")}
 function liveUi(state){const b=liveEl(".callbtn");if(!b)return;b.classList.toggle("end",state==="connected");b.disabled=state==="connecting";b.setAttribute("aria-label",state==="connected"?"Завершить":"Позвонить");const l=liveEl(".miclabel");if(l)l.textContent=state==="connected"?"Говори обычным голосом. Красная кнопка — завершить.":"Разреши микрофон, когда браузер спросит"}
+function liveFail(msg){
+  const t=liveEl(".b-text");if(t)t.textContent="Звонок не прошёл. Скорее всего, закончились минуты голоса ElevenLabs — они обновятся 19 декабря. Пока говори с Беркутом в чате: те же подколы и слова, только голос телефона."+(msg?" ("+msg+")":"");
+  liveStatus("idle","Звонок недоступен");
+  const st=document.querySelector(".stage");if(st&&!st.querySelector('[data-a="tochat"]')){const b=h(`<button class="btn primary big" type="button" data-a="tochat">${I.chat} Говорить в чате</button>`);b.onclick=()=>{endLive();liveMode=false;S.profile.char="berkut";startCall()};st.append(b)}
+}
 async function startLive(){
   liveUi("connecting");liveStatus("thinking","Соединяю…");
   try{await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){liveStatus("idle","Нет доступа к микрофону");const t=liveEl(".b-text");if(t)t.textContent="Разреши микрофон в настройках браузера для этого сайта и нажми ещё раз.";liveUi("idle");return}
@@ -1863,7 +1868,7 @@ async function startLive(){
     live={t0:0,raf:0};
     live.conv=await EL.Conversation.startSession({agentId:LIVE_AGENT_ID,connectionType:"webrtc",dynamicVariables:liveVars(),
       onConnect:()=>{live.t0=Date.now();talkT0=live.t0;liveUi("connected");liveStatus("listening","Слушаю тебя…");const d=dayRec();d.live=(d.live||0)+1;persist("profile")},
-      onDisconnect:()=>{endLive(true)},
+      onDisconnect:()=>{const short=!live||!live.t0||Date.now()-live.t0<8000;endLive(true);if(short)liveFail()},
       onError:(m)=>{const t=liveEl(".b-text");if(t)t.textContent="Связь прервалась: "+String(m||"")},
       onModeChange:({mode})=>{if(mode==="speaking"){liveStatus("talking","Беркут говорит…");if(curMascot)mascotSet(curMascot,"idle")}else{liveStatus("listening","Слушаю тебя…");if(curMascot)mascotSet(curMascot,"listening")}},
       onMessage:(p)=>{const role=p.role||p.source,t=String(p.message||"");if(!t)return;
@@ -1871,7 +1876,7 @@ async function startLive(){
         else{const y=liveEl(".you");if(y)y.textContent="Ты: "+t;countTalk(t)}}
     });
     const loop=()=>{if(!live||!live.conv)return;let v=0;try{v=live.conv.getOutputVolume()||0}catch(e){}if(curMascot){const o=v<.02?0:Math.min(1,.25+v*3.2);live.ov=(live.ov||0)*.35+o*.65;mascotOpen(curMascot,live.ov<.05?0:live.ov)}live.raf=requestAnimationFrame(loop)};loop();
-  }catch(e){live=null;liveUi("idle");liveStatus("idle","Не получилось позвонить");const t=liveEl(".b-text");if(t)t.textContent="Проверь интернет и нажми ещё раз. ("+((e&&e.message)||"ошибка")+")"}
+  }catch(e){live=null;liveUi("idle");liveFail((e&&e.message)||"")}
 }
 function endLive(remote){
   const l=live;live=null;talkT0=0;if(!l)return;cancelAnimationFrame(l.raf);clearTimeout(l.mt);
