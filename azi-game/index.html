@@ -805,6 +805,7 @@ function slLine(a){if(a.includes("AZI"))return 0;const nw=a.filter(x=>x!=="W");i
  if(nw.every(x=>x===nw[0]))return nw[0]==="7"?SL_PAY["7"]:nw[0]==="BAR"?SL_PAY.BAR:SL_PAY.suit;return 0}
 function slEval(g,bet){let win=0;const cells=[];SL_LINES.forEach(L=>{const m=slLine(L.map(([r,c])=>g[r][c]));if(m){win+=m*bet/5;cells.push(...L)}});
  const sc=[];g.forEach((col,r)=>col.forEach((x,c)=>{if(x==="AZI")sc.push([r,c])}));if(sc.length>=3){win+=10*bet;cells.push(...sc)}return{win:Math.round(win),cells}}
+const boostCost=()=>Math.max(3,Math.ceil(SL_BETS[slot.bet]/4000));
 function slotSheet(){if(!slot.grid)slot.grid=[0,1,2].map(()=>[slPick(),slPick(),slPick()]);
  const bet=SL_BETS[slot.bet];const lamps=n=>Array.from({length:n},()=>"<i></i>").join("");
  const arrow=d=>`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="${d}"/></svg>`;
@@ -815,8 +816,8 @@ function slotSheet(){if(!slot.grid)slot.grid=[0,1,2].map(()=>[slPick(),slPick(),
    ${sz(COIN,52)}<div><div class="v num" id="slWin">0</div><div class="sub">Выигрыш</div></div></div></div>
  <button class="btn btn-play btn-block" id="spinBtn" style="font-size:20px">Спин</button>
  <button class="boost" id="boostBtn" aria-pressed="${slot.boost}"></button>
- <p class="note">×2 стоит 3 золота за спин · 5 линий · возврат ≈ 93%</p>`);
- const upd=()=>{$("#slBet").textContent=fmt(SL_BETS[slot.bet])};
+ <p class="note" id="boostNote"></p>`);
+ const upd=()=>{$("#slBet").textContent=fmt(SL_BETS[slot.bet]);$("#boostNote").textContent=`×2 стоит ${boostCost()} золота за спин · 5 линий · возврат ≈ 93%`};upd();
  const bt=()=>{const b=$("#boostBtn");if(!b)return;b.setAttribute("aria-pressed",slot.boost);b.innerHTML=(slot.boost?"Выигрыш ×2 включён":"Увеличить выигрыш на ×2")+" "+CHEV};bt();
  $("#betUp").onclick=()=>{slot.bet=Math.min(SL_BETS.length-1,slot.bet+1);upd();sfx("tick")};
  $("#betDn").onclick=()=>{slot.bet=Math.max(0,slot.bet-1);upd();sfx("tick")};
@@ -829,8 +830,8 @@ function paySheet(){openModal(`${sheetHead("Таблица выплат","Мно
  <button class="btn btn-play btn-block" data-act="slots">Назад к слоту</button>`)}
 function spin(){if(slot.spinning)return;const bet=SL_BETS[slot.bet];
  if(S.coins<bet){toast("Не хватает фишек для ставки");return}
- if(slot.boost&&S.gems<3){toast("Не хватает золота для ×2");return}
- slot.spinning=true;S.coins-=bet;if(slot.boost)S.gems-=3;save();renderWallet();
+ if(slot.boost&&S.gems<boostCost()){toast(`Не хватает золота для ×2: нужно ${boostCost()}`);return}
+ slot.spinning=true;S.coins-=bet;if(slot.boost)S.gems-=boostCost();save();renderWallet();
  $("#spinBtn").disabled=true;$("#slWin").textContent="0";
  const g=[0,1,2].map(()=>[slPick(),slPick(),slPick()]);slot.grid=g;const res=slEval(g,bet);if(slot.boost)res.win*=2;
  [0,1,2].forEach(r=>{const st=$("#strip"+r);const filler=Array.from({length:14+r*5},()=>slPick());const syms=[...filler,...g[r]];
@@ -943,20 +944,20 @@ function newHand(isAzi){
   S.stats.hands++;save();sfx("chip");
  }else{
   G.aziN++;
-  G.seats.forEach((p,i)=>{if(!p)return;p.tricks=0;p.bet=0;p.rp=0;p.hand=[];p.folded=false;p.allIn=false;if(!p.inHand)setBadge(i,"Ждёт","b-wait");else setBadge(i,"","")});
+  G.seats.forEach((p,i)=>{if(!p)return;p.tricks=0;p.bet=0;p.rp=0;p.hand=[];p.folded=false;p.allIn=p.inHand&&(p.me?S.coins:p.bal)<=0;if(!p.inHand)setBadge(i,"Ждёт","b-wait");else setBadge(i,"","")});
  }
  const deck=newDeck();
  G.seats.forEach(p=>{if(p&&p.inHand)p.hand=deck.splice(0,3)});
  G.trumpCard=deck.shift();G.trumpS=G.trumpCard.s;G.shoha=G.trumpCard.r==="A";G.dealAt=Date.now();hist(`— ${isAzi?"Переигровка Ази":"Новая раздача"}. Козырь: ${RL(G.trumpCard.r)} ${SUITNAME[G.trumpS]}${G.shoha?" (Шоха на трассе)":""}`);
  G.seats.forEach(p=>{if(p&&p.hand)p.hand.sort((a,b)=>cval(a)-cval(b)||a.s.localeCompare(b.s))});
  G.seats.forEach(p=>{if(p)p.shown=0});G.trumpShown=false;G.lastDealt=null;G.phase="deal";G.acted=new Set();G.turn=-1;
- const first=G.lastWinner>=0&&occ(G.lastWinner)?nextIdx(G.lastWinner,inHand):nextIdx(G.dealer,inHand);
+ const first=G.lastWinner>=0&&occ(G.lastWinner)?nextIdx(G.lastWinner,canAct):nextIdx(G.dealer,canAct);
  G.firstBettor=first;
  const order=[];for(let r=0;r<3;r++){let k=G.dealer;for(let c=0;c<G.n;c++){k=(k+1)%G.n;if(occ(k)&&occ(k).inHand)order.push(k)}}
  renderTable();
  let t=700;order.forEach(k=>{later(()=>{const p=occ(k);if(!p)return;p.shown++;G.lastDealt={seat:k,idx:p.shown-1};sfx("card");renderTable()},t);t+=240});
  later(()=>{G.trumpShown=true;G.trumpFlip=true;G.lastDealt=null;sfx("card");renderTable();G.trumpFlip=false},t+300);
- later(()=>{if(G.phase!=="deal")return;G.phase="bet";G.turn=first;G.turnStart=Date.now();stepTurn()},t+1500)}
+ later(()=>{if(G.phase!=="deal")return;G.phase="bet";if(first<0||G.seats.filter((q,k)=>canAct(k)).length<2){G.turn=-1;return startPlay()}G.turn=first;G.turnStart=Date.now();stepTurn()},t+1500)}
 
 function stepTurn(){if(!G||view!=="table")return;G.turnStart=Date.now();
  if(G.phase==="bet"){const p=occ(G.turn);if(p.bot){const w=rnd(1300,2700)+(toCall(G.turn)>0?rnd(300,1600):0)+(Math.random()<.1?rnd(1200,3000):0);G.botWait=w/1000;const t=G.turn;later(()=>botBet(t),w)}else{sfx("turn");armTimer()}}
